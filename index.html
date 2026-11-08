@@ -76,6 +76,7 @@ html, body { height: 100%; margin: 0; background: var(--ink); color: var(--cream
   -webkit-user-select: text; user-select: text; background: #fff; color: var(--ink); }
 .lead input:focus-visible { outline: 3px solid var(--snx); outline-offset: 1px; }
 .lead .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; font-weight: 500; line-height: 1.35; }
+.lead .check a { color: var(--rood-donker); font-weight: 700; }
 .lead .check input { width: 20px; height: 20px; flex: none; accent-color: var(--snx); margin: 0; }
 .lead .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .lead .btn { font-size: 17px; padding: 9px 12px 7px; background: var(--snx); color: #fff; box-shadow: 0 4px 0 var(--ink); }
@@ -93,7 +94,8 @@ html, body { height: 100%; margin: 0; background: var(--ink); color: var(--cream
 .board .empty { font-size: 13px; font-weight: 500; }
 details.terms { text-align: left; font-size: 12px; font-weight: 500; line-height: 1.4; }
 details.terms summary { cursor: pointer; font-weight: 700; }
-details.terms p { font-size: 12px; font-weight: 500; margin: 4px 0 0; }
+details.terms { background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 10px; }
+details.terms p { font-size: 12px; font-weight: 500; margin: 6px 0 0; }
 #multi { color: #fff; background: var(--snx); border-radius: 6px; padding: 1px 6px; text-shadow: none; }
 .site { font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--ink); }
 .banner { position: fixed; left: 0; right: 0; top: 34%; text-align: center; pointer-events: none; font-family: var(--font-display);
@@ -151,14 +153,15 @@ details.terms p { font-size: 12px; font-weight: 500; margin: 4px 0 0; }
     </div>
     <div class="lead" id="leadBox" hidden>
       <h3>Zet je naam op de ranglijst</h3>
-      <p>Laat je gegevens achter en krijg als eerste SNX-acties en kortingen in je mail.</p>
+      <p>Laat je gegevens achter en speel mee voor de ranglijst van dit jaar.</p>
       <form id="leadForm" novalidate>
         <div style="display:grid;gap:8px">
           <label for="fVoornaam">Voornaam<input id="fVoornaam" type="text" autocomplete="given-name" maxlength="60"></label>
           <label for="fEmail">E-mailadres<input id="fEmail" type="email" autocomplete="email" maxlength="254" required></label>
           <label for="fNick">Naam op de ranglijst<input id="fNick" type="text" maxlength="16" placeholder="2 tot 16 tekens" required></label>
           <div class="hp" aria-hidden="true"><label for="fWebsite">Website<input id="fWebsite" type="text" tabindex="-1" autocomplete="off"></label></div>
-          <label class="check" for="fConsent"><input id="fConsent" type="checkbox" required><span>Ja, stuur mij SNX-nieuws en acties. Afmelden kan altijd.</span></label>
+          <label class="check" for="fTerms"><input id="fTerms" type="checkbox" required><span>Ik ga akkoord met de <a href="#voorwaarden" id="termsLink">actievoorwaarden en privacy</a>.</span></label>
+          <label class="check" for="fMarketing"><input id="fMarketing" type="checkbox"><span>Ja, stuur mij ook SNX-nieuws en acties (niet verplicht). Afmelden kan altijd.</span></label>
           <button class="btn" id="leadBtn" type="submit">ZET ME OP DE LIJST</button>
         </div>
       </form>
@@ -169,9 +172,17 @@ details.terms p { font-size: 12px; font-weight: 500; margin: 4px 0 0; }
       <h3>Top 10 van <span id="boardYear">dit jaar</span></h3>
       <ol id="board"><li class="empty">Ranglijst laden…</li></ol>
     </div>
-    <details class="terms">
-      <summary>Privacy</summary>
-      <p>We bewaren je voornaam, e-mailadres, schermnaam en scores om je SNX-nieuws en acties te sturen en de ranglijst bij te houden. Op de ranglijst staat alleen je schermnaam. Afmelden kan via elke mail; vragen of verwijderen via orders@snxfood.com.</p>
+    <details class="terms" id="voorwaarden">
+      <summary>Actievoorwaarden en privacy</summary>
+      <p><b>1. Organisator.</b> SNX Snack Rush is een spel van SNX B.V., Groenekanseweg 70, 3732 AG De Bilt, KvK 98692224 (hierna: SNX).</p>
+      <p><b>2. Meedoen.</b> Meedoen is gratis en kan vanaf 16 jaar. Je doet mee door een score in te sturen en akkoord te gaan met deze voorwaarden. Per persoon één e-mailadres; meerdere accounts per persoon zijn niet toegestaan. Medewerkers van SNX en hun gezinsleden dingen niet mee naar prijzen.</p>
+      <p><b>3. Ranglijst.</b> De ranglijst loopt per kalenderjaar. Per deelnemer telt de hoogste score. Op de ranglijst staat alleen je schermnaam. SNX mag een schermnaam die beledigend is, een merk of andermans naam bevat, aanpassen of verwijderen.</p>
+      <p><b>4. Prijzen.</b> SNX kan prijzen koppelen aan de ranglijst. Welke prijs, voor welke periode en voor hoeveel winnaars maakt SNX vooraf bekend in het spel of op snxfood.com. Een prijs is persoonlijk, niet overdraagbaar en niet inwisselbaar voor geld. Winnaars krijgen bericht per e-mail en reageren binnen 14 dagen; daarna vervalt de prijs.</p>
+      <p><b>5. Eerlijk spel.</b> Valsspelen is niet toegestaan. Wie hacks, scripts, bots of andere hulpmiddelen gebruikt, scores of het spel manipuleert, of met meerdere accounts speelt, wordt zonder bericht uitgesloten van deelname en van prijzen. SNX controleert winnende scores en verwijdert scores die technisch niet mogelijk zijn of niet eerlijk zijn behaald.</p>
+      <p><b>6. Uitslag.</b> Over de uitslag wordt niet gecorrespondeerd. Klachten over de actie kun je mailen naar orders@snxfood.com.</p>
+      <p><b>7. Aansprakelijkheid en wijzigingen.</b> SNX is niet aansprakelijk voor storingen, verloren scores of technische fouten in het spel. SNX mag de actie en deze voorwaarden op elk moment wijzigen of beëindigen.</p>
+      <p><b>8. Privacy.</b> Voor de ranglijst en om winnaars te bereiken bewaren we je voornaam, e-mailadres, schermnaam en scores. Alleen als je daar apart voor kiest, sturen we je ook SNX-nieuws en acties; afmelden kan via elke mail. We bewaren je gegevens tot uiterlijk 12 maanden na het einde van het speeljaar, op servers in de EU. Inzage of verwijderen kan via orders@snxfood.com.</p>
+      <p><b>9. Recht.</b> Op deze actie is Nederlands recht van toepassing.</p>
     </details>
     <div class="site">snxfood.com</div>
   </div>
@@ -449,7 +460,7 @@ let player = null;
 try { player = JSON.parse(localStorage.getItem('snx_rush_player') || 'null'); } catch (e) { player = null; }
 let lastRun = null, myNick = null;
 const ERRORS = {
-  consent_required: 'Vink het vakje aan om mee te doen.',
+  terms_required: 'Ga akkoord met de actievoorwaarden om mee te doen.',
   invalid_email: 'Dat e-mailadres klopt niet. Kijk het even na.',
   invalid_nickname: 'Je naam op de ranglijst moet 2 tot 16 tekens zijn: letters, cijfers, spatie, punt of streepje.',
   implausible_score: 'Deze score kunnen we niet controleren, dus hij telt niet mee.',
@@ -487,28 +498,29 @@ async function autoSubmit() {
   myNick = player.nickname;
   showMsg('Score versturen…');
   try {
-    const d = await submitRun(Object.assign({ consent: true }, player));
+    const d = await submitRun({ voornaam: player.voornaam, email: player.email, nickname: player.nickname, terms: true, marketing: !!player.marketing });
     showMsg(d.rank ? 'Je staat op plek ' + d.rank + ' van ' + d.jaar + ' met je beste score ' + d.best + '.' : 'Score ontvangen.');
   } catch (e) { showMsg(ERRORS[e.message] || 'Versturen lukte niet. Je score staat wel op dit toestel.', true); }
   loadBoard();
 }
+$('termsLink').addEventListener('click', e => { e.preventDefault(); const d = $('voorwaarden'); d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
 $('leadForm').addEventListener('submit', async e => {
   e.preventDefault();
   const p = {
     voornaam: $('fVoornaam').value.trim(), email: $('fEmail').value.trim(), nickname: $('fNick').value.trim(),
-    consent: $('fConsent').checked, website: $('fWebsite').value,
+    terms: $('fTerms').checked, marketing: $('fMarketing').checked, website: $('fWebsite').value,
   };
-  if (!p.consent) { showMsg(ERRORS.consent_required, true); return; }
+  if (!p.terms) { showMsg(ERRORS.terms_required, true); return; }
   if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(p.email)) { showMsg(ERRORS.invalid_email, true); $('fEmail').focus(); return; }
   if (!/^[A-Za-z0-9 _.\-]{2,16}$/.test(p.nickname)) { showMsg(ERRORS.invalid_nickname, true); $('fNick').focus(); return; }
   $('leadBtn').disabled = true; showMsg('Versturen…');
   try {
     const d = await submitRun(p);
-    player = { voornaam: p.voornaam, email: p.email, nickname: p.nickname };
+    player = { voornaam: p.voornaam, email: p.email, nickname: p.nickname, marketing: p.marketing };
     try { localStorage.setItem('snx_rush_player', JSON.stringify(player)); } catch (err) {}
     myNick = p.nickname;
     $('leadBox').hidden = true;
-    showMsg('Top! Je staat op plek ' + d.rank + ' van ' + d.jaar + '. SNX-acties komen naar ' + p.email + '.');
+    showMsg('Top! Je staat op plek ' + d.rank + ' van ' + d.jaar + '.' + (p.marketing ? ' SNX-acties komen naar ' + p.email + '.' : ''));
     loadBoard();
   } catch (err) {
     showMsg(ERRORS[err.message] || 'Versturen lukte niet. Probeer het zo nog eens.', true);
