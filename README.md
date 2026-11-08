@@ -11,7 +11,8 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 - Verzenddoos Betterballen = power-up: +100 en 8 seconden dubbele punten.
 
 ## Leads en ranglijst
-- Na een ronde: voornaam, e-mail, schermnaam en toestemming. De kortingscode gaat per mail.
+- Na een ronde: voornaam, e-mail, schermnaam en toestemming voor SNX-nieuws en acties.
+- Fase 1 (nu): spelers verzamelen. Nog geen prijs of kortingscode in de game; spelregels en beloning volgen later.
 - Backend: Supabase-project `snx-snack-rush` (eu-central-1), Edge Function `snack-rush`
   (`GET` = top 10 van dit jaar, `POST` = score + lead). Scores worden op de server op plausibiliteit gecontroleerd.
 - Leads gaan naar ActiveCampaign-lijst **Snack Rush** (id 39) met tag `game-snack-rush` (id 219), zodra

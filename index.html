@@ -146,16 +146,16 @@ details.terms p { font-size: 12px; font-weight: 500; margin: 4px 0 0; }
       <div>Afstand<b id="finalDist">0 m</b></div>
     </div>
     <div class="lead" id="leadBox" hidden>
-      <h3>Pak je kortingscode</h3>
-      <p>Laat je gegevens achter: je kortingscode komt per mail en je score telt mee voor de jaarprijs.</p>
+      <h3>Zet je naam op de ranglijst</h3>
+      <p>Laat je gegevens achter en krijg als eerste SNX-acties en kortingen in je mail.</p>
       <form id="leadForm" novalidate>
         <div style="display:grid;gap:8px">
           <label for="fVoornaam">Voornaam<input id="fVoornaam" type="text" autocomplete="given-name" maxlength="60"></label>
           <label for="fEmail">E-mailadres<input id="fEmail" type="email" autocomplete="email" maxlength="254" required></label>
           <label for="fNick">Naam op de ranglijst<input id="fNick" type="text" maxlength="16" placeholder="2 tot 16 tekens" required></label>
           <div class="hp" aria-hidden="true"><label for="fWebsite">Website<input id="fWebsite" type="text" tabindex="-1" autocomplete="off"></label></div>
-          <label class="check" for="fConsent"><input id="fConsent" type="checkbox" required><span>Ja, stuur mij de kortingscode en af en toe SNX-nieuws. Afmelden kan altijd. Ik ga akkoord met de actievoorwaarden hieronder.</span></label>
-          <button class="btn" id="leadBtn" type="submit">STUUR MIJN CODE</button>
+          <label class="check" for="fConsent"><input id="fConsent" type="checkbox" required><span>Ja, stuur mij SNX-nieuws en acties. Afmelden kan altijd.</span></label>
+          <button class="btn" id="leadBtn" type="submit">ZET ME OP DE LIJST</button>
         </div>
       </form>
     </div>
@@ -166,10 +166,8 @@ details.terms p { font-size: 12px; font-weight: 500; margin: 4px 0 0; }
       <ol id="board"><li class="empty">Ranglijst laden…</li></ol>
     </div>
     <details class="terms">
-      <summary>Actievoorwaarden en privacy</summary>
-      <p>De speler met de hoogste score op 31 december om 23:59 (Nederlandse tijd) wint een verzenddoos SNX Betterballen (54 stuks). Meedoen is gratis en kan vanaf 16 jaar. Eén account per e-mailadres.</p>
-      <p>SNX controleert de winnende score en neemt per mail contact op met de winnaar. Scores die technisch niet kunnen of niet eerlijk zijn behaald, tellen niet mee.</p>
-      <p>We bewaren je voornaam, e-mailadres, schermnaam en scores om je de kortingscode en SNX-nieuws te sturen en de ranglijst bij te houden. Op de ranglijst staat alleen je schermnaam. Afmelden kan via elke mail; vragen of verwijderen via orders@snxfood.com.</p>
+      <summary>Privacy</summary>
+      <p>We bewaren je voornaam, e-mailadres, schermnaam en scores om je SNX-nieuws en acties te sturen en de ranglijst bij te houden. Op de ranglijst staat alleen je schermnaam. Afmelden kan via elke mail; vragen of verwijderen via orders@snxfood.com.</p>
     </details>
     <div class="site">snxfood.com</div>
   </div>
@@ -506,7 +504,7 @@ $('leadForm').addEventListener('submit', async e => {
     try { localStorage.setItem('snx_rush_player', JSON.stringify(player)); } catch (err) {}
     myNick = p.nickname;
     $('leadBox').hidden = true;
-    showMsg('Top! Je kortingscode komt naar ' + p.email + '. Je staat op plek ' + d.rank + ' van ' + d.jaar + '.');
+    showMsg('Top! Je staat op plek ' + d.rank + ' van ' + d.jaar + '. SNX-acties komen naar ' + p.email + '.');
     loadBoard();
   } catch (err) {
     showMsg(ERRORS[err.message] || 'Versturen lukte niet. Probeer het zo nog eens.', true);
