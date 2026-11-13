@@ -22,6 +22,11 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 ## Backend-bron
 `supabase/functions/snack-rush/index.ts` en `supabase/migrations/` (de migratie van 8 nov moet vóór de nieuwe functie draaien).
 
+## Web-app (iPhone, Samsung, Android)
+`manifest.webmanifest`, `sw.js` en `icons/` maken van de game een installeerbare web-app: spelers openen de link in hun
+browser en kunnen hem op het beginscherm zetten (Android: knop in het startscherm; iPhone: Safari > Deel > Zet op beginscherm).
+Na het eerste bezoek werkt het spel ook offline; de ranglijst heeft internet nodig.
+
 ## Online zetten
 GitHub Pages via `.github/workflows/pages.yml` (bij push naar `main`). Daarna met een iframe op snxfood.com/game:
 

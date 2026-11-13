@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#111111">
+<meta name="theme-color" content="#ff2625">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Snack Rush">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <!--SNX-BODY-START-->
 <title>SNX Snack Rush</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,17 +37,17 @@ html, body { height: 100%; margin: 0; background: var(--ink); color: var(--cream
 .hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: flex-start;
   padding: calc(env(safe-area-inset-top, 0px) + 10px) max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));
   pointer-events: none; font-variant-numeric: tabular-nums; }
-.hud .score { font-family: var(--font-display); font-size: 30px; line-height: 1; color: var(--cream);
+.hud .score { font-family: var(--font-display); font-size: clamp(30px, 5vh, 72px); line-height: 1; color: var(--cream);
   text-shadow: 0 3px 0 var(--ink), 0 0 12px rgba(17,17,17,.5); }
-.hud .small { font-size: 16px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--cream);
+.hud .small { font-size: clamp(16px, 2.2vh, 30px); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--cream);
   text-shadow: 0 2px 0 var(--ink); }
 .hud .right { text-align: right; display: grid; gap: 6px; justify-items: end; }
-.meter { width: 120px; height: 12px; border-radius: 6px; background: rgba(17,17,17,.55); border: 2px solid var(--cream); overflow: hidden; }
+.meter { width: clamp(120px, 14vh, 240px); height: clamp(12px, 1.4vh, 20px); border-radius: 6px; background: rgba(17,17,17,.55); border: 2px solid var(--cream); overflow: hidden; }
 .meter i { display: block; height: 100%; width: 0%; background: var(--mustard); transition: width .15s; }
 .meter.on i { background: linear-gradient(90deg, #fff, var(--snx), #fff); background-size: 200% 100%; animation: flow .5s linear infinite; }
 @keyframes flow { to { background-position: -200% 0; } }
 #mute { pointer-events: auto; background: rgba(17,17,17,.55); color: var(--cream); border: 2px solid var(--cream); border-radius: 8px;
-  font: 800 13px var(--font-ui); letter-spacing: .08em; padding: 3px 8px; }
+  font: 800 clamp(13px, 1.6vh, 22px) var(--font-ui); letter-spacing: .08em; padding: 3px 8px; }
 .screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(17,17,17,.35); }
 .card { width: min(360px, 100%); max-height: 100%; overflow-y: auto; background: var(--snx) url('data:image/webp;base64,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') center top / cover no-repeat; color: var(--ink); border: 4px solid var(--ink); border-radius: 22px;
   box-shadow: 0 8px 0 var(--ink); padding: 22px 20px 20px; text-align: center; display: grid; gap: 12px; }
@@ -83,7 +88,8 @@ html, body { height: 100%; margin: 0; background: var(--ink); color: var(--cream
 .lead .btn:hover { background: var(--ink); }
 .msg { font-size: 15px; font-weight: 600; margin: 0; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 10px; }
 .msg.err { color: var(--rood-donker); }
-.linkbtn { background: none; border: 0; padding: 0; font: 600 13px var(--font-ui); color: var(--ink); text-decoration: underline; cursor: pointer; }
+.linkbtn { background: none; border: 0; padding: 0; font: 700 14px var(--font-ui); color: var(--ink); text-decoration: underline; cursor: pointer; }
+.install-hint { font-size: 14px !important; font-weight: 600; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 10px; }
 .board { text-align: left; display: grid; gap: 6px; }
 .board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-variant-numeric: tabular-nums; }
 .board li { display: flex; gap: 8px; font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 8px; background: #fff; border: 1px solid var(--steen); }
@@ -98,9 +104,10 @@ details.terms { background: #fff; border: 2px solid var(--ink); border-radius: 1
 details.terms p { font-size: 12px; font-weight: 500; margin: 6px 0 0; }
 #multi { color: #fff; background: var(--snx); border-radius: 6px; padding: 1px 6px; text-shadow: none; }
 .site { font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--ink); }
-.banner { position: fixed; left: 0; right: 0; top: 34%; text-align: center; pointer-events: none; font-family: var(--font-display);
-  font-size: 44px; color: #fff; text-shadow: 0 4px 0 var(--snx); opacity: 0; transform: scale(.6); transition: opacity .2s, transform .2s; }
-.banner.show { opacity: 1; transform: scale(1); }
+.banner { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + max(96px, 12vh)); pointer-events: none; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(22px, 4vh, 56px); color: #fff; background: var(--snx); border: 3px solid var(--ink);
+  border-radius: 40px; padding: .15em .8em; box-shadow: 0 4px 0 var(--ink); opacity: 0; transform: translateX(-50%) scale(.6); transition: opacity .2s, transform .2s; }
+.banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
 @media (prefers-reduced-motion: reduce) { .meter.on i { animation: none; } .banner { transition: none; } }
 </style>
 
@@ -137,6 +144,8 @@ details.terms p { font-size: 12px; font-weight: 500; margin: 6px 0 0; }
       <div><kbd>Verzenddoos</kbd>Power-up: 8 seconden dubbele punten</div>
     </div>
     <button class="btn" id="startBtn" type="button">SPEEL</button>
+    <button class="linkbtn" id="installBtn" type="button" hidden>Zet Snack Rush op je beginscherm</button>
+    <p class="install-hint" id="installHint" hidden>Tik in Safari op <b>Deel</b> en kies <b>Zet op beginscherm</b>.</p>
     <div class="site">snxfood.com</div>
   </div>
 </div>
@@ -912,46 +921,60 @@ function drawKiosk(o) {
   ctx.fillText('KIOSK', x + w / 2, y + h * 0.82);
 }
 function drawTruck(o) {
-  shadow(o.x, o.z + 1.2, 0.6);
-  // cargo box
-  const cargo = drawBox(o.x, 0.9, 1.8, o.z + 0.85, o.d - 0.85, '#ff2625', '#d12322', '#ffffff', 0.15);
-  // logo on cargo front (above cab)
+  shadow(o.x, o.z + 1.4, 0.62);
+  const zc = o.z + 0.95, L = o.d - 0.95, zf = Math.max(zc, 0.35);
+  // cargo box: SNX red with a white roof
+  const cargo = drawBox(o.x, 0.92, 1.85, zc, L, '#ff2625', '#e8201f', '#ffffff', 0.2);
+  // side graphics on the visible side: black skirt + white diagonal speed band
+  const sx = o.x > 0.02 ? o.x - 0.46 : (o.x < -0.02 ? o.x + 0.46 : null);
+  if (sx !== null) {
+    poly([proj(sx, 0.2, zf), proj(sx, 0.42, zf), proj(sx, 0.42, zc + L), proj(sx, 0.2, zc + L)], '#111111');
+    poly([proj(sx, 0.55, zf), proj(sx, 0.8, zf), proj(sx, 1.85, zc + L * 0.75), proj(sx, 1.85, zc + L * 0.55)], '#ffffff');
+    poly([proj(sx, 0.86, zf), proj(sx, 0.94, zf), proj(sx, 1.85, zc + L * 0.85), proj(sx, 1.85, zc + L * 0.79)], '#111111');
+  }
   {
     const { x, y, w, h } = cargo;
-    ctx.fillStyle = '#111111'; ctx.fillRect(x, y, w, h * 0.05);
-    if (IMG.logo) drawImg(IMG.logo, x + w / 2, y + h * 0.22, w * 0.78);
-    else {
-      ctx.font = `800 ${Math.max(5, Math.min(h * 0.24, w * 0.34))}px 'Poppins', 'Arial Black', sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('SNX', x + w / 2, y + h * 0.2);
+    if (IMG.logo) drawImg(IMG.logo, x + w / 2, y + h * 0.2, w * 0.72);
+    if (w > 70) {
+      ctx.fillStyle = '#ffffff'; ctx.font = `800 ${Math.max(6, w * 0.075)}px 'Poppins', sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('snxfood.com', x + w / 2, y + h * 0.37);
     }
   }
-  // cab
-  const cab = drawBox(o.x, 0.86, 1.05, o.z, 0.9, '#1c1c1c', '#111111', '#2a2a2a', 0.12);
+  // cab-over cab: gloss black with red accents
+  const cab = drawBox(o.x, 0.9, 1.3, o.z, 0.95, '#151515', '#0b0b0b', '#262626', 0.14);
+  // aero visor on the roof
+  drawBox(o.x, 0.9, 0.1, o.z + 0.05, 0.55, '#ff2625', '#d12325', '#ff2625', 1.44);
   {
     const { x, y, w, h } = cab;
-    // windshield
-    ctx.fillStyle = '#23324a'; rrect(x + w * 0.08, y + h * 0.1, w * 0.84, h * 0.36, w * 0.05); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,.25)';
-    ctx.beginPath(); ctx.moveTo(x + w * 0.15, y + h * 0.42); ctx.lineTo(x + w * 0.35, y + h * 0.12); ctx.lineTo(x + w * 0.45, y + h * 0.12); ctx.lineTo(x + w * 0.25, y + h * 0.42); ctx.fill();
-    // grille
-    ctx.fillStyle = '#2c2a38'; ctx.fillRect(x + w * 0.25, y + h * 0.58, w * 0.5, h * 0.22);
-    ctx.fillStyle = '#5a5866';
-    for (let i = 0; i < 3; i++) ctx.fillRect(x + w * 0.27, y + h * (0.61 + i * 0.065), w * 0.46, h * 0.025);
+    // panoramic windshield
+    const g = ctx.createLinearGradient(0, y + h * 0.08, 0, y + h * 0.46);
+    g.addColorStop(0, '#3a4a66'); g.addColorStop(1, '#0d1220');
+    ctx.fillStyle = g; rrect(x + w * 0.05, y + h * 0.08, w * 0.9, h * 0.38, w * 0.08); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.22)';
+    ctx.beginPath(); ctx.moveTo(x + w * 0.12, y + h * 0.44); ctx.lineTo(x + w * 0.38, y + h * 0.1); ctx.lineTo(x + w * 0.5, y + h * 0.1); ctx.lineTo(x + w * 0.24, y + h * 0.44); ctx.fill();
+    // red accent band
+    ctx.fillStyle = '#ff2625'; ctx.fillRect(x, y + h * 0.5, w, h * 0.05);
+    // full-width LED light strip + slim headlights
+    ctx.save();
+    ctx.shadowColor = 'rgba(255,255,255,.9)'; ctx.shadowBlur = Math.max(4, w * 0.08);
     ctx.fillStyle = '#ffffff';
-    ctx.font = `800 ${Math.max(5, h * 0.12)}px 'Poppins', sans-serif`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('SNX', x + w / 2, y + h * 0.52);
-    // headlights
-    ctx.fillStyle = '#fff2a8';
-    ctx.beginPath(); ctx.arc(x + w * 0.13, y + h * 0.7, w * 0.07, 0, 7); ctx.arc(x + w * 0.87, y + h * 0.7, w * 0.07, 0, 7); ctx.fill();
+    ctx.fillRect(x + w * 0.06, y + h * 0.6, w * 0.88, Math.max(1.5, h * 0.018));
+    rrect(x + w * 0.04, y + h * 0.65, w * 0.22, h * 0.045, h * 0.02); ctx.fill();
+    rrect(x + w * 0.74, y + h * 0.65, w * 0.22, h * 0.045, h * 0.02); ctx.fill();
+    ctx.restore();
+    // grille with the logo
+    ctx.fillStyle = '#0a0a0a'; rrect(x + w * 0.3, y + h * 0.67, w * 0.4, h * 0.15, h * 0.03); ctx.fill();
+    if (IMG.logo && w > 30) drawImg(IMG.logo, x + w / 2, y + h * 0.745, w * 0.22);
     // bumper
-    ctx.fillStyle = '#2c2a38'; ctx.fillRect(x - w * 0.02, y + h * 0.86, w * 1.04, h * 0.1);
+    ctx.fillStyle = '#d12325'; ctx.fillRect(x - w * 0.02, y + h * 0.87, w * 1.04, h * 0.09);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(x + w * 0.08, y + h * 0.9, w * 0.1, h * 0.03); ctx.fillRect(x + w * 0.82, y + h * 0.9, w * 0.1, h * 0.03);
   }
-  // wheels
-  const wl = proj(o.x - 0.4, 0, Math.max(o.z + 0.2, 0.4)), wr = proj(o.x + 0.4, 0, Math.max(o.z + 0.2, 0.4));
-  ctx.fillStyle = '#16141f';
-  ctx.fillRect(wl.x - 0.07 * wl.s, wl.y - 0.28 * wl.s, 0.14 * wl.s, 0.28 * wl.s);
-  ctx.fillRect(wr.x - 0.07 * wr.s, wr.y - 0.28 * wr.s, 0.14 * wr.s, 0.28 * wr.s);
+  // wheels with red hubs
+  for (const wxo of [-0.41, 0.41]) {
+    const wp = proj(o.x + wxo, 0, Math.max(o.z + 0.25, 0.4)), s = wp.s;
+    ctx.fillStyle = '#0d0d0d'; rrect(wp.x - 0.08 * s, wp.y - 0.32 * s, 0.16 * s, 0.32 * s, 0.04 * s); ctx.fill();
+    ctx.fillStyle = '#ff2625'; ctx.fillRect(wp.x - 0.03 * s, wp.y - 0.2 * s, 0.06 * s, 0.08 * s);
+  }
 }
 function crumbs(cx, cy, r, n, col) {
   ctx.fillStyle = col;
@@ -1036,7 +1059,6 @@ function drawPlayer() {
   if ((P.y > 0.05 || P.roll > 0) && !P.dead) {
     const r = 0.36 * s;
     ctx.translate(0, -r);
-    // speed trail
     ctx.fillStyle = 'rgba(255,38,37,.25)';
     ctx.beginPath(); ctx.arc(0, r * 0.35, r * 0.95, 0, 7); ctx.fill();
     ctx.rotate(P.spin);
@@ -1046,41 +1068,53 @@ function drawPlayer() {
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = r * 0.12; ctx.lineCap = 'round';
     for (let i = 0; i < 3; i++) { ctx.rotate(Math.PI * 2 / 3); ctx.beginPath(); ctx.arc(0, 0, r * 0.62, 0, 1.1); ctx.stroke(); }
     ctx.fillStyle = '#111111'; ctx.beginPath(); ctx.arc(0, 0, r * 0.22, 0, 7); ctx.fill();
-  } else {
-    const a = Math.sin(P.anim);
-    const bob = Math.abs(Math.cos(P.anim)) * 0.05 * s;
-    ctx.translate(0, -bob);
-    // legs
-    ctx.lineCap = 'round';
-    for (const [side, ph] of [[-1, a], [1, -a]]) {
-      const lift = Math.max(0, ph) * 0.2 * s;
-      ctx.strokeStyle = '#2b3a67'; ctx.lineWidth = 0.13 * s;
-      ctx.beginPath(); ctx.moveTo(side * 0.1 * s, -0.48 * s); ctx.lineTo(side * 0.12 * s, -0.08 * s - lift); ctx.stroke();
-      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(side * 0.12 * s, -0.04 * s - lift, 0.09 * s, 0.06 * s, 0, 0, 7); ctx.fill();
-      ctx.fillStyle = '#ff2625'; ctx.fillRect(side * 0.12 * s - 0.09 * s, -0.05 * s - lift, 0.18 * s, 0.02 * s);
-    }
-    // arms
-    for (const [side, ph] of [[-1, -a], [1, a]]) {
-      ctx.strokeStyle = '#d12322'; ctx.lineWidth = 0.1 * s;
-      const hx = side * 0.34 * s, hy = -0.58 * s - ph * 0.12 * s;
-      ctx.beginPath(); ctx.moveTo(side * 0.22 * s, -0.86 * s); ctx.lineTo(hx, hy); ctx.stroke();
-      ctx.fillStyle = '#f2c09a'; ctx.beginPath(); ctx.arc(hx, hy, 0.055 * s, 0, 7); ctx.fill();
-    }
-    // hoodie
-    ctx.fillStyle = '#ff2625'; rrect(-0.24 * s, -0.98 * s, 0.48 * s, 0.56 * s, 0.13 * s); ctx.fill();
-    ctx.fillStyle = '#d12322'; rrect(-0.16 * s, -1.0 * s, 0.32 * s, 0.14 * s, 0.07 * s); ctx.fill(); // hood
-    if (IMG.logo) drawImg(IMG.logo, 0, -0.7 * s, 0.38 * s);
-    else {
-      ctx.fillStyle = '#ffffff'; ctx.font = `800 ${0.17 * s}px 'Poppins', 'Arial Black', sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('SNX', 0, -0.7 * s);
-    }
-    // head (from behind)
-    ctx.fillStyle = '#f2c09a'; ctx.beginPath(); ctx.arc(0, -1.12 * s, 0.17 * s, 0, 7); ctx.fill();
-    ctx.fillStyle = '#3a2516'; ctx.beginPath(); ctx.arc(0, -1.13 * s, 0.165 * s, Math.PI * 0.85, Math.PI * 2.15); ctx.fill();
-    // backwards cap
-    ctx.fillStyle = '#111111'; ctx.beginPath(); ctx.arc(0, -1.17 * s, 0.17 * s, Math.PI, 0); ctx.fill();
-    ctx.fillStyle = '#000000'; rrect(-0.11 * s, -1.2 * s, 0.22 * s, 0.07 * s, 0.03 * s); ctx.fill();
+    ctx.restore();
+    return;
   }
+  const a = Math.sin(P.anim);
+  const bob = Math.abs(Math.cos(P.anim)) * 0.05 * s;
+  ctx.translate(0, -bob);
+  ctx.lineCap = 'round';
+  // legs: black tapered joggers with a white side stripe
+  for (const [side, ph] of [[-1, a], [1, -a]]) {
+    const lift = Math.max(0, ph) * 0.22 * s;
+    const hx = side * 0.1 * s, fx = side * 0.12 * s, fy = -0.1 * s - lift;
+    ctx.strokeStyle = '#111111'; ctx.lineWidth = 0.15 * s;
+    ctx.beginPath(); ctx.moveTo(hx, -0.5 * s); ctx.lineTo(fx, fy); ctx.stroke();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 0.025 * s;
+    ctx.beginPath(); ctx.moveTo(hx + side * 0.06 * s, -0.48 * s); ctx.lineTo(fx + side * 0.065 * s, fy - 0.02 * s); ctx.stroke();
+    // white sock
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(fx - 0.06 * s, fy - 0.01 * s, 0.12 * s, 0.05 * s);
+    // chunky sneaker: white upper, black sole, red heel tab
+    ctx.fillStyle = '#111111'; rrect(fx - 0.11 * s, fy + 0.06 * s, 0.22 * s, 0.05 * s, 0.02 * s); ctx.fill();
+    ctx.fillStyle = '#ffffff'; rrect(fx - 0.1 * s, fy + 0.02 * s, 0.2 * s, 0.07 * s, 0.035 * s); ctx.fill();
+    ctx.fillStyle = '#ff2625'; ctx.fillRect(fx - 0.03 * s, fy + 0.015 * s, 0.06 * s, 0.05 * s);
+  }
+  // arms in oversized sleeves
+  for (const [side, ph] of [[-1, -a], [1, a]]) {
+    const hx = side * 0.36 * s, hy = -0.56 * s - ph * 0.13 * s;
+    ctx.strokeStyle = '#e61f1e'; ctx.lineWidth = 0.13 * s;
+    ctx.beginPath(); ctx.moveTo(side * 0.24 * s, -0.9 * s); ctx.lineTo(hx, hy); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(hx, hy, 0.06 * s, 0, 7); ctx.fill(); // cuff
+    ctx.fillStyle = '#d9a37e'; ctx.beginPath(); ctx.arc(hx + side * 0.01 * s, hy + 0.05 * s, 0.05 * s, 0, 7); ctx.fill();
+  }
+  // oversized boxy hoodie with ribbed hem
+  ctx.fillStyle = '#ff2625'; rrect(-0.27 * s, -1.0 * s, 0.54 * s, 0.6 * s, 0.1 * s); ctx.fill();
+  ctx.fillStyle = '#e61f1e'; ctx.fillRect(-0.27 * s, -0.47 * s, 0.54 * s, 0.07 * s);
+  // hood lying on the back
+  ctx.fillStyle = '#e61f1e'; ctx.beginPath(); ctx.ellipse(0, -0.96 * s, 0.19 * s, 0.1 * s, 0, 0, Math.PI); ctx.fill();
+  if (IMG.logo) drawImg(IMG.logo, 0, -0.7 * s, 0.4 * s);
+  // head: curly hair from behind
+  ctx.fillStyle = '#d9a37e'; ctx.fillRect(-0.06 * s, -1.08 * s, 0.12 * s, 0.08 * s); // neck
+  ctx.fillStyle = '#2a1a10'; ctx.beginPath(); ctx.arc(0, -1.18 * s, 0.17 * s, 0, 7); ctx.fill();
+  ctx.fillStyle = '#3d2716';
+  for (let i = 0; i < 7; i++) { const an = Math.PI * (1.05 + i * 0.15); ctx.beginPath(); ctx.arc(Math.cos(an) * 0.13 * s, -1.2 * s + Math.sin(an) * 0.12 * s, 0.06 * s, 0, 7); ctx.fill(); }
+  // headphones: black band, red ear cups
+  ctx.strokeStyle = '#111111'; ctx.lineWidth = 0.04 * s;
+  ctx.beginPath(); ctx.arc(0, -1.18 * s, 0.19 * s, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+  ctx.fillStyle = '#ff2625';
+  rrect(-0.23 * s, -1.22 * s, 0.07 * s, 0.13 * s, 0.03 * s); ctx.fill();
+  rrect(0.16 * s, -1.22 * s, 0.07 * s, 0.13 * s, 0.03 * s); ctx.fill();
   ctx.restore();
 }
 
@@ -1155,6 +1189,22 @@ resize();
 // attract mode: some scenery while on the menu
 for (let i = 0; i < 4; i++) { addObs(['apple', 'kiosk', 'truck', 'apple'][i], [-1, 1, 0, 1][i], 18 + i * 12); snackLine([0, -1, 1, -1][i], 4, 14 + i * 12); }
 requestAnimationFrame(loop);
+// ---------- web app: install + offline ----------
+(() => {
+  const inClaude = /claude/i.test(location.hostname) || location.protocol !== 'https:';
+  const standalone = matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches || navigator.standalone === true;
+  if (!inClaude && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (inClaude || standalone) return;
+  const btn = $('installBtn');
+  let deferred = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; btn.hidden = false; });
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if (ios) btn.hidden = false;
+  btn.addEventListener('click', async () => {
+    if (deferred) { deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; btn.hidden = true; return; }
+    $('installHint').hidden = !$('installHint').hidden;
+  });
+})();
 window.__snx = { act, start, get state() { return state; }, get score() { return score; }, objs: () => objs, setDist: v => { dist = v; } };
 })();
 </script>
