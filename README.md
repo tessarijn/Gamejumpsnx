@@ -27,6 +27,13 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 browser en kunnen hem op het beginscherm zetten (Android: knop in het startscherm; iPhone: Safari > Deel > Zet op beginscherm).
 Na het eerste bezoek werkt het spel ook offline; de ranglijst heeft internet nodig.
 
+## SNX Snack Match (`match.html`)
+Tweede game: eigen match-3 puzzel met de SNX-producten als tegels (Betterbal, BOB Burger, K-Rocket, Doos, SNX-logo).
+- Swipe of tik twee buren om te wisselen. 3 op een rij = weg.
+- 4 op een rij = Turbo-snack (ruimt rij of kolom). L/T-vorm = Frituurbom. 5 op een rij = SNX Mega (wist een hele soort).
+- 30 levels met doel (X van een product verzamelen + puntendoel) en beperkt aantal zetten; 1-3 sterren.
+- Voortgang staat lokaal in de browser (localStorage). Nog geen leadformulier of ranglijst gekoppeld.
+
 ## Online zetten
 GitHub Pages via `.github/workflows/pages.yml` (bij push naar `main`). Daarna met een iframe op snxfood.com/game:
 
