@@ -698,7 +698,8 @@ function pauseMenu() {
     <div class="btns"><button class="b alt" data-a="mute">${muted ? 'Geluid aan' : 'Geluid uit'}</button><button class="b alt" data-a="reset">Nieuw spel</button><button class="b dark" data-a="save">Opslaan</button><button class="b" data-a="close">Doorgaan</button></div>`, {
     close: closeModal, save() { save(); toast('Opgeslagen', 'good'); closeModal(); },
     mute() { muted = !muted; pauseMenu(); },
-    reset() { if (confirm('Weet je het zeker? Je huidige spel wordt gewist.')) { S = newState(); startDay(); save(); closeModal(); } },
+    reset() { modal(`<h2>Nieuw spel?</h2><p>Je huidige spel wordt gewist.</p><div class="btns"><button class="b alt" data-a="back">Terug</button><button class="b" data-a="wipe">Ja, opnieuw beginnen</button></div>`,
+      { back: pauseMenu, wipe() { S = newState(); startDay(); save(); closeModal(); } }); },
   });
 }
 function winMenu() {
@@ -1001,7 +1002,11 @@ function begin(state) {
   startDay(); hud();
   if (isTouch) $('#act').style.display = 'block';
 }
-$('#bNew').onclick = () => { if (saved && !confirm('Nieuw spel starten? Je opgeslagen spel wordt overschreven.')) return; begin(newState()); save(); };
+$('#bNew').onclick = () => {
+  const b = $('#bNew');
+  if (saved && !b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'Zeker? Opgeslagen spel wissen'; return; }
+  begin(newState()); save();
+};
 $('#bCont').onclick = () => begin(saved);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S) drawBG(season()); });
 addEventListener('visibilitychange', () => { if (document.hidden && S) save(); });
