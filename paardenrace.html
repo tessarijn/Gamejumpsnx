@@ -315,7 +315,9 @@ const HORSES = [
   { id: 'burger', names: { nl: 'BOB Burger', en: 'BOB Burger' }, jockey: 'B. Bun', img: 'assets/burger.webp',
     coat: '#2b211c', mane: '#0d0907', blaze: true, socks: [0, 1, 0, 0], silk: ['#ffffff', '#ff2625', 'sash'] },
   { id: 'doos',   names: { nl: 'Verzenddoos Express', en: 'Shipping Box Express' }, jockey: 'D. Doos', img: 'assets/doos.webp',
-    coat: '#c4beb6', mane: '#76706a', blaze: false, socks: [0, 0, 0, 0], silk: ['#ff2625', '#111111', 'quarters'] },
+    coat: '#c4beb6', mane: '#76706a', blaze: false, socks: [0, 0, 0, 0], silk: ['#ff2625', '#111111', 'quarters'], box: true },
+  { id: 'chicken', names: { nl: 'Chickenbites Champ', en: 'Chickenbites Champ' }, jockey: 'C. Kip', img: 'assets/chickenbites.webp',
+    coat: '#9a6436', mane: '#3b2212', blaze: true, socks: [1, 1, 1, 1], silk: ['#ff2625', '#ffffff', 'stripes'], box: true, riderH: 0.42 },
   { id: 'now',    names: { nl: 'Now You Can', en: 'Now You Can' }, jockey: 'N. Kan', img: null,
     coat: '#c8975a', mane: '#f1e6d0', blaze: true, socks: [1, 1, 0, 0], silk: ['#ffffff', '#111111', 'stripes'] },
   { id: 'all',    names: { nl: 'Have It All', en: 'Have It All' }, jockey: 'H. Alles', img: null,
@@ -912,7 +914,7 @@ function drawHorse(c, s, r, moving) {
   const rb = moving ? Math.sin(ph * 2) * 0.012 : 0;
   const im = IMG[h.id];
   if (im && im.complete && im.naturalWidth) {
-    const hh = h.id === 'doos' ? 0.28 : 0.34, ww = Math.min(0.42, hh * im.naturalWidth / im.naturalHeight), hgt = ww * im.naturalHeight / im.naturalWidth;
+    const hh = h.riderH || (h.box ? 0.3 : 0.34), ww = Math.min(0.42, hh * im.naturalWidth / im.naturalHeight), hgt = ww * im.naturalHeight / im.naturalWidth;
     c.drawImage(im, -0.04 - ww / 2, -0.18 - hgt + rb, ww, hgt);
   } else {
     c.fillStyle = '#ff2625'; c.strokeStyle = '#fff'; c.lineWidth = 0.022;
