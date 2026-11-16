@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Bundel de site
-        run: mkdir -p _site && cp index.html manifest.webmanifest sw.js _site/ && cp -r assets icons _site/
+        run: mkdir -p _site && cp index.html slot.html manifest.webmanifest sw.js _site/ && cp -r assets icons _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

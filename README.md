@@ -10,6 +10,13 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 - 25 snacks = Turbo (onkwetsbaar, sneller, punten ×2).
 - Verzenddoos Betterballen = power-up: +100 en 8 seconden dubbele punten.
 
+## SNX Power Slot (`slot.html`)
+Tweede game: 5 rollen x 3 rijen, 243 manieren om te winnen, met SNX-snacks als symbolen. Gratis snack-punten, geen geld, geen prijzen.
+- **SNX Wild** (rol 2-5) vervangt elke snack. **Bonus-doos**: 3/4/5 = 8/12/20 free spins, multiplier stijgt per winst (max x10).
+- **Power-meter**: +1 per winnende spin of Bonus-doos. Bij 15: Power Spin, 2 rollen volledig wild, winst x3 tot x5.
+- **Snack Truck**: willekeurig (~1 op 14 spins) 2-5 extra wilds.
+- Turbo, Auto-spin, geluid, punten en meter blijven bewaard in de browser. Gesimuleerd: ~100% terugbetaling, Power Spin ~1 op 17, free spins ~1 op 75.
+
 ## Leads en ranglijst
 - Na een ronde: voornaam, e-mail, schermnaam. Verplicht: akkoord met de actievoorwaarden en privacy.
   Vrijwillig (los vinkje): SNX-nieuws en acties. Alleen wie dat aanvinkt, gaat naar ActiveCampaign.
