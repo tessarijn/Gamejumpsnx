@@ -1,6 +1,6 @@
 // SNX Snack Rush service worker: the game works offline after the first visit.
 // The score API (Supabase) always goes to the network.
-const CACHE = 'snx-snack-rush-v1';
+const CACHE = 'snx-snack-rush-v2';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (e) => {
@@ -14,8 +14,9 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET' || req.url.includes('.supabase.co/')) return;
   if (req.mode === 'navigate') {
     // newest game first, cached copy when offline
-    e.respondWith(fetch(req).then((r) => { const c = r.clone(); caches.open(CACHE).then((x) => x.put('./index.html', c)); return r; })
-      .catch(() => caches.match('./index.html')));
+    // elke pagina (Snack Rush, SNXbar Tycoon) onder haar eigen adres in de cache
+    e.respondWith(fetch(req).then((r) => { const c = r.clone(); caches.open(CACHE).then((x) => x.put(req, c)); return r; })
+      .catch(() => caches.match(req).then((hit) => hit || caches.match('./index.html'))));
     return;
   }
   // icons, fonts and other files: cache first
