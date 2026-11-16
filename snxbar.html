@@ -69,6 +69,36 @@ table.sum tr.tot td{font-size:16px;font-weight:800;border-bottom:0;padding-top:8
 #title button.b{font-size:16px;padding:10px 20px;background:#fff;color:var(--ink)}
 #title a{color:#fff;font-size:12px}
 .kbd{display:inline-block;border:2px solid var(--ink);border-radius:5px;padding:0 5px;font-weight:800;font-size:12px;background:#fff}
+#hudD{position:fixed;right:calc(8px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));padding:6px 10px;text-align:right;font-size:12px;font-weight:600;line-height:1.35;display:none}
+#hudD .big{font-size:18px;font-weight:800;color:var(--groen)}
+#title .roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:min(720px,100%)}
+#title .role{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);padding:12px 10px;cursor:pointer;font:inherit;text-align:center}
+#title .role:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+#title .role img{width:56px;height:46px;object-fit:contain}
+#title .role b{display:block;font-size:17px;font-weight:800;color:var(--crust)}
+#title .role span{display:block;font-size:11px;color:#555;margin-top:2px}
+#title .free{font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;opacity:.95}
+#title .free button.b{font-size:12px;padding:5px 10px}
+@media (max-width:560px){#title .roles{grid-template-columns:1fr}#title .role{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px}#title .role img{width:44px;height:36px}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:8px 0}
+.tile{border:2px solid var(--ink);border-radius:10px;padding:6px 8px;background:#fff}
+.tile b{display:block;font-size:20px;font-weight:800;color:var(--crust);line-height:1.1}
+.tile span{font-size:11px;color:#555}
+table.pt{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+table.pt th,table.pt td{padding:4px 3px;border-bottom:1px solid #e3ddd2;text-align:right}
+table.pt th:first-child,table.pt td:first-child{text-align:left}
+.calc{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 10px;margin:8px 0}
+.calc label{display:block;font-size:12px;font-weight:600;margin-top:6px}
+.calc input[type=range]{width:100%;accent-color:var(--snx);touch-action:pan-x}
+.calc .out{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.calc .out div{background:var(--paper);border-radius:8px;padding:5px 8px;font-size:11px}
+.calc .out b{display:block;font-size:17px;font-weight:800}
+.note{font-size:11px;color:#666}
+form.lead label{display:block;font-size:12px;font-weight:600;margin-top:8px}
+form.lead input[type=text],form.lead input[type=email],form.lead input[type=tel],form.lead select{width:100%;font:500 14px Poppins,sans-serif;padding:7px 9px;border:2px solid var(--ink);border-radius:8px;background:#fff;-webkit-user-select:text;user-select:text}
+form.lead .chk{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:12px;margin-top:6px}
+form.lead .chk input{margin-top:3px;accent-color:var(--snx)}
+.err{color:var(--crust);font-size:12px;font-weight:600;min-height:16px}
 </style>
 </head>
 <body>
@@ -86,6 +116,11 @@ table.sum tr.tot td{font-size:16px;font-weight:800;border-bottom:0;padding-top:8
   <div>Reputatie <span id="hRep">0</span></div>
   <div>Filialen <span id="hBr">0</span>/12</div>
 </div>
+<div id="hudD" class="panel">
+  <div class="big" id="dMargin">€ 0</div>
+  <div>brutomarge</div>
+  <div id="dSold">0 verkocht</div>
+</div>
 <div id="tray" class="panel">
   <div class="slots" id="tSlots"></div>
   <div class="stock" id="tStock"></div>
@@ -99,9 +134,14 @@ table.sum tr.tot td{font-size:16px;font-weight:800;border-bottom:0;padding-top:8
 
 <div id="title">
   <img src="assets/logo_white.webp" alt="SNX">
-  <h1>SNXbar Tycoon</h1>
-  <p>Begin met één snackbar en één friteuse. Bak, serveer, lever aan de groothandel en bouw een SNXbar-keten door heel Europa.</p>
-  <div class="btns">
+  <h1>Wat levert SNX jouw zaak op?</h1>
+  <p>Kies je rol en draai een korte dienst van ±2,5 minuut. Daarna zie je je business case: verkoop, marge en wat het per jaar kan opleveren.</p>
+  <div class="roles">
+    <button class="role" data-role="gh"><img src="assets/doos.webp" alt=""><div><b>Groothandel</b><span>Cash &amp; carry, foodservice-groothandel, distributeur</span></div></button>
+    <button class="role" data-role="rt"><img src="assets/kroket.webp" alt=""><div><b>Retail</b><span>Supermarkt, tankstationshop, gemakswinkel</span></div></button>
+    <button class="role" data-role="fs"><img src="assets/burger.webp" alt=""><div><b>Foodservice</b><span>Kantine, snackbar, stadion, horeca</span></div></button>
+  </div>
+  <div class="free">Of speel de volledige game SNXbar Tycoon:
     <button class="b" id="bCont" style="display:none">Verder spelen</button>
     <button class="b" id="bNew">Nieuw spel</button>
   </div>
@@ -149,9 +189,41 @@ const CITIES = [
 ];
 const B2B = ['Sportkantine De Spurt', 'Bedrijfsrestaurant Noord', 'Tankstation A12', 'Schoolkantine Het Plein', 'Stadion Oost', 'Buurtsuper De Hoek', 'Festival Zomerpark', 'Zwembad De Golf'];
 
+// ================= VERKOOPINSTELLINGEN =================
+// Alle prijzen hieronder zijn VOORBEELDEN. Vervang ze door de echte SNX-prijzen per kanaal:
+// prices: { product: [inkoopprijs voor de klant, verkoopprijs van de klant] } per eenheid van dat kanaal.
+const CONFIG = {
+  leadEndpoint: null,          // later: Supabase Edge Function die B2B-leads naar ActiveCampaign stuurt
+  demoMinS: 1.0,               // echte seconden per spelminuut in de demo (150 min = 2,5 min)
+  privacyUrl: 'https://www.snxfood.com',
+  roles: {
+    fs: { title: 'Foodservice', unit: 'portie', units: 'porties', tray: 'Dienblad', start: 690, end: 840, spawn: 5.2, perDay: 80, days: 5,
+      sign: null, shift: 'lunchspits', role: 'Eigenaar / F&B-manager',
+      intro: ['Je runt een kantine of snackbar tijdens de lunchspits.', 'Kies aan de friteuse wat je bakt, pak de porties en serveer ze aan de toonbank.', 'Let op de geduldbalk boven de klant: snel helpen = tevreden gasten.'],
+      prices: { b: [0.55, 2.75], k: [0.60, 2.95], r: [1.40, 5.50] } },
+    rt: { title: 'Retail', unit: 'verpakking', units: 'verpakkingen', tray: 'Kar', start: 960, end: 1110, spawn: 4.0, perDay: 30, days: 7,
+      sign: 'SUPERMARKT', shift: 'middagspits', role: 'Category manager / inkoper',
+      intro: ['Je bent de supermarkt in de middagspits. Shoppers pakken SNX zelf uit het diepvriesschap.', 'Haal verpakkingen uit het magazijn (achter) en vul het schap aan de toonbank.', 'Leeg schap = gemiste verkoop. Houd alle drie de producten op voorraad.'],
+      prices: { b: [2.40, 3.99], k: [2.10, 3.49], r: [2.60, 4.29] } },
+    gh: { title: 'Groothandel', unit: 'doos', units: 'dozen', tray: 'Kar', start: 360, end: 510, spawn: 7.0, perDay: 40, days: 5,
+      sign: 'GROOTHANDEL', shift: 'ochtendroute', role: 'Inkoper / category manager',
+      intro: ['Je runt de ochtendroute van een groothandel.', 'Klanten (snackbars, kantines, supermarkten) halen bestellingen op aan het laaddock.', 'Pak dozen uit de stellingen en laad de complete bestelling in voor de klant vertrekt.'],
+      prices: { b: [18.00, 22.50], k: [19.00, 23.75], r: [24.00, 30.00] } },
+  },
+};
+const isDemo = () => !!(S && S.mode && S.mode !== 'tycoon');
+const ROLE = () => CONFIG.roles[S.mode];
+const cookTime = p => PRODUCTS[p].cook * (isDemo() ? 0.65 : 1);
+const buyPrice = p => isDemo() ? ROLE().prices[p][0] : 0;
+const sellPrice = p => isDemo() ? ROLE().prices[p][1] : PRODUCTS[p].price;
+function unitName(p) {
+  if (!isDemo() || S.mode === 'fs') return PRODUCTS[p].name;
+  return (S.mode === 'gh' ? 'doos ' : 'pak ') + PRODUCTS[p].plural;
+}
+
 // ---------- plaatjes ----------
 const IMG = {};
-['bal', 'kroket', 'burger', 'logo_white'].forEach(n => { const i = new Image(); i.src = 'assets/' + n + '.webp'; IMG[n] = i; });
+['bal', 'kroket', 'burger', 'logo_white', 'doos'].forEach(n => { const i = new Image(); i.src = 'assets/' + n + '.webp'; IMG[n] = i; });
 const imgOk = i => i && i.complete && i.naturalWidth > 0;
 
 // ---------- geluid ----------
@@ -330,11 +402,11 @@ const season = () => Math.floor((S.day - 1) / 10) % 4;
 const dayInSeason = () => (S.day - 1) % 10 + 1;
 const year = () => Math.floor((S.day - 1) / 40) + 1;
 const weekday = () => WEEK[(S.day - 1) % 7];
-const fryerCount = () => 1 + S.upg.fryer;
-const trayCap = () => S.upg.tray ? 4 : 2;
+const fryerCount = () => isDemo() ? 3 : 1 + S.upg.fryer;
+const trayCap = () => isDemo() ? (S.mode === 'fs' ? 3 : 4) : S.upg.tray ? 4 : 2;
 const branchCount = () => Object.keys(S.branches).length;
 const festival = () => (season() === 1 && dayInSeason() === 10) ? 'Zomerfestival' : (season() === 3 && dayInSeason() === 10) ? 'Wintermarkt' : null;
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } }
+function save() { if (isDemo()) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } saved = S; const c = document.getElementById('bCont'); if (c) c.style.display = 'inline-block'; }
 function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) return s; } catch (e) { } return null; }
 
 // ---------- entiteiten ----------
@@ -442,16 +514,27 @@ function wantedProduct() {
 }
 function spawnCustomer() {
   const free = slotUsed.map((u, i) => u ? -1 : i).filter(i => i >= 0);
-  if (!free.length) { S.today.lost++; return; }
+  const demo = isDemo();
+  let order = [wantedProduct()];
+  if (!demo) { if (Math.random() < 0.28 + S.day * 0.004) order.push(wantedProduct()); }
+  else if (S.mode === 'gh') { const n = 2 + Math.floor(Math.random() * 3); for (let i = 1; i < n; i++) order.push(wantedProduct()); }
+  else if (Math.random() < 0.35) order.push(wantedProduct());
+  if (demo) S.demo.orders++;
+  if (!free.length) { S.today.lost++; if (demo) S.demo.missed += order.length; return; }
   const slot = pick(free);
-  const order = [wantedProduct()]; if (Math.random() < 0.28 + S.day * 0.004) order.push(wantedProduct());
   const sx = (SLOTS[slot] + 0.5) * TS;
   const from = pick([[21.5, 27], [9, 20.6], [34, 21.4]]);
   const path = [];
   if (from[1] < 26) path.push([21.6 * TS, from[1] * TS]);
   path.push([21.6 * TS, 17.2 * TS], [21.6 * TS, 12.6 * TS], [sx, 12.6 * TS], [sx, 11.75 * TS]);
-  const pat = (38 + order.length * 10) * (S.upg.terras ? 1.3 : 1);
-  const c = { x: from[0] * TS, y: from[1] * TS, path, state: 'enter', slot, want: order.slice(), order: order.length, paid: 0, pat, maxPat: pat, look: randomLook(), dir: 'up', moving: true, anim: Math.random() * 5, speed: rnd(85, 105), mood: null };
+  let pat = (38 + order.length * 10) * (S.upg.terras ? 1.3 : 1);
+  const look = randomLook();
+  if (demo) {
+    pat = S.mode === 'fs' ? 30 + order.length * 10 : S.mode === 'rt' ? 16 + order.length * 6 : 34 + order.length * 8;
+    if (S.mode === 'gh') { look.shirt = '#3b4a5a'; look.vest = true; }
+    if (S.mode === 'rt') look.basket = true;
+  }
+  const c = { x: from[0] * TS, y: from[1] * TS, path, state: 'enter', slot, want: order.slice(), order: order.length, paid: 0, margin: 0, pat, maxPat: pat, look, client: demo && S.mode === 'gh' ? pick(B2B) : null, dir: 'up', moving: true, anim: Math.random() * 5, speed: rnd(85, 105), mood: null };
   slotUsed[slot] = c; customers.push(c);
 }
 function customerLeave(c, mood) {
@@ -463,29 +546,41 @@ function serveCustomer(c, src) {   // src: array met porties (dienblad), geeft a
   let given = 0;
   for (let i = src.length - 1; i >= 0; i--) {
     const k = c.want.indexOf(src[i]);
-    if (k >= 0) { c.want.splice(k, 1); const p = src.splice(i, 1)[0]; given++; c.paid += PRODUCTS[p].price; questProgress(p, 1, 'sell'); }
+    if (k >= 0) { c.want.splice(k, 1); const p = src.splice(i, 1)[0]; given++; c.paid += sellPrice(p); recordSale(c, p); questProgress(p, 1, 'sell'); }
   }
   if (!given) return 0;
   sfx.pick();
-  if (!c.want.length) {
+  if (!c.want.length) finishOrder(c);
+  return given;
+}
+function recordSale(c, p) {
+  if (!isDemo()) return;
+  const d = S.demo; d.sold[p]++; d.rev += sellPrice(p); d.cost += buyPrice(p); c.margin += sellPrice(p) - buyPrice(p);
+}
+function finishOrder(c) {
+  if (isDemo()) {
+    S.demo.served++; S.demo.waits.push(c.maxPat - c.pat);
+    floaters.push({ x: c.x, y: c.y - 40, text: '+' + euro(c.margin) + ' marge', col: '#2e9d4f', t: 1.4 });
+    sfx.cash(); customerLeave(c, c.pat / c.maxPat > 0.5 ? 'blij' : 'ok'); return;
+  }
+  {
     const frac = c.pat / c.maxPat, tip = Math.round(c.paid * 0.3 * frac * 2) / 2;
     S.money += c.paid + tip; S.today.sales += c.paid; S.today.tips += tip; S.today.served++; S.total.served++; S.total.earned += c.paid + tip;
     addRep((frac > 0.5 ? 0.7 : 0.35) + (S.upg.terras ? 0.2 : 0));
     floaters.push({ x: c.x, y: c.y - 40, text: '+' + euro(c.paid + tip), col: '#2e9d4f', t: 1.4 });
     sfx.cash(); customerLeave(c, frac > 0.5 ? 'blij' : 'ok');
   }
-  return given;
 }
 
 // ---------- friteuses ----------
 function startFry(f, p) {
-  if (S.stock[p] <= 0) { toast(`Geen ${PRODUCTS[p].plural} op voorraad. Koop bij de groothandel.`, 'bad'); sfx.bad(); return false; }
-  S.stock[p]--; f.state = 'cook'; f.p = p; f.t = 0; f.n = S.upg.basket ? 2 : 1; sfx.fry(); return true;
+  if (!isDemo() && S.stock[p] <= 0) { toast(`Geen ${PRODUCTS[p].plural} op voorraad. Koop bij de groothandel.`, 'bad'); sfx.bad(); return false; }
+  if (!isDemo()) S.stock[p]--; f.state = 'cook'; f.p = p; f.t = 0; f.n = S.upg.basket ? 2 : 1; sfx.fry(); return true;
 }
 function updateFryers(dt) {
   for (const f of fryers) {
     if (f.i >= fryerCount()) continue;
-    if (f.state === 'cook') { f.t += dt; if (f.t >= PRODUCTS[f.p].cook) { f.state = 'ready'; f.t = 0; sfx.ready(); } }
+    if (f.state === 'cook') { f.t += dt; if (f.t >= cookTime(f.p)) { f.state = 'ready'; f.t = 0; sfx.ready(); } }
     else if (f.state === 'ready') { f.t += dt; if (f.t > 35) { f.state = 'burnt'; f.t = 0; floaters.push({ x: (f.tx + .5) * TS, y: f.ty * TS - 6, text: 'Aangebrand!', col: '#d12325', t: 1.6 }); } }
   }
 }
@@ -552,19 +647,27 @@ function interactables() {
   const L = [];
   fryers.forEach(f => {
     const x = (f.tx + .5) * TS, y = (f.ty + 1.25) * TS;
-    if (f.i >= fryerCount()) { L.push({ x, y, r: 30, label: 'Lege plek (friteuse kopen in het kantoor)', act() { toast('Koop een extra friteuse in het kantoor.'); } }); return; }
+    if (f.i >= fryerCount()) { if (!isDemo()) L.push({ x, y, r: 30, label: 'Lege plek (friteuse kopen in het kantoor)', act() { toast('Koop een extra friteuse in het kantoor.'); } }); return; }
+    if (f.state === 'rack') { const full = player.tray.length >= trayCap(); L.push({ x, y, r: 30, label: full ? ROLE().tray + ' vol' : `Pak ${unitName(f.p)}`, act() {
+      if (player.tray.length >= trayCap()) { toast(`Je ${ROLE().tray.toLowerCase()} is vol.`); return; } player.tray.push(f.p); sfx.pick(); } }); return; }
     if (f.state === 'empty') L.push({ x, y, r: 30, label: 'Bakken', act: () => fryerMenu(f) });
-    else if (f.state === 'cook') L.push({ x, y, r: 30, label: `${PRODUCTS[f.p].name}: nog ${Math.ceil(PRODUCTS[f.p].cook - f.t)} s`, act() { } });
+    else if (f.state === 'cook') L.push({ x, y, r: 30, label: `${PRODUCTS[f.p].name}: nog ${Math.ceil(cookTime(f.p) - f.t)} s`, act() { } });
     else if (f.state === 'ready') L.push({ x, y, r: 30, label: player.tray.length >= trayCap() ? 'Dienblad vol' : `Pak ${f.n}× ${PRODUCTS[f.p].name}`, act() {
       if (player.tray.length >= trayCap()) { toast('Je dienblad is vol. Serveer eerst of zet het in de krat.'); return; }
       takeFromFryer(f, player.tray, trayCap()); sfx.pick(); } });
     else if (f.state === 'burnt') L.push({ x, y, r: 30, label: 'Schoonmaken', act() { f.state = 'empty'; useEnergy(2); sfx.pick(); } });
   });
   for (const c of customers) {
-    if (c.state !== 'wait') continue;
+    if (c.state !== 'wait' || (isDemo() && S.mode === 'rt')) continue;
     const ok = player.tray.some(p => c.want.includes(p));
-    L.push({ x: c.x, y: c.y, r: 74, prio: ok ? 1 : 0, label: ok ? 'Serveren' : 'Klant wil: ' + c.want.map(p => PRODUCTS[p].name).join(' + '), act() {
+    L.push({ x: c.x, y: c.y, r: 74, prio: ok ? 1 : 0, label: ok ? (c.client ? 'Inladen voor ' + c.client : 'Serveren') : (c.client || 'Klant') + ' wil: ' + c.want.map(p => PRODUCTS[p].name).join(' + '), act() {
       if (!serveCustomer(c, player.tray)) { toast('Je hebt niet wat deze klant wil.'); return; } useEnergy(1); } });
+  }
+  if (isDemo()) {
+    if (S.mode === 'rt' && player.tray.length && player.y < 10 * TS && player.y > 9.2 * TS && player.x < 28 * TS)
+      L.push({ x: player.x, y: 10.1 * TS, r: 30, prio: 1, label: 'Schap vullen', act() {
+        const n = player.tray.length; player.tray.forEach(p => S.demo.shelf[p]++); player.tray = []; sfx.pick(); toast(`${n} verpakkingen in het schap`); } });
+    return L;
   }
   L.push({ x: (KRAT[0] + .5) * TS, y: (KRAT[1] + .5) * TS, r: 40, label: player.tray.length ? 'In groothandelskrat zetten' : 'Groothandelskrat', act: kratAct });
   L.push({ x: (BOARD[0] + .5) * TS, y: (BOARD[1] + .5) * TS, r: 40, label: 'Opdrachtenbord', act: boardMenu });
@@ -691,13 +794,17 @@ function sleepMenu() {
     <div class="btns"><button class="b alt" data-a="close">Nog niet</button><button class="b" data-a="sleep">Slapen</button></div>`, { close: closeModal, sleep: () => goSleep(false) });
 }
 function pauseMenu() {
+  if (isDemo()) return modal(`<h2>Pauze</h2><p>${ROLE().title}-demo · ${ROLE().shift}</p>
+    <div class="btns"><button class="b alt" data-a="mute">${muted ? 'Geluid aan' : 'Geluid uit'}</button><button class="b alt" data-a="roles">Andere rol</button><button class="b dark" data-a="end">Dienst afronden</button><button class="b" data-a="close">Doorgaan</button></div>`,
+    { close: closeModal, mute() { muted = !muted; pauseMenu(); }, roles: showTitle, end: finishDemo });
   modal(`<h2>Menu</h2>
     <p><b>Doel:</b> bouw een SNXbar-keten met filialen in 12 Europese steden.</p>
     <p><b>Zo werkt het:</b> bak aan de friteuse, pak de porties en serveer klanten aan de toonbank. Over? Zet porties in de groothandelskrat bij de deur: die worden 's nachts verkocht. Koop voorraad bij de groothandel, upgrades en filialen in het kantoor. Slaap thuis voor 02:00.</p>
     <p class="muted">Dag ${S.day} · jaar ${year()} · ${S.total.served} klanten geholpen · ${euro(S.total.earned)} totale omzet</p>
-    <div class="btns"><button class="b alt" data-a="mute">${muted ? 'Geluid aan' : 'Geluid uit'}</button><button class="b alt" data-a="reset">Nieuw spel</button><button class="b dark" data-a="save">Opslaan</button><button class="b" data-a="close">Doorgaan</button></div>`, {
+    <div class="btns"><button class="b alt" data-a="mute">${muted ? 'Geluid aan' : 'Geluid uit'}</button><button class="b alt" data-a="b2b">Zakelijk: business case</button><button class="b alt" data-a="reset">Nieuw spel</button><button class="b dark" data-a="save">Opslaan</button><button class="b" data-a="close">Doorgaan</button></div>`, {
     close: closeModal, save() { save(); toast('Opgeslagen', 'good'); closeModal(); },
     mute() { muted = !muted; pauseMenu(); },
+    b2b() { save(); showTitle(); },
     reset() { modal(`<h2>Nieuw spel?</h2><p>Je huidige spel wordt gewist.</p><div class="btns"><button class="b alt" data-a="back">Terug</button><button class="b" data-a="wipe">Ja, opnieuw beginnen</button></div>`,
       { back: pauseMenu, wipe() { S = newState(); startDay(); save(); closeModal(); } }); },
   });
@@ -708,6 +815,110 @@ function winMenu() {
     <div class="btns"><button class="b" data-a="close">Doorgaan</button></div>`, { close: closeModal });
 }
 
+// ---------- sales-demo ----------
+function newDemo(mode) {
+  const s = newState(); s.mode = mode; s.unlocked = { b: true, k: true, r: true }; s.stock = { b: 999, k: 999, r: 999 };
+  s.min = CONFIG.roles[mode].start; s.weather = 'zon';
+  s.demo = { sold: { b: 0, k: 0, r: 0 }, rev: 0, cost: 0, served: 0, orders: 0, missed: 0, waits: [], shelf: { b: 3, k: 3, r: 3 } };
+  return s;
+}
+function startDemo() {
+  S.quest = null; resetDayEntities(); rebuildSolid(); if (bgSeason !== 0) drawBG(0);
+  if (S.mode !== 'fs') fryers.forEach((f, i) => { if (i < 3) { f.state = 'rack'; f.p = ['b', 'k', 'r'][i]; } });
+  player.x = 19.5 * TS; player.y = 8.75 * TS; player.dir = 'down';
+  const R = ROLE();
+  modal(`<h2>${R.title}: ${R.shift}</h2>${R.intro.map(t => `<p>• ${t}</p>`).join('')}
+    <p class="muted">Je hebt ±2,5 minuut. Rechtsboven zie je je brutomarge oplopen.</p>
+    <p class="note">${isTouch ? 'Sleep links op het scherm om te lopen, tik op de rode knop voor actie.' : 'Lopen: pijltjes of WASD · actie: E of spatie · pauze: Esc'}</p>
+    <div class="btns"><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="next">Start dienst</button></div>`,
+    { next: closeModal, roles: showTitle }, true);
+}
+function showTitle() { closeModal(); S = null; customers = []; $('#title').style.display = 'flex'; $('#prompt').style.display = 'none'; $('#act').style.display = 'none'; }
+let lastReport = null;
+function finishDemo() {
+  const R = ROLE(), d = S.demo, mode = S.mode;
+  const units = d.sold.b + d.sold.k + d.sold.r, hours = (R.end - R.start) / 60;
+  const ordered = units + d.missed, service = ordered ? Math.round(units / ordered * 100) : 0;
+  const avgWait = d.waits.length ? Math.round(d.waits.reduce((a, b) => a + b, 0) / d.waits.length) : 0;
+  const mix = {}; ['b', 'k', 'r'].forEach(p => mix[p] = units ? d.sold[p] / units : 1 / 3);
+  lastReport = { mode, units, missed: d.missed, service, avgWait, margin: d.rev - d.cost, rev: d.rev, perHour: Math.round(units / hours), mix };
+  const rows = ['b', 'k', 'r'].map(p => { const [buy, sell] = R.prices[p], m = sell - buy;
+    return `<tr><td>${unitName(p)}</td><td>${d.sold[p]}</td><td>${euro(buy)}</td><td>${euro(sell)}</td><td>${euro(m)}</td><td>${Math.round(m / sell * 100)}%</td></tr>`; }).join('');
+  const missTxt = mode === 'rt' ? 'gemist door leeg schap' : mode === 'gh' ? 'niet geleverd' : 'gemist (wachttijd)';
+  modal(`<h2>Jouw SNX-business case · ${R.title}</h2>
+    <p>Zo ging jouw ${R.shift}:</p>
+    <div class="tiles">
+      <div class="tile"><b>${units}</b><span>${R.units} verkocht</span></div>
+      <div class="tile"><b>${euro(d.rev - d.cost)}</b><span>brutomarge</span></div>
+      <div class="tile"><b>${service}%</b><span>servicegraad (${d.missed} ${missTxt})</span></div>
+      <div class="tile"><b>${avgWait} s</b><span>gem. ${mode === 'gh' ? 'laadtijd' : 'wachttijd'} per klant</span></div>
+    </div>
+    <table class="pt"><tr><th>Product (${R.unit})</th><th>Verkocht</th><th>Inkoop</th><th>Verkoop</th><th>Marge</th><th>%</th></tr>${rows}</table>
+    <div class="calc"><b>Reken het door voor jouw zaak</b>
+      <label>${R.units[0].toUpperCase() + R.units.slice(1)} per dag: <span id="cvU"></span></label><input type="range" id="cU" min="5" max="${R.perDay * 6}" step="5" value="${R.perDay}">
+      <label>Dagen per week open: <span id="cvD"></span></label><input type="range" id="cD" min="1" max="7" step="1" value="${R.days}">
+      <div class="out"><div>Omzet per week<b id="cRw"></b></div><div>Brutomarge per week<b id="cMw"></b></div><div>Brutomarge per jaar<b id="cMy"></b></div><div>Gem. marge per ${R.unit}<b id="cMu"></b></div></div>
+      <p class="note">Productmix uit jouw demo. Jaar = 50 weken. Voorbeeldprijzen, indicatief: vraag de actuele prijslijst aan.</p>
+    </div>
+    <div class="btns"><button class="b alt" data-a="again">Nog een dienst</button><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="lead">Prijslijst of proefpakket aanvragen</button></div>
+    <div class="calc" style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="grow" style="flex:1;min-width:200px"><b>Blijf spelen en bouw door</b><br><span class="note">Start je eigen SNXbar en bouw een keten van 12 filialen door Europa. Je demo-marge krijg je als startkapitaal: <b>${euro(startBonus())}</b>.</span></div>
+      <button class="b dark" data-a="build">Doorbouwen</button></div>`,
+    { again() { closeModal(); begin(newDemo(mode)); }, roles: showTitle, lead: leadForm,
+      build() { const bonus = startBonus(), st = saved && !saved.mode ? saved : newState(); st.money += bonus; closeModal(); begin(st); save(); toast(`Startkapitaal uit je demo: +${euro(bonus)}`, 'good'); } }, true);
+  const calc = () => {
+    const u = +$('#cU').value, dpw = +$('#cD').value;
+    let rev = 0, mar = 0; ['b', 'k', 'r'].forEach(p => { rev += u * mix[p] * R.prices[p][1]; mar += u * mix[p] * (R.prices[p][1] - R.prices[p][0]); });
+    $('#cvU').textContent = u; $('#cvD').textContent = dpw;
+    $('#cRw').textContent = euro(Math.round(rev * dpw)); $('#cMw').textContent = euro(Math.round(mar * dpw)); $('#cMy').textContent = euro(Math.round(mar * dpw * 50)); $('#cMu').textContent = euro(Math.round(mar / u * 100) / 100);
+    lastReport.calc = { perDay: u, daysPerWeek: dpw, marginPerYear: Math.round(mar * dpw * 50) };
+  };
+  $('#cU').oninput = calc; $('#cD').oninput = calc; calc();
+}
+function startBonus() { return Math.max(50, Math.round(S.demo.rev - S.demo.cost) * 10); }
+function leadForm() {
+  const R = ROLE(), mode = S.mode;
+  const roleOpts = ['Inkoper / category manager', 'Category manager / inkoper', 'Eigenaar / F&B-manager', 'Directie', 'Anders'].filter((v, i, a) => a.indexOf(v) === i)
+    .map(o => `<option${o === R.role ? ' selected' : ''}>${o}</option>`).join('');
+  modal(`<h2>Prijslijst of proefpakket</h2>
+    <p>Laat je gegevens achter. Een SNX-accountmanager neemt contact op met de actuele prijzen voor ${R.title.toLowerCase()}.</p>
+    <form class="lead" id="lf" novalidate>
+      <label>Naam*<input type="text" name="naam" autocomplete="name" required></label>
+      <label>Bedrijf*<input type="text" name="bedrijf" autocomplete="organization" required></label>
+      <label>Functie<select name="functie">${roleOpts}</select></label>
+      <label>Zakelijk e-mailadres*<input type="email" name="email" autocomplete="email" required></label>
+      <label>Telefoon<input type="tel" name="telefoon" autocomplete="tel"></label>
+      <label>Land<select name="land"><option>Nederland</option><option>België</option><option>Duitsland</option><option>Frankrijk</option><option>Ander land</option></select></label>
+      <label style="margin-top:10px">Ik wil graag</label>
+      <div class="chk"><input type="checkbox" name="wens" value="prijslijst" checked id="w1"><label for="w1" style="margin:0;font-weight:500">De prijslijst</label></div>
+      <div class="chk"><input type="checkbox" name="wens" value="proefpakket" id="w2"><label for="w2" style="margin:0;font-weight:500">Een proefpakket</label></div>
+      <div class="chk"><input type="checkbox" name="wens" value="afspraak" id="w3"><label for="w3" style="margin:0;font-weight:500">Een afspraak met een accountmanager</label></div>
+      <div class="chk" style="margin-top:12px"><input type="checkbox" name="privacy" id="pv"><label for="pv" style="margin:0;font-weight:500">Ik ga akkoord dat SNX mijn gegevens gebruikt om contact op te nemen over deze aanvraag (<a href="${CONFIG.privacyUrl}" target="_blank" rel="noopener">privacy</a>).*</label></div>
+      <div class="chk"><input type="checkbox" name="nieuws" id="nb"><label for="nb" style="margin:0;font-weight:500">Stuur mij ook zakelijk nieuws en acties van SNX (vrijwillig).</label></div>
+      <div class="err" id="lerr"></div>
+      <div class="btns"><button type="button" class="b alt" data-a="back">Terug</button><button type="submit" class="b">Aanvraag versturen</button></div>
+    </form>`, { back: finishDemo }, true);
+  $('#lf').onsubmit = async e => {
+    e.preventDefault();
+    const f = new FormData(e.target), err = $('#lerr');
+    const v = { naam: (f.get('naam') || '').trim(), bedrijf: (f.get('bedrijf') || '').trim(), email: (f.get('email') || '').trim() };
+    if (!v.naam || !v.bedrijf) return err.textContent = 'Vul je naam en bedrijf in.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return err.textContent = 'Vul een geldig e-mailadres in.';
+    if (!f.get('privacy')) return err.textContent = 'Geef akkoord voor het gebruik van je gegevens.';
+    const payload = { ...v, functie: f.get('functie'), telefoon: f.get('telefoon'), land: f.get('land'), wensen: f.getAll('wens'), nieuwsbrief: !!f.get('nieuws'), kanaal: R.title, demo: lastReport };
+    if (!CONFIG.leadEndpoint) {
+      return modal(`<h2>Testversie</h2><p><b>Je aanvraag is niet verstuurd.</b> Deze versie is nog niet gekoppeld aan het CRM. In de live versie gaat dit naar ActiveCampaign.</p>
+        <p class="note">Wat er straks wordt meegestuurd:</p><pre style="font-size:11px;white-space:pre-wrap;background:#fff;border:2px solid #111;border-radius:8px;padding:8px">${JSON.stringify(payload, null, 1).replace(/</g, '&lt;')}</pre>
+        <div class="btns"><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="back">Terug naar business case</button></div>`, { back: finishDemo, roles: showTitle }, true);
+    }
+    try {
+      err.textContent = 'Versturen…';
+      const r = await fetch(CONFIG.leadEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!r.ok) throw new Error(r.status);
+      modal(`<h2>Bedankt, ${v.naam.split(' ')[0].replace(/</g, '')}!</h2><p>We nemen snel contact met je op.</p><div class="btns"><button class="b" data-a="roles">Klaar</button></div>`, { roles: showTitle }, true);
+    } catch (x) { err.textContent = 'Versturen lukt nu niet. Probeer het later opnieuw.'; }
+  };
+}
+
 // ---------- invoer ----------
 const keys = new Set();
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
@@ -715,6 +926,7 @@ addEventListener('keydown', e => {
   if ($('#title').style.display !== 'none') return;
   const k = e.key.toLowerCase();
   if (modalOpen) {
+    if (e.target.closest && e.target.closest('input,select,textarea')) return;
     if (k === 'escape' && !modalLocked) closeModal();
     if (/^[1-3]$/.test(k) && modalHandlers.num) modalHandlers.num(+k);
     if ((k === 'enter' || k === ' ') && modalHandlers.next) modalHandlers.next();
@@ -757,12 +969,18 @@ function toast(msg, cls = '') { const d = document.createElement('div'); d.class
 function update(dt) {
   if (modalOpen) return;
   // tijd
-  const prev = S.min;
-  S.min += dt / MIN_S;
-  if (prev < OPEN_AT && S.min >= OPEN_AT) toast('10:00 · De SNXbar is open!', 'good');
-  if (prev < CLOSE_AT && S.min >= CLOSE_AT) toast('21:00 · De bar sluit. Help de laatste klanten en ga daarna naar huis.');
-  if (prev < 1440 && S.min >= 1440) toast('Middernacht. Ga snel naar bed!', 'bad');
-  if (S.min >= PASS_OUT) { goSleep(true); return; }
+  const prev = S.min, demo = isDemo();
+  S.min += dt / (demo ? CONFIG.demoMinS : MIN_S);
+  if (demo) {
+    const R = ROLE();
+    if (prev < R.end - 30 && S.min >= R.end - 30) toast('Nog 30 seconden in deze dienst!');
+    if (S.min >= R.end) { finishDemo(); return; }
+  } else {
+    if (prev < OPEN_AT && S.min >= OPEN_AT) toast('10:00 · De SNXbar is open!', 'good');
+    if (prev < CLOSE_AT && S.min >= CLOSE_AT) toast('21:00 · De bar sluit. Help de laatste klanten en ga daarna naar huis.');
+    if (prev < 1440 && S.min >= 1440) toast('Middernacht. Ga snel naar bed!', 'bad');
+    if (S.min >= PASS_OUT) { goSleep(true); return; }
+  }
   // speler
   let mx = 0, my = 0;
   if (keys.has('arrowleft') || keys.has('a')) mx--; if (keys.has('arrowright') || keys.has('d')) mx++;
@@ -779,7 +997,8 @@ function update(dt) {
     player.anim += dt;
   }
   // klanten
-  if (S.min >= OPEN_AT && S.min < CLOSE_AT - 15) { if (Math.random() < custPerHour() / (60 * MIN_S) * dt) spawnCustomer(); }
+  if (demo) { if (S.min < ROLE().end - 6 && Math.random() < dt / ROLE().spawn) spawnCustomer(); }
+  else if (S.min >= OPEN_AT && S.min < CLOSE_AT - 15) { if (Math.random() < custPerHour() / (60 * MIN_S) * dt) spawnCustomer(); }
   for (let i = customers.length - 1; i >= 0; i--) {
     const c = customers[i];
     if (c.path.length) {
@@ -791,8 +1010,12 @@ function update(dt) {
     } else c.moving = false;
     if (c.state === 'wait') {
       c.pat -= dt;
-      if (S.min >= CLOSE_AT + 30) { customerLeave(c, 'ok'); continue; }
-      if (c.pat <= 0) { customerLeave(c, 'boos'); addRep(-1.5); S.today.angry++; sfx.bad(); floaters.push({ x: c.x, y: c.y - 40, text: 'Te lang!', col: '#d12325', t: 1.5 }); }
+      if (demo && S.mode === 'rt') {
+        for (const p of c.want.slice()) if (S.demo.shelf[p] > 0) { S.demo.shelf[p]--; c.want.splice(c.want.indexOf(p), 1); c.paid += sellPrice(p); recordSale(c, p); }
+        if (!c.want.length) { finishOrder(c); continue; }
+      }
+      if (!demo && S.min >= CLOSE_AT + 30) { customerLeave(c, 'ok'); continue; }
+      if (c.pat <= 0) { if (demo) S.demo.missed += c.want.length; customerLeave(c, 'boos'); addRep(-1.5); S.today.angry++; sfx.bad(); floaters.push({ x: c.x, y: c.y - 40, text: demo && S.mode === 'rt' ? 'Schap leeg!' : 'Te lang!', col: '#d12325', t: 1.5 }); }
     }
     if (c.moodT) c.moodT -= dt;
   }
@@ -831,6 +1054,8 @@ function drawPerson(e, look) {
   ctx.fillStyle = look.pants; ctx.fillRect(x - 5, y - 9, 4, 8 + st * 1.5); ctx.fillRect(x + 1, y - 9, 4, 8 - st * 1.5);
   ctx.fillStyle = look.shirt; rr(ctx, x - 7, y - 21 + bob, 14, 13, 4);
   ctx.fillRect(x - 9, y - 19 + bob + (e.moving ? st * 1.5 : 0), 3, 9); ctx.fillRect(x + 6, y - 19 + bob - (e.moving ? st * 1.5 : 0), 3, 9);
+  if (look.vest) { ctx.fillStyle = '#ff8c1a'; ctx.fillRect(x - 7, y - 20 + bob, 14, 11); ctx.fillStyle = '#f4ff5a'; ctx.fillRect(x - 7, y - 14 + bob, 14, 2); }
+  if (look.basket) { ctx.fillStyle = '#ff2625'; rr(ctx, x + 6, y - 14 + bob, 8, 6, 2); ctx.fillStyle = '#111'; ctx.fillRect(x + 9, y - 17 + bob, 2, 3); }
   if (look.apron && e.dir !== 'up') { ctx.fillStyle = '#ff2625'; ctx.fillRect(x - 5, y - 17 + bob, 10, 9); ctx.fillStyle = '#fff'; ctx.fillRect(x - 2, y - 14 + bob, 4, 2); }
   const hy = y - 27 + bob;
   ctx.fillStyle = look.skin; ell(x, hy, 7, 7);
@@ -847,6 +1072,13 @@ function drawCarry(e, items) {
 }
 function drawFryer(f) {
   const x = f.tx * TS, y = f.ty * TS, cx = x + 16;
+  if (f.state === 'rack') {
+    ctx.fillStyle = '#b7895a'; ctx.fillRect(x + 1, y + 25, 30, 6); ctx.fillStyle = '#8a6440'; ctx.fillRect(x + 4, y + 27, 4, 4); ctx.fillRect(x + 24, y + 27, 4, 4);
+    ctx.fillStyle = S.mode === 'gh' ? '#d9b98a' : '#ff2625';
+    rr(ctx, x + 2, y + 13, 13, 12, 2); rr(ctx, x + 17, y + 13, 13, 12, 2); rr(ctx, x + 9, y + 2, 14, 11, 2);
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(x + 2, y + 18, 28, 1);
+    drawProd(f.p, cx, y - 4, 20); return;
+  }
   if (f.i >= fryerCount()) {
     ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.setLineDash([4, 3]); ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, 26, 26); ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.font = '800 16px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('+', cx, y + 16); return;
@@ -859,7 +1091,7 @@ function drawFryer(f) {
   if (f.state === 'cook') {
     ctx.fillStyle = 'rgba(255,255,255,.75)';
     for (let i = 0; i < 4; i++) { const ph = (T * 2 + i * 0.37) % 1; ell(x + 9 + i * 4.5, y + 18 - ph * 10, 1.6, 1.6); }
-    const pr = f.t / PRODUCTS[f.p].cook;
+    const pr = f.t / cookTime(f.p);
     ctx.fillStyle = '#fff'; rr(ctx, x + 1, y - 9, 30, 6, 3); ctx.fillStyle = '#ff2625'; rr(ctx, x + 2, y - 8, 28 * pr, 4, 2);
   } else if (f.state === 'ready') {
     const b = Math.sin(T * 6) * 2;
@@ -880,6 +1112,20 @@ function drawStatic() {
   const table = (x, y, w) => { ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(x * TS + 4, y * TS + 24, w * TS - 6, 6); ctx.fillStyle = '#8a5a3c'; rr(ctx, x * TS + 2, y * TS + 4, w * TS - 4, 20, 4); ctx.fillStyle = '#ff2625'; ctx.fillRect(x * TS + 2, y * TS + 4, w * TS - 4, 3); ctx.fillStyle = '#d12325'; [[x * TS + 8, y * TS - 4], [x * TS + w * TS - 16, y * TS - 4], [x * TS + 8, y * TS + 26], [x * TS + w * TS - 16, y * TS + 26]].forEach(([a, b]) => rr(ctx, a, b, 8, 7, 2)); };
   table(15, 14, 2); table(26, 14, 2);
   if (S.upg.terras) TERRAS.forEach(([x, y]) => { table(x, y, 1); ctx.fillStyle = (x % 2) ? '#ff2625' : '#fff'; ctx.beginPath(); ctx.moveTo(x * TS - 6, y * TS + 2); ctx.lineTo(x * TS + 16, y * TS - 14); ctx.lineTo(x * TS + 38, y * TS + 2); ctx.fill(); ctx.fillStyle = '#555'; ctx.fillRect(x * TS + 15, y * TS + 2, 2, 8); });
+  if (isDemo() && S.mode === 'rt') {     // diepvriesschap op de toonbank
+    ctx.fillStyle = '#e9f6ff'; ctx.fillRect(15 * TS, 10 * TS + 2, 13 * TS, 28); ctx.fillStyle = '#9fd3f0'; ctx.fillRect(15 * TS + 3, 10 * TS + 5, 13 * TS - 6, 18);
+    ['b', 'k', 'r'].forEach((p, i) => { const n = S.demo.shelf[p], x0 = (15 + i * 4.33) * TS + 6;
+      for (let j = 0; j < Math.min(n, 6); j++) drawProd(p, x0 + 10 + j * 19, 10 * TS + 14, 17);
+      ctx.fillStyle = n ? '#111' : '#d12325'; ctx.font = '800 9px Poppins'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n ? n + '×' : 'LEEG', x0, 10 * TS + 26); });
+  }
+  if (isDemo() && S.mode === 'gh') { for (let i = 0; i < 26; i++) { ctx.fillStyle = i % 2 ? '#111' : '#f4d21a'; ctx.fillRect(15 * TS + i * 16, 10 * TS + 26, 16, 5); } }
+  const sx = 18.4 * TS, sy = 4.9 * TS, sw = 7.2 * TS, sh = 1.55 * TS;
+  if (isDemo() && ROLE().sign) {
+    ctx.fillStyle = '#111'; rr(ctx, sx - 3, sy - 3, sw + 6, sh + 6, 8); ctx.fillStyle = '#ffffff'; rr(ctx, sx, sy, sw, sh, 6);
+    ctx.fillStyle = '#111'; ctx.font = '800 22px Poppins, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ROLE().sign, sx + sw / 2, sy + sh / 2 + 2);
+    ctx.fillStyle = '#ff2625'; rr(ctx, sx + sw - 70, sy + sh - 6, 74, 18, 4); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.fillText('met SNX', sx + sw - 33, sy + sh + 3);
+  } else drawSign(sx, sy, sw, sh);
+  if (isDemo()) return;
   // krat
   const kx = KRAT[0] * TS, ky = KRAT[1] * TS;
   ctx.fillStyle = '#2b5fa8'; rr(ctx, kx + 2, ky + 6, 28, 24, 3); ctx.fillStyle = '#3c78cf'; ctx.fillRect(kx + 2, ky + 6, 28, 5);
@@ -893,8 +1139,8 @@ function drawStatic() {
   if (S.quest && !S.quest.done) { const b = Math.sin(performance.now() / 250) * 2; ctx.fillStyle = '#ff2625'; ell(bx + 26, by - 4 + b, 6, 6); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', bx + 26, by - 3.5 + b); }
   // lantaarns
   LAMPS.forEach(([x, y]) => { ctx.fillStyle = '#333'; ctx.fillRect(x * TS + 14, y * TS - 14, 4, 42); ctx.fillStyle = '#222'; rr(ctx, x * TS + 9, y * TS - 22, 14, 10, 3); ctx.fillStyle = S.min > 1110 ? '#ffe28a' : '#ddd'; ctx.fillRect(x * TS + 11, y * TS - 20, 10, 6); });
-  // bord van de bar
-  const sx = 18.4 * TS, sy = 4.9 * TS, sw = 7.2 * TS, sh = 1.55 * TS;
+}
+function drawSign(sx, sy, sw, sh) {
   ctx.fillStyle = '#111'; rr(ctx, sx - 3, sy - 3, sw + 6, sh + 6, 8);
   ctx.fillStyle = '#ff2625'; rr(ctx, sx, sy, sw, sh, 6);
   const lg = IMG.logo_white;
@@ -910,6 +1156,7 @@ function drawBubble(c) {
   ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, 26, 7) : ctx.rect(x, y, w, 26); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(c.x - 4, y + 25); ctx.lineTo(c.x, y + 31); ctx.lineTo(c.x + 4, y + 25); ctx.fill();
   c.want.forEach((p, i) => drawProd(p, x + 16 + i * 22, y + 13, 19));
+  if (c.client) { ctx.font = '700 9px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.strokeText(c.client, c.x, y - 4); ctx.fillStyle = '#111'; ctx.fillText(c.client, c.x, y - 4); }
   const fr = clamp(c.pat / c.maxPat, 0, 1);
   ctx.fillStyle = '#ddd'; ctx.fillRect(x + 4, y + 29, w - 8, 4);
   ctx.fillStyle = fr > 0.5 ? '#2e9d4f' : fr > 0.25 ? '#f2a33a' : '#d12325'; ctx.fillRect(x + 4, y + 29, (w - 8) * fr, 4);
@@ -942,11 +1189,11 @@ function render() {
   // nacht en licht
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   const m = S.min;
-  let dark = m >= 1080 ? clamp((m - 1080) / 240, 0, 1) * 0.58 : m < 420 ? (420 - m) / 60 * 0.25 : 0;
+  let dark = isDemo() ? 0 : m >= 1080 ? clamp((m - 1080) / 240, 0, 1) * 0.58 : m < 420 ? (420 - m) / 60 * 0.25 : 0;
   if (S.weather === 'regen' || S.weather === 'sneeuw') dark += 0.1; else if (S.weather === 'bewolkt') dark += 0.04;
   if (dark > 0) {
     ctx.fillStyle = `rgba(20,24,60,${dark})`; ctx.fillRect(0, 0, innerWidth, innerHeight);
-    if (m >= 1080) {
+    if (m >= 1080 && !isDemo()) {
       ctx.globalCompositeOperation = 'lighter';
       const glow = (wx, wy, r) => { const sx = (wx - camX) * SCALE, sy = (wy - camY) * SCALE, rr2 = r * SCALE; const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, rr2); g.addColorStop(0, `rgba(255,200,110,${dark * 0.55})`); g.addColorStop(1, 'rgba(255,200,110,0)'); ctx.fillStyle = g; ctx.fillRect(sx - rr2, sy - rr2, rr2 * 2, rr2 * 2); };
       LAMPS.forEach(([x, y]) => glow(x * TS + 16, y * TS - 16, 80));
@@ -965,10 +1212,20 @@ let hudT = 0;
 function hud() {
   const m = Math.floor(S.min) % 1440, h = Math.floor(m / 60), mm = Math.floor(m % 60 / 10) * 10;
   $('#hTime').textContent = String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  const demo = isDemo();
+  $('#hudR').style.display = demo ? 'none' : 'block'; $('#hudD').style.display = demo ? 'block' : 'none';
+  if (demo) {
+    const R = ROLE(), d = S.demo, left = Math.max(0, Math.ceil((R.end - S.min) * CONFIG.demoMinS)), sold = d.sold.b + d.sold.k + d.sold.r;
+    $('#hDay').textContent = R.title + ' · ' + R.shift;
+    $('#hWeather').textContent = 'Nog ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+    const o = $('#open'); o.textContent = 'DEMO'; o.className = 'on';
+    $('#hEnergy').parentElement.style.display = 'none'; $('#hEnergy').parentElement.previousElementSibling.style.display = 'none';
+    $('#dMargin').textContent = euro(d.rev - d.cost); $('#dSold').textContent = sold + ' ' + R.units + ' verkocht';
+  } else { $('#hEnergy').parentElement.style.display = ''; $('#hEnergy').parentElement.previousElementSibling.style.display = ''; }
   const fest = festival();
-  $('#hDay').textContent = `${weekday()} · dag ${dayInSeason()} · ${SEASONS[season()]}${year() > 1 ? ' · jaar ' + year() : ''}`;
-  $('#hWeather').textContent = fest ? '🎉 ' + fest : { zon: '☀ Zon', bewolkt: '☁ Bewolkt', regen: '🌧 Regen', sneeuw: '❄ Sneeuw' }[S.weather];
-  const open = S.min >= OPEN_AT && S.min < CLOSE_AT; const o = $('#open'); o.textContent = open ? 'OPEN' : 'DICHT'; o.className = open ? 'on' : '';
+  if (!demo) $('#hDay').textContent = `${weekday()} · dag ${dayInSeason()} · ${SEASONS[season()]}${year() > 1 ? ' · jaar ' + year() : ''}`;
+  if (!demo) $('#hWeather').textContent = fest ? '🎉 ' + fest : { zon: '☀ Zon', bewolkt: '☁ Bewolkt', regen: '🌧 Regen', sneeuw: '❄ Sneeuw' }[S.weather];
+  const open = S.min >= OPEN_AT && S.min < CLOSE_AT; const o = demo ? { } : $('#open'); o.textContent = open ? 'OPEN' : 'DICHT'; o.className = open ? 'on' : '';
   const en = $('#hEnergy'); en.style.width = S.energy + '%'; en.style.background = S.energy > 30 ? '#2e9d4f' : '#d12325';
   $('#hMoney').textContent = euro(Math.floor(S.money));
   $('#hRep').textContent = Math.round(S.rep) + '/100';
@@ -976,7 +1233,8 @@ function hud() {
   const slots = []; for (let i = 0; i < trayCap(); i++) { const p = player.tray[i]; slots.push(`<div class="slot">${p ? `<img src="assets/${PRODUCTS[p].img}.webp" alt="">` : ''}</div>`); }
   const sh = slots.join('');
   if ($('#tSlots').dataset.h !== sh) { $('#tSlots').innerHTML = sh; $('#tSlots').dataset.h = sh; }
-  $('#tStock').innerHTML = 'Voorraad<br>' + Object.keys(PRODUCTS).filter(k => S.unlocked[k]).map(k => `${PRODUCTS[k].name.split(' ')[0]} <b>${S.stock[k]}</b>`).join(' · ');
+  if (demo) $('#tStock').innerHTML = S.mode === 'rt' ? 'Schap<br>' + ['b', 'k', 'r'].map(k => `${PRODUCTS[k].name.split(' ')[0]} <b style="color:${S.demo.shelf[k] ? '#111' : '#d12325'}">${S.demo.shelf[k]}</b>`).join(' · ') : ROLE().tray + '<br>' + player.tray.length + '/' + trayCap();
+  else $('#tStock').innerHTML = 'Voorraad<br>' + Object.keys(PRODUCTS).filter(k => S.unlocked[k]).map(k => `${PRODUCTS[k].name.split(' ')[0]} <b>${S.stock[k]}</b>`).join(' · ');
   const pr = $('#prompt');
   if (focus && !modalOpen) { pr.style.display = 'block'; pr.innerHTML = (isTouch ? '' : '<b>E</b>') + focus.label; $('#act').textContent = focus.label.length > 22 ? 'ACTIE' : focus.label; }
   else { pr.style.display = 'none'; $('#act').textContent = 'ACTIE'; }
@@ -994,12 +1252,13 @@ function loop(now) {
 // ---------- start ----------
 buildMap();
 resize();
-const saved = load();
+let saved = load();
 if (saved) $('#bCont').style.display = 'inline-block';
 function begin(state) {
   S = state; $('#title').style.display = 'none';
-  rebuildSolid(); drawBG(season());
-  startDay(); hud();
+  rebuildSolid();
+  if (isDemo()) startDemo(); else { drawBG(season()); startDay(); }
+  hud();
   if (isTouch) $('#act').style.display = 'block';
 }
 $('#bNew').onclick = () => {
@@ -1008,6 +1267,7 @@ $('#bNew').onclick = () => {
   begin(newState()); save();
 };
 $('#bCont').onclick = () => begin(saved);
+document.querySelectorAll('#title .role').forEach(b => b.onclick = () => begin(newDemo(b.dataset.role)));
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S) drawBG(season()); });
 addEventListener('visibilitychange', () => { if (document.hidden && S) save(); });
 requestAnimationFrame(loop);
