@@ -10,6 +10,14 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 - 25 snacks = Turbo (onkwetsbaar, sneller, punten ×2).
 - Verzenddoos Betterballen = power-up: +100 en 8 seconden dubbele punten.
 
+## SNX Snack Blaster (`bubble.html`)
+Bubble shooter met SNX-snacks. Eén bestand, gebruikt dezelfde `assets/`.
+- Sleep om te mikken, laat los om te schieten. 3+ dezelfde snacks (Betterbal, K-Rocket, BOB Burger, SNX-logo) knallen weg.
+- Snacks die los komen te hangen vallen: dubbele punten.
+- 8+ in één schot = Verzenddoos als volgende schot: blaast alles in de buurt weg.
+- Elke paar missers schuift er een nieuwe rij in. Snacks over de stippellijn = game over. Bord leeg = volgend level (+500 × level).
+- Record wordt lokaal bewaard. Nog geen koppeling met leads/ranglijst.
+
 ## Leads en ranglijst
 - Na een ronde: voornaam, e-mail, schermnaam. Verplicht: akkoord met de actievoorwaarden en privacy.
   Vrijwillig (los vinkje): SNX-nieuws en acties. Alleen wie dat aanvinkt, gaat naar ActiveCampaign.
