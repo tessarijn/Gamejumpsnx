@@ -197,8 +197,12 @@ const CITIES = [
 const B2B = ['Sportkantine De Spurt', 'Bedrijfsrestaurant Noord', 'Tankstation A12', 'Schoolkantine Het Plein', 'Stadion Oost', 'Buurtsuper De Hoek', 'Festival Zomerpark', 'Zwembad De Golf'];
 
 // ================= VERKOOPINSTELLINGEN =================
-// Alle prijzen hieronder zijn VOORBEELDEN. Vervang ze door de echte SNX-prijzen per kanaal:
-// prices: { product: [inkoopprijs voor de klant, verkoopprijs van de klant] } per eenheid van dat kanaal.
+// Inkoopprijzen: inventory.snxfood.com/direct-bestellen, excl. btw (opgehaald 16 nov 2026).
+//   fs = standaardprijzen per doos (horeca direct), omgerekend naar portie
+//   rt = ?kanaal=retail (inkoop + adviesprijs incl. 9% btw)
+//   gh = ?kanaal=wholesale (palletprijs per doos); verkoopprijs = SNX-direct horecaprijs per doos
+// prices: { product: [inkoop excl. btw, verkoopprijs] }. vat: true = verkoopprijs is incl. 9% btw.
+// Verkoopprijzen bij fs zijn AANNAMES; de speler kan ze in de business case aanpassen.
 const CONFIG = {
   leadEndpoint: null,          // later: Supabase Edge Function die B2B-leads naar ActiveCampaign stuurt
   demoMinS: 1.0,               // echte seconden per spelminuut in de demo (150 min = 2,5 min)
@@ -207,15 +211,22 @@ const CONFIG = {
     fs: { title: 'Foodservice', unit: 'portie', units: 'porties', tray: 'Dienblad', start: 690, end: 840, spawn: 5.2, perDay: 80, days: 5,
       sign: null, shift: 'lunchspits', role: 'Eigenaar / F&B-manager',
       intro: ['Je runt een kantine of snackbar tijdens de lunchspits.', 'Kies aan de friteuse wat je bakt, pak de porties en serveer ze aan de toonbank.', 'Let op de geduldbalk boven de klant: snel helpen = tevreden gasten.'],
-      prices: { b: [0.55, 2.75], k: [0.60, 2.95], r: [1.40, 5.50] } },
+      vat: true, sellNote: 'Verkoopprijs = aanname, pas aan naar jouw menukaart (incl. 9% btw).',
+      names: { b: 'Portie 6 bitterballen (25% rundvlees)', k: 'Kroket 100 gr (25% rundvlees)', r: 'Hamburger 120 gr + bun 10 cm' },
+      // bitterbal BULK 25% 300 st € 130,37 → 6 × € 0,4346 · kroket BULK 25% 100 st € 139,16 · hamburger 36×120 gr € 59,45 + bun 30 st € 26,10
+      prices: { b: [2.61, 6.50], k: [1.39, 3.95], r: [2.52, 5.95] } },
     rt: { title: 'Retail', unit: 'verpakking', units: 'verpakkingen', tray: 'Kar', start: 960, end: 1110, spawn: 4.0, perDay: 30, days: 7,
       sign: 'SUPERMARKT', shift: 'middagspits', role: 'Category manager / inkoper',
       intro: ['Je bent de supermarkt in de middagspits. Shoppers pakken SNX zelf uit het diepvriesschap.', 'Haal verpakkingen uit het magazijn (achter) en vul het schap aan de toonbank.', 'Leeg schap = gemiste verkoop. Houd alle drie de producten op voorraad.'],
-      prices: { b: [2.40, 3.99], k: [2.10, 3.49], r: [2.60, 4.29] } },
+      vat: true, sellNote: 'Verkoopprijs = SNX-adviesprijs incl. 9% btw.',
+      names: { b: 'Snackdoos Bitterbal 25%', k: 'Snackdoos Kroket 25%', r: 'Snackdoos Hamburger 120 gr' },
+      prices: { b: [3.85, 5.99], k: [4.31, 6.75], r: [2.56, 4.28] } },
     gh: { title: 'Groothandel', unit: 'doos', units: 'dozen', tray: 'Kar', start: 360, end: 510, spawn: 7.0, perDay: 40, days: 5,
       sign: 'GROOTHANDEL', shift: 'ochtendroute', role: 'Inkoper / category manager',
       intro: ['Je runt de ochtendroute van een groothandel.', 'Klanten (snackbars, kantines, supermarkten) halen bestellingen op aan het laaddock.', 'Pak dozen uit de stellingen en laad de complete bestelling in voor de klant vertrekt.'],
-      prices: { b: [18.00, 22.50], k: [19.00, 23.75], r: [24.00, 30.00] } },
+      vat: false, sellNote: 'Verkoopprijs = SNX-direct horecaprijs per doos (excl. btw); jouw eigen prijs kan afwijken.',
+      names: { b: 'Verzenddoos Bitterbal 25% (54 st)', k: 'Verzenddoos Kroket 25% (18 st)', r: 'Hamburgers 36×120 gr' },
+      prices: { b: [18.68, 23.47], k: [19.94, 23.10], r: [46.01, 59.45] } },
   },
 };
 // Vragen, tegenwerpingen en USP's. Alleen claims die op snxfood.com staan (stand nov 2026). a[0] is het goede antwoord.
@@ -237,7 +248,7 @@ const isDemo = () => !!(S && S.mode && S.mode !== 'tycoon');
 const ROLE = () => CONFIG.roles[S.mode];
 const cookTime = p => PRODUCTS[p].cook * (isDemo() ? 0.65 : 1);
 const buyPrice = p => isDemo() ? ROLE().prices[p][0] : 0;
-const sellPrice = p => isDemo() ? ROLE().prices[p][1] : PRODUCTS[p].price;
+const sellPrice = p => isDemo() ? ROLE().prices[p][1] / (ROLE().vat ? 1.09 : 1) : PRODUCTS[p].price;   // excl. btw
 function unitName(p) {
   if (!isDemo() || S.mode === 'fs') return PRODUCTS[p].name;
   return (S.mode === 'gh' ? 'doos ' : 'verpakking ') + PRODUCTS[p].plural;
@@ -960,8 +971,10 @@ function finishDemo() {
   const avgWait = d.waits.length ? Math.round(d.waits.reduce((a, b) => a + b, 0) / d.waits.length) : 0;
   const mix = {}; ['b', 'k', 'r'].forEach(p => mix[p] = units ? d.sold[p] / units : 1 / 3);
   lastReport = { mode, units, missed: d.missed, service, avgWait, margin: d.rev - d.cost, rev: d.rev, perHour: Math.round(units / hours), mix };
-  const rows = ['b', 'k', 'r'].map(p => { const [buy, sell] = R.prices[p], m = sell - buy;
-    return `<tr><td>${unitName(p)}</td><td>${d.sold[p]}</td><td>${euro(buy)}</td><td>${euro(sell)}</td><td>${euro(m)}</td><td>${Math.round(m / sell * 100)}%</td></tr>`; }).join('');
+  const sp = {}; ['b', 'k', 'r'].forEach(p => sp[p] = R.prices[p][1]);
+  const exv = v => v / (R.vat ? 1.09 : 1);
+  const rows = ['b', 'k', 'r'].map(p => `<tr><td>${R.names[p]}</td><td>${d.sold[p]}</td><td>${euro(R.prices[p][0])}</td>
+    <td><input type="number" class="sp" data-p="${p}" value="${sp[p].toFixed(2)}" step="0.05" min="0" style="width:66px;font:600 12px Poppins;border:2px solid #111;border-radius:6px;padding:2px 4px"></td><td id="pm_${p}"></td><td id="pp_${p}"></td></tr>`).join('');
   const missTxt = mode === 'rt' ? 'gemist door leeg schap' : mode === 'gh' ? 'niet geleverd' : 'gemist (wachttijd)';
   modal(`<h2>Jouw SNX-business case · ${R.title}</h2>
     <p>Zo ging jouw ${R.shift}:</p>
@@ -974,12 +987,13 @@ function finishDemo() {
       <div class="tile"><b>${d.qOk}/${d.qAll}</b><span>vragen goed beantwoord</span></div>
       ${mode !== 'gh' ? `<div class="tile"><b>${d.kids} 😄</b><span>blije gezinnen met kinderen</span></div>` : ''}
     </div>
-    <table class="pt"><tr><th>Product (${R.unit})</th><th>Verkocht</th><th>Inkoop</th><th>Verkoop</th><th>Marge</th><th>%</th></tr>${rows}</table>
+    <table class="pt"><tr><th>Product (per ${R.unit})</th><th>Verkocht</th><th>Inkoop</th><th>Verkoop${R.vat ? ' incl. btw' : ''}</th><th>Marge</th><th>%</th></tr>${rows}</table>
+    <p class="note">Inkoopprijzen excl. btw uit de SNX-bestelportal (inventory.snxfood.com). ${R.sellNote} Marge = verkoop excl. btw − inkoop. Pas de verkoopprijs gerust aan.</p>
     <div class="calc"><b>Reken het door voor jouw zaak</b>
       <label>${R.units[0].toUpperCase() + R.units.slice(1)} per dag: <span id="cvU"></span></label><input type="range" id="cU" min="5" max="${R.perDay * 6}" step="5" value="${R.perDay}">
       <label>Dagen per week open: <span id="cvD"></span></label><input type="range" id="cD" min="1" max="7" step="1" value="${R.days}">
       <div class="out"><div>Omzet per week<b id="cRw"></b></div><div>Brutomarge per week<b id="cMw"></b></div><div>Brutomarge per jaar<b id="cMy"></b></div><div>Gem. marge per ${R.unit}<b id="cMu"></b></div></div>
-      <p class="note">Productmix uit jouw demo. Jaar = 50 weken. Voorbeeldprijzen, indicatief: vraag de actuele prijslijst aan.</p>
+      <p class="note">Productmix uit jouw demo. Jaar = 50 weken. Omzet en marge excl. btw; indicatief.</p>
     </div>
     <div class="btns"><button class="b alt" data-a="again">Nog een dienst</button><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="lead">Prijslijst of proefpakket aanvragen</button></div>
     <div class="calc" style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="grow" style="flex:1;min-width:200px"><b>Blijf spelen en bouw door</b><br><span class="note">Start je eigen SNXbar en bouw een keten van 12 filialen door Europa. Je demo-marge krijg je als startkapitaal: <b>${euro(startBonus())}</b>.</span></div>
@@ -988,12 +1002,18 @@ function finishDemo() {
       build() { const bonus = startBonus(), st = saved && !saved.mode ? saved : newState(); st.money += bonus; closeModal(); begin(st); save(); toast(`Startkapitaal uit je demo: +${euro(bonus)}`, 'good'); } }, true);
   const calc = () => {
     const u = +$('#cU').value, dpw = +$('#cD').value;
-    let rev = 0, mar = 0; ['b', 'k', 'r'].forEach(p => { rev += u * mix[p] * R.prices[p][1]; mar += u * mix[p] * (R.prices[p][1] - R.prices[p][0]); });
+    let rev = 0, mar = 0; ['b', 'k', 'r'].forEach(p => {
+      const ex = exv(sp[p]), m = ex - R.prices[p][0];
+      rev += u * mix[p] * ex; mar += u * mix[p] * m;
+      $('#pm_' + p).textContent = euro(Math.round(m * 100) / 100); $('#pm_' + p).style.color = m < 0 ? '#d12325' : '';
+      $('#pp_' + p).textContent = ex > 0 ? Math.round(m / ex * 100) + '%' : '–'; });
     $('#cvU').textContent = u; $('#cvD').textContent = dpw;
     $('#cRw').textContent = euro(Math.round(rev * dpw)); $('#cMw').textContent = euro(Math.round(mar * dpw)); $('#cMy').textContent = euro(Math.round(mar * dpw * 50)); $('#cMu').textContent = euro(Math.round(mar / u * 100) / 100);
-    lastReport.calc = { perDay: u, daysPerWeek: dpw, marginPerYear: Math.round(mar * dpw * 50) };
+    lastReport.calc = { perDay: u, daysPerWeek: dpw, sellPrices: { ...sp }, marginPerYear: Math.round(mar * dpw * 50) };
   };
-  $('#cU').oninput = calc; $('#cD').oninput = calc; calc();
+  $('#cU').oninput = calc; $('#cD').oninput = calc;
+  document.querySelectorAll('#mbox input.sp').forEach(i => i.oninput = () => { sp[i.dataset.p] = Math.max(0, +i.value || 0); calc(); });
+  calc();
 }
 function startBonus() { return Math.max(50, Math.round(S.demo.rev - S.demo.cost) * 10); }
 function leadForm() {
