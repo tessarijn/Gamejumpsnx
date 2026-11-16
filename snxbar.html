@@ -34,7 +34,7 @@ canvas{display:block}
 .toast.good{background:var(--groen)}.toast.bad{background:var(--crust)}
 @keyframes t{0%{opacity:0;transform:translateY(-6px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
 #menuBtn{position:fixed;right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:44px;height:44px;font-size:20px;font-weight:800;cursor:pointer}
-#act{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(64px + env(safe-area-inset-bottom));width:84px;height:84px;border-radius:50%;background:var(--snx);color:#fff;border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);font:800 13px Poppins,sans-serif;display:none;padding:6px;line-height:1.1}
+#act{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(64px + env(safe-area-inset-bottom));width:92px;height:92px;border-radius:50%;background:#9a9a9a;transition:background .15s;color:#fff;border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);font:800 13px Poppins,sans-serif;display:none;padding:6px;line-height:1.1}
 #act:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 #joy{position:fixed;width:110px;height:110px;border-radius:50%;border:3px solid rgba(255,255,255,.7);background:rgba(0,0,0,.18);display:none;pointer-events:none}
 #joy i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:rgba(255,255,255,.85);border:3px solid var(--ink)}
@@ -99,6 +99,13 @@ form.lead input[type=text],form.lead input[type=email],form.lead input[type=tel]
 form.lead .chk{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:12px;margin-top:6px}
 form.lead .chk input{margin-top:3px;accent-color:var(--snx)}
 .err{color:var(--crust);font-size:12px;font-weight:600;min-height:16px}
+#act.pick{background:#2b6fd6}#act.give{background:#2e9d4f}#act.fry{background:#f28c18}#act.promo{background:#8e44ad}#act.talk{background:#1fa7a7}#prompt.talk{background:#1fa7a7}#act.info{background:#555}
+#act .ic{display:block;font-size:24px;line-height:1;margin-bottom:2px}
+#prompt{white-space:normal;max-width:92vw;text-align:center}
+#prompt.pick{background:#2b6fd6}#prompt.give{background:#2e9d4f}#prompt.fry{background:#f28c18}#prompt.promo{background:#8e44ad}
+#prompt.coach{background:rgba(255,250,242,.95);color:var(--ink);border:2px solid var(--ink);font-weight:600;font-size:13px}
+#prompt.coach b{background:#2e9d4f;color:#fff}
+@media (max-width:700px){#prompt{bottom:auto;top:calc(92px + env(safe-area-inset-top));font-size:13px}#toasts{top:calc(132px + env(safe-area-inset-top))}}
 </style>
 </head>
 <body>
@@ -211,6 +218,21 @@ const CONFIG = {
       prices: { b: [18.00, 22.50], k: [19.00, 23.75], r: [24.00, 30.00] } },
   },
 };
+// Vragen, tegenwerpingen en USP's. Alleen claims die op snxfood.com staan (stand nov 2026). a[0] is het goede antwoord.
+const TALK = {
+  questions: [
+    { q: 'Wat is eigenlijk een hybride snack?', a: ['Best of Both: vlees én plantaardig eiwit en vezels. Minder vlees, net zo lekker.', 'Een snack helemaal zonder vlees.', 'Een snack met extra vet voor de smaak.'] },
+    { q: 'Is dit nou wel gezond?', a: ['De BOB Burger heeft Nutri-Score A, de bitterbal en kroket Nutri-Score B.', 'Nee, maar wel lekker.', 'Er zitten helemaal geen calorieën in.'] },
+    { q: 'Snacks zijn toch altijd ongezond?', a: ['SNX schrapt de onnodige suikers, vetten en lege koolhydraten.', 'Klopt, daar is niks aan te doen.', 'Als je er maar één eet, is het gezond.'] },
+    { q: 'Mijn gasten willen gewoon een vleessnack…', a: ['SNX belooft snacks die duurzamer, gezonder én erg lekker zijn. Laat ze proeven!', 'Dan moet je het maar niet verkopen.', 'Zeg gewoon niet wat erin zit.'] },
+    { q: 'Wat betekent BOB?', a: ['Best of Both.', 'Big Old Burger.', 'Bakken Op Barbecue.'] },
+    { q: 'Is dat niet lastig klaarmaken?', a: ['Nee: bitterballen en kroketten gaan diepgevroren de frituur in. Burgers op grill, bakplaat of in de pan.', 'Eerst 24 uur ontdooien.', 'Alleen in een speciale oven.'], roles: ['fs', 'gh', 'tycoon'] },
+    { q: 'Hoe moet ik het bewaren?', a: ['In de vriezer, bij -18 °C.', 'Gewoon in de koelkast.', 'Op kamertemperatuur in de kast.'], roles: ['rt', 'gh'] },
+    { q: 'Waar kan ik SNX als horeca bestellen?', a: ['Via groothandel VHC en Nice to Meat, of direct via het SNX-bestelportaal.', 'Alleen in de supermarkt.', 'Dat kan nog nergens.'], roles: ['gh', 'fs'] },
+  ],
+  lines: ['Lekker! Best of Both 😋', 'Mam, mag ik er nog één?', 'Nutri-Score A en tóch een burger!', 'Duurzamer én lekker, top!', 'Die bitterbal is echt goed!', 'Minder vlees? Proef je niks van!'],
+  gh: ['Mijn gasten vragen er steeds vaker om.', 'Volgende week weer, graag!', 'Snel geleverd, top!'],
+};
 const isDemo = () => !!(S && S.mode && S.mode !== 'tycoon');
 const ROLE = () => CONFIG.roles[S.mode];
 const cookTime = p => PRODUCTS[p].cook * (isDemo() ? 0.65 : 1);
@@ -218,7 +240,7 @@ const buyPrice = p => isDemo() ? ROLE().prices[p][0] : 0;
 const sellPrice = p => isDemo() ? ROLE().prices[p][1] : PRODUCTS[p].price;
 function unitName(p) {
   if (!isDemo() || S.mode === 'fs') return PRODUCTS[p].name;
-  return (S.mode === 'gh' ? 'doos ' : 'pak ') + PRODUCTS[p].plural;
+  return (S.mode === 'gh' ? 'doos ' : 'verpakking ') + PRODUCTS[p].plural;
 }
 
 // ---------- plaatjes ----------
@@ -261,7 +283,7 @@ const BUILDINGS = [
 ];
 const FRYERS_POS = [[16, 7], [18, 7], [20, 7], [22, 7]];
 const SLOTS = [16, 18, 20, 22, 24, 26];    // klantplekken voor de toonbank (y = 11)
-const KRAT = [19, 17], BOARD = [24, 17], FRIDGE = [[26, 7], [27, 7]];
+const PROMO = [17, 17], KRAT = [19, 17], BOARD = [24, 17], FRIDGE = [[26, 7], [27, 7]];
 const TABLES = [[15, 14], [16, 14], [26, 14], [27, 14]];
 const TERRAS = [[15, 18], [17, 18], [27, 18]];
 const LAMPS = [[13, 19], [30, 19], [10, 22], [25, 22], [37, 22], [4, 19]];
@@ -299,7 +321,7 @@ function rebuildSolid() {
   for (let i = 0; i < MW * MH; i++) { const t = map[i]; SOLID[i] = (t === W || t === WA || t === C || t === TR || t === RF) ? 1 : 0; }
   const s = (x, y) => SOLID[y * MW + x] = 1;
   FRYERS_POS.forEach(([x, y]) => s(x, y)); FRIDGE.forEach(([x, y]) => s(x, y)); TABLES.forEach(([x, y]) => s(x, y));
-  s(KRAT[0], KRAT[1]); s(BOARD[0], BOARD[1]); LAMPS.forEach(([x, y]) => s(x, y));
+  s(KRAT[0], KRAT[1]); s(BOARD[0], BOARD[1]); s(PROMO[0], PROMO[1]); LAMPS.forEach(([x, y]) => s(x, y));
   s(24, 7);                                  // spoelbak
   if (S && S.upg.terras) TERRAS.forEach(([x, y]) => s(x, y));
 }
@@ -412,13 +434,14 @@ function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if
 // ---------- entiteiten ----------
 const player = { x: 0, y: 0, dir: 'down', moving: false, anim: 0, tray: [] };
 let fryers = [], customers = [], staff = [], floaters = [], slotUsed = [], rain = [];
+let promoCD = 0, boostT = 0, quietT = 0, quietHint = 0, qCD = 6, lastQ = -1;
 const LOOKS = { skin: ['#f6d2b5', '#e9b48f', '#c98d63', '#9a6440', '#6e4428'], hair: ['#2b1d14', '#5a3a22', '#b5793c', '#e2c06b', '#111', '#8a2b2b', '#cfcfcf'], shirt: ['#3b7dd8', '#2e9d4f', '#f2c14e', '#8e5bd1', '#ff8c42', '#1fa7a7', '#e85d9e', '#444', '#ffffff'], pants: ['#2c3e66', '#3a3a3a', '#5a4632', '#1f4d3a'] };
 function randomLook() { return { skin: pick(LOOKS.skin), hair: pick(LOOKS.hair), shirt: pick(LOOKS.shirt), pants: pick(LOOKS.pants), hairStyle: Math.floor(Math.random() * 3) }; }
 const PLAYER_LOOK = { skin: '#f0c7a4', hair: '#4a2e1c', shirt: '#ffffff', pants: '#222', apron: true, cap: true, hairStyle: 0 };
 
 function resetDayEntities() {
   fryers = FRYERS_POS.map(([x, y], i) => ({ i, tx: x, ty: y, state: 'empty', p: null, t: 0, n: 0, claim: null }));
-  customers = []; floaters = []; slotUsed = SLOTS.map(() => null); player.tray = [];
+  customers = []; floaters = []; slotUsed = SLOTS.map(() => null); player.tray = []; promoCD = 0; boostT = 0; quietT = 0; quietHint = 0; qCD = 6; lastQ = -1;
   staff = [];
   for (let i = 0; i < S.staff; i++) staff.push({ x: (19 + i * 3) * TS, y: 8.6 * TS, dir: 'down', moving: false, anim: 0, carry: [], task: null, idle: 0, look: { skin: pick(LOOKS.skin), hair: pick(LOOKS.hair), shirt: '#ffffff', pants: '#222', apron: true, hairStyle: i % 3 }, name: ['Sam', 'Noor'][i] });
   player.x = 5.5 * TS; player.y = 10.3 * TS; player.dir = 'down';
@@ -512,7 +535,7 @@ function wantedProduct() {
   let tot = ks.reduce((a, k) => a + w[k], 0), x = Math.random() * tot;
   for (const k of ks) { x -= w[k]; if (x <= 0) return k; } return ks[0];
 }
-function spawnCustomer() {
+function spawnCustomer(promo) {
   const free = slotUsed.map((u, i) => u ? -1 : i).filter(i => i >= 0);
   const demo = isDemo();
   let order = [wantedProduct()];
@@ -520,7 +543,7 @@ function spawnCustomer() {
   else if (S.mode === 'gh') { const n = 2 + Math.floor(Math.random() * 3); for (let i = 1; i < n; i++) order.push(wantedProduct()); }
   else if (Math.random() < 0.35) order.push(wantedProduct());
   if (demo) S.demo.orders++;
-  if (!free.length) { S.today.lost++; if (demo) S.demo.missed += order.length; return; }
+  if (!free.length) { if (promo) return; S.today.lost++; if (demo) S.demo.missed += order.length; return; }
   const slot = pick(free);
   const sx = (SLOTS[slot] + 0.5) * TS;
   const from = pick([[21.5, 27], [9, 20.6], [34, 21.4]]);
@@ -534,10 +557,34 @@ function spawnCustomer() {
     if (S.mode === 'gh') { look.shirt = '#3b4a5a'; look.vest = true; }
     if (S.mode === 'rt') look.basket = true;
   }
-  const c = { x: from[0] * TS, y: from[1] * TS, path, state: 'enter', slot, want: order.slice(), order: order.length, paid: 0, margin: 0, pat, maxPat: pat, look, client: demo && S.mode === 'gh' ? pick(B2B) : null, dir: 'up', moving: true, anim: Math.random() * 5, speed: rnd(85, 105), mood: null };
+  const c = { x: from[0] * TS, y: from[1] * TS, path, state: 'enter', slot, want: order.slice(), order: order.length, paid: 0, margin: 0, pat, maxPat: pat, look, client: demo && S.mode === 'gh' ? pick(B2B) : null, promo: !!promo,
+    kid: (!demo || S.mode !== 'gh') && Math.random() < (promo ? 0.6 : 0.3) ? { skin: look.skin, hair: pick(LOOKS.hair), shirt: pick(['#ffd23f', '#3bc2ff', '#ff6b8a', '#7ed957', '#ff8c42']), pants: pick(LOOKS.pants), hairStyle: Math.floor(Math.random() * 3) } : null, dir: 'up', moving: true, anim: Math.random() * 5, speed: rnd(85, 105), mood: null };
   slotUsed[slot] = c; customers.push(c);
 }
+function maybeAsk(c) {
+  if (qCD > 0 || customers.some(o => o.question) || Math.random() > 0.6) return;
+  const role = isDemo() ? S.mode : 'tycoon';
+  const list = TALK.questions.map((q, i) => ({ q, i })).filter(o => (!o.q.roles || o.q.roles.includes(role)) && o.i !== lastQ);
+  const { q, i } = pick(list); lastQ = i;
+  c.question = q; c.say = { text: q.q, t: 999 }; c.pat += 12; c.maxPat += 12;
+  qCD = isDemo() ? 12 : 35;
+}
+function talkMenu(c) {
+  const q = c.question, order = [0, 1, 2].sort(() => Math.random() - 0.5);
+  modal(`<h2>💬 Vraag van ${c.client || 'een klant'}</h2><p style="font-size:16px;font-weight:600">"${q.q}"</p><p class="muted">Wat antwoord je?</p>` +
+    order.map(i => `<div class="row"><button class="b alt" style="white-space:normal;text-align:left;flex:1" data-a="ans:${i}">${q.a[i]}</button></div>`).join(''), {
+    ans(i) {
+      closeModal(); c.question = null; if (isDemo()) S.demo.qAll++;
+      if (+i === 0) {
+        if (isDemo()) S.demo.qOk++;
+        c.say = { text: 'Overtuigd! Doe er nog één bij 👍', t: 2.5 }; c.pat = c.maxPat;
+        if (c.state === 'wait') { const extra = c.want[0] || wantedProduct(); c.want.push(extra); }
+        addRep(1); sfx.ready(); toast('Goed antwoord! De klant bestelt er nog één bij.', 'good');
+      } else { c.say = { text: 'Hmm, ik twijfel…', t: 2.5 }; c.pat *= 0.6; sfx.bad(); toast('Beter antwoord: ' + q.a[0], 'bad'); }
+    } }, true);
+}
 function customerLeave(c, mood) {
+  if (c.question) { c.question = null; c.say = null; }
   c.state = 'leave'; c.mood = mood; c.moodT = 2.5; slotUsed[c.slot] = null;
   const to = pick([[21.5, MH + 1], [-1, 20.6], [MW + 1, 21.4]]);
   c.path = [[c.x, 12.6 * TS], [21.4 * TS, 12.6 * TS], [21.4 * TS, 17.2 * TS], [21.4 * TS, to[1] === MH + 1 ? 20.8 * TS : to[1] * TS], [to[0] * TS, to[1] * TS]];
@@ -559,15 +606,19 @@ function recordSale(c, p) {
 }
 function finishOrder(c) {
   if (isDemo()) {
-    S.demo.served++; S.demo.waits.push(c.maxPat - c.pat);
+    S.demo.served++; S.demo.waits.push(c.maxPat - c.pat); if (c.promo) S.demo.promoServed++; if (c.kid) S.demo.kids++;
+    if (c.kid) floaters.push({ x: c.x - 14, y: c.y - 30, text: '😄', col: '#111', t: 1.4 });
+    if (Math.random() < 0.45) c.sayLater = pick(S.mode === 'gh' ? TALK.gh : c.kid ? ['Mam, mag ik er nog één?', 'Joepie, een Betterbal!', ...TALK.lines] : TALK.lines);
     floaters.push({ x: c.x, y: c.y - 40, text: '+' + euro(c.margin) + ' marge', col: '#2e9d4f', t: 1.4 });
-    sfx.cash(); customerLeave(c, c.pat / c.maxPat > 0.5 ? 'blij' : 'ok'); return;
+    sfx.cash(); customerLeave(c, c.pat / c.maxPat > 0.5 ? 'blij' : 'ok'); if (c.sayLater) c.say = { text: c.sayLater, t: 2.6 }; return;
   }
   {
     const frac = c.pat / c.maxPat, tip = Math.round(c.paid * 0.3 * frac * 2) / 2;
     S.money += c.paid + tip; S.today.sales += c.paid; S.today.tips += tip; S.today.served++; S.total.served++; S.total.earned += c.paid + tip;
     addRep((frac > 0.5 ? 0.7 : 0.35) + (S.upg.terras ? 0.2 : 0));
     floaters.push({ x: c.x, y: c.y - 40, text: '+' + euro(c.paid + tip), col: '#2e9d4f', t: 1.4 });
+    if (c.kid) { floaters.push({ x: c.x - 14, y: c.y - 30, text: '😄', col: '#111', t: 1.4 }); addRep(0.2); }
+    if (Math.random() < 0.35) c.say = { text: pick(TALK.lines), t: 2.6 };
     sfx.cash(); customerLeave(c, frac > 0.5 ? 'blij' : 'ok');
   }
 }
@@ -642,30 +693,97 @@ function staffPlan(s) {
   return { kind: 'wait', x: (17 + staff.indexOf(s) * 6) * TS, y: 8.7 * TS };
 }
 
+// ---------- actie bij rust ----------
+const PROMO_TXT = {
+  fs: { label: 'Flyers ophangen', done: 'Flyers hangen! Extra klanten en gezinnen komen eraan.' },
+  rt: { label: 'Proeverij starten', done: 'Proeverij loopt! Shoppers proeven en lopen naar het schap.' },
+  gh: { label: 'Actiefolder rondsturen', done: 'Actiefolder verstuurd! Klanten komen extra bestellen.' },
+  tycoon: { label: 'Flyers ophangen (€ 5)', done: 'Flyers hangen! Het wordt even drukker.' },
+};
+const promoTxt = () => PROMO_TXT[isDemo() ? S.mode : 'tycoon'];
+function doPromo() {
+  if (promoCD > 0) { toast(`Nog ${Math.ceil(promoCD)} s voordat je een nieuwe actie kunt doen.`); return; }
+  if (!isDemo()) {
+    if (S.min < OPEN_AT || S.min >= CLOSE_AT - 30) { toast('Doe dit als de bar open is.'); return; }
+    if (S.money < 5) { toast('Je hebt € 5 nodig voor flyers.', 'bad'); return; }
+    S.money -= 5; S.today.stockCost += 5; useEnergy(5);
+  } else S.demo.promos++;
+  promoCD = isDemo() ? 25 : 60; boostT = isDemo() ? 18 : 30;
+  sfx.buy(); toast(promoTxt().done, 'good');
+  floaters.push({ x: (PROMO[0] + .5) * TS, y: PROMO[1] * TS - 20, text: '📣 Actie!', col: '#8e44ad', t: 1.6 });
+  spawnCustomer(true); setTimeout(() => S && spawnCustomer(true), 1200); setTimeout(() => S && spawnCustomer(true), 2600);
+}
+
+// ---------- uitleg: pijlen en coach ----------
+function guideTargets() {
+  const T = [], waiting = customers.filter(c => c.state === 'wait'), demo = isDemo();
+  waiting.forEach(c => { if (c.question) T.push({ x: c.x, y: c.y, talk: true }); });
+  if (player.tray.length) {
+    if (demo && S.mode === 'rt') { [...new Set(player.tray)].forEach(p => { const i = ['b', 'k', 'r'].indexOf(p); T.push({ x: (15 + i * 4.33) * TS + 64, y: 10 * TS + 6 }); }); return T; }
+    waiting.forEach(c => { if (c.want.some(p => player.tray.includes(p))) T.push({ x: c.x, y: c.y }); });
+    if (T.length) return T;
+  }
+  if (player.tray.length < trayCap()) {
+    for (const f of fryers) {
+      if (f.i >= fryerCount()) continue;
+      const pos = { x: (f.tx + .5) * TS, y: (f.ty + 1) * TS };
+      if (f.state === 'ready') T.push(pos);
+      else if (f.state === 'rack') {
+        const need = S.mode === 'rt' ? S.demo.shelf[f.p] < 2 && !player.tray.includes(f.p) : waiting.some(c => c.want.filter(p => p === f.p).length > player.tray.filter(p => p === f.p).length);
+        if (need) T.push(pos);
+      }
+    }
+    if (!T.length && (!demo || S.mode === 'fs') && waiting.length && !fryers.some(f => f.state === 'cook'))
+      fryers.forEach(f => { if (f.i < fryerCount() && f.state === 'empty') T.push({ x: (f.tx + .5) * TS, y: (f.ty + 1) * TS }); });
+  }
+  if (promoCD <= 0 && quietT > 4 && (demo || (S.min >= OPEN_AT && S.min < CLOSE_AT - 30))) T.push({ x: (PROMO[0] + .5) * TS, y: (PROMO[1] + 1) * TS, promo: true });
+  return T;
+}
+function coachText() {
+  const demo = isDemo();
+  if (!demo && S.day > 2) return '';
+  if (!demo && S.min < OPEN_AT) return 'Loop naar je SNXbar in het midden. Om 10:00 komen de eerste klanten.';
+  const waiting = customers.filter(c => c.state === 'wait'), tray = player.tray;
+  if (waiting.some(c => c.question)) return 'Een klant heeft een vraag (<b>blauwgroene pijl</b>). Loop erheen en beantwoord hem.';
+  if (promoCD <= 0 && quietT > 4) return `Rustig? Loop naar buiten: <b>${promoTxt().label}</b> (paarse pijl).`;
+  if (tray.length) {
+    if (demo && S.mode === 'rt') return 'Breng het naar het schap (toonbank) bij de groene pijl en vul het.';
+    return waiting.some(c => c.want.some(p => tray.includes(p))) ? 'Breng het naar de klant met de <b>groene pijl</b>.' : 'Niemand wil dit nu. Pak eerst wat de klanten vragen (zie hun wolkje).';
+  }
+  if (demo && S.mode === 'rt') { const e = ['b', 'k', 'r'].find(p => S.demo.shelf[p] === 0); return e ? `Schap leeg! Pak ${PRODUCTS[e].plural} in het magazijn (groene pijl).` : 'Pak verpakkingen in het magazijn achter en vul het schap.'; }
+  if (demo && S.mode === 'gh') return waiting.length ? 'Kijk in het wolkje wat de klant wil en pak die dozen (groene pijl).' : 'Wachten op klanten…';
+  if (fryers.some(f => f.state === 'ready')) return 'Klaar! Pak de porties bij de friteuse met de <b>groene pijl</b>.';
+  if (!fryers.some(f => f.state === 'cook')) return waiting.length ? 'Kijk in het wolkje wat de klant wil en bak dat aan een friteuse.' : 'Bak alvast iets aan een friteuse.';
+  return 'Aan het bakken… let op de balk boven de friteuse.';
+}
+
 // ---------- interactie ----------
 function interactables() {
   const L = [];
   fryers.forEach(f => {
     const x = (f.tx + .5) * TS, y = (f.ty + 1.25) * TS;
     if (f.i >= fryerCount()) { if (!isDemo()) L.push({ x, y, r: 30, label: 'Lege plek (friteuse kopen in het kantoor)', act() { toast('Koop een extra friteuse in het kantoor.'); } }); return; }
-    if (f.state === 'rack') { const full = player.tray.length >= trayCap(); L.push({ x, y, r: 30, label: full ? ROLE().tray + ' vol' : `Pak ${unitName(f.p)}`, act() {
+    if (f.state === 'rack') { const full = player.tray.length >= trayCap(); L.push({ x, y, r: 30, kind: full ? 'info' : 'pick', label: full ? ROLE().tray + ' vol' : `Pak ${unitName(f.p)}`, act() {
       if (player.tray.length >= trayCap()) { toast(`Je ${ROLE().tray.toLowerCase()} is vol.`); return; } player.tray.push(f.p); sfx.pick(); } }); return; }
-    if (f.state === 'empty') L.push({ x, y, r: 30, label: 'Bakken', act: () => fryerMenu(f) });
+    if (f.state === 'empty') L.push({ x, y, r: 30, kind: 'fry', label: 'Bakken', act: () => fryerMenu(f) });
     else if (f.state === 'cook') L.push({ x, y, r: 30, label: `${PRODUCTS[f.p].name}: nog ${Math.ceil(cookTime(f.p) - f.t)} s`, act() { } });
-    else if (f.state === 'ready') L.push({ x, y, r: 30, label: player.tray.length >= trayCap() ? 'Dienblad vol' : `Pak ${f.n}× ${PRODUCTS[f.p].name}`, act() {
+    else if (f.state === 'ready') L.push({ x, y, r: 30, kind: player.tray.length >= trayCap() ? 'info' : 'pick', label: player.tray.length >= trayCap() ? 'Dienblad vol' : `Pak ${f.n}× ${PRODUCTS[f.p].name}`, act() {
       if (player.tray.length >= trayCap()) { toast('Je dienblad is vol. Serveer eerst of zet het in de krat.'); return; }
       takeFromFryer(f, player.tray, trayCap()); sfx.pick(); } });
-    else if (f.state === 'burnt') L.push({ x, y, r: 30, label: 'Schoonmaken', act() { f.state = 'empty'; useEnergy(2); sfx.pick(); } });
+    else if (f.state === 'burnt') L.push({ x, y, r: 30, kind: 'fry', label: 'Schoonmaken', act() { f.state = 'empty'; useEnergy(2); sfx.pick(); } });
   });
   for (const c of customers) {
-    if (c.state !== 'wait' || (isDemo() && S.mode === 'rt')) continue;
+    if (c.state !== 'wait') continue;
+    if (c.question) { L.push({ x: c.x, y: c.y, r: 74, prio: 2, kind: 'talk', label: 'Beantwoord de vraag', act: () => talkMenu(c) }); continue; }
+    if (isDemo() && S.mode === 'rt') continue;
     const ok = player.tray.some(p => c.want.includes(p));
-    L.push({ x: c.x, y: c.y, r: 74, prio: ok ? 1 : 0, label: ok ? (c.client ? 'Inladen voor ' + c.client : 'Serveren') : (c.client || 'Klant') + ' wil: ' + c.want.map(p => PRODUCTS[p].name).join(' + '), act() {
+    L.push({ x: c.x, y: c.y, r: 74, prio: ok ? 1 : 0, kind: ok ? 'give' : 'info', label: ok ? (c.client ? 'Inladen voor ' + c.client : 'Serveren') : (c.client || 'Klant') + ' wil: ' + c.want.map(p => PRODUCTS[p].name).join(' + '), act() {
       if (!serveCustomer(c, player.tray)) { toast('Je hebt niet wat deze klant wil.'); return; } useEnergy(1); } });
   }
+  L.push({ x: (PROMO[0] + .5) * TS, y: (PROMO[1] + .5) * TS, r: 42, kind: promoCD > 0 ? 'info' : 'promo', label: promoCD > 0 ? `${promoTxt().label}: nog ${Math.ceil(promoCD)} s` : promoTxt().label, act: doPromo });
   if (isDemo()) {
     if (S.mode === 'rt' && player.tray.length && player.y < 10 * TS && player.y > 9.2 * TS && player.x < 28 * TS)
-      L.push({ x: player.x, y: 10.1 * TS, r: 30, prio: 1, label: 'Schap vullen', act() {
+      L.push({ x: player.x, y: 10.1 * TS, r: 30, prio: 1, kind: 'give', label: 'Schap vullen', act() {
         const n = player.tray.length; player.tray.forEach(p => S.demo.shelf[p]++); player.tray = []; sfx.pick(); toast(`${n} verpakkingen in het schap`); } });
     return L;
   }
@@ -819,7 +937,7 @@ function winMenu() {
 function newDemo(mode) {
   const s = newState(); s.mode = mode; s.unlocked = { b: true, k: true, r: true }; s.stock = { b: 999, k: 999, r: 999 };
   s.min = CONFIG.roles[mode].start; s.weather = 'zon';
-  s.demo = { sold: { b: 0, k: 0, r: 0 }, rev: 0, cost: 0, served: 0, orders: 0, missed: 0, waits: [], shelf: { b: 3, k: 3, r: 3 } };
+  s.demo = { sold: { b: 0, k: 0, r: 0 }, rev: 0, cost: 0, served: 0, orders: 0, missed: 0, waits: [], promos: 0, promoServed: 0, kids: 0, qOk: 0, qAll: 0, shelf: { b: 3, k: 3, r: 3 } };
   return s;
 }
 function startDemo() {
@@ -852,6 +970,9 @@ function finishDemo() {
       <div class="tile"><b>${euro(d.rev - d.cost)}</b><span>brutomarge</span></div>
       <div class="tile"><b>${service}%</b><span>servicegraad (${d.missed} ${missTxt})</span></div>
       <div class="tile"><b>${avgWait} s</b><span>gem. ${mode === 'gh' ? 'laadtijd' : 'wachttijd'} per klant</span></div>
+      <div class="tile"><b>${d.promos}×</b><span>${promoTxt().label.toLowerCase()} → ${d.promoServed} extra klanten geholpen</span></div>
+      <div class="tile"><b>${d.qOk}/${d.qAll}</b><span>vragen goed beantwoord</span></div>
+      ${mode !== 'gh' ? `<div class="tile"><b>${d.kids} 😄</b><span>blije gezinnen met kinderen</span></div>` : ''}
     </div>
     <table class="pt"><tr><th>Product (${R.unit})</th><th>Verkocht</th><th>Inkoop</th><th>Verkoop</th><th>Marge</th><th>%</th></tr>${rows}</table>
     <div class="calc"><b>Reken het door voor jouw zaak</b>
@@ -997,15 +1118,21 @@ function update(dt) {
     player.anim += dt;
   }
   // klanten
-  if (demo) { if (S.min < ROLE().end - 6 && Math.random() < dt / ROLE().spawn) spawnCustomer(); }
-  else if (S.min >= OPEN_AT && S.min < CLOSE_AT - 15) { if (Math.random() < custPerHour() / (60 * MIN_S) * dt) spawnCustomer(); }
+  const boost = boostT > 0 ? 2.2 : 1;
+  qCD -= dt; promoCD = Math.max(0, promoCD - dt); boostT = Math.max(0, boostT - dt);
+  if (demo) { if (S.min < ROLE().end - 6 && Math.random() < boost * dt / ROLE().spawn) spawnCustomer(boostT > 0); }
+  else if (S.min >= OPEN_AT && S.min < CLOSE_AT - 15) { if (Math.random() < boost * custPerHour() / (60 * MIN_S) * dt) spawnCustomer(boostT > 0); }
+  const busy = customers.some(c => c.state !== 'leave');
+  quietT = busy ? 0 : quietT + dt;
+  quietHint -= dt;
+  if (quietT > 4 && promoCD <= 0 && quietHint <= 0 && (demo || (S.min >= OPEN_AT && S.min < CLOSE_AT - 30))) { quietHint = 25; toast(`Rustig in de zaak? ${promoTxt().label} voor extra klanten!`); }
   for (let i = customers.length - 1; i >= 0; i--) {
     const c = customers[i];
     if (c.path.length) {
       const [tx, ty] = c.path[0], dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy), st = c.speed * dt;
       if (d <= st) { c.x = tx; c.y = ty; c.path.shift(); } else { c.x += dx / d * st; c.y += dy / d * st; }
       c.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'); c.moving = true; c.anim += dt;
-      if (!c.path.length && c.state === 'enter') { c.state = 'wait'; c.dir = 'up'; c.moving = false; }
+      if (!c.path.length && c.state === 'enter') { c.state = 'wait'; c.dir = 'up'; c.moving = false; maybeAsk(c); }
       if (!c.path.length && c.state === 'leave') { customers.splice(i, 1); continue; }
     } else c.moving = false;
     if (c.state === 'wait') {
@@ -1018,6 +1145,7 @@ function update(dt) {
       if (c.pat <= 0) { if (demo) S.demo.missed += c.want.length; customerLeave(c, 'boos'); addRep(-1.5); S.today.angry++; sfx.bad(); floaters.push({ x: c.x, y: c.y - 40, text: demo && S.mode === 'rt' ? 'Schap leeg!' : 'Te lang!', col: '#d12325', t: 1.5 }); }
     }
     if (c.moodT) c.moodT -= dt;
+    if (c.say && c.say.t < 900) { c.say.t -= dt; if (c.say.t <= 0) c.say = null; }
   }
   updateFryers(dt); updateStaff(dt);
   for (let i = floaters.length - 1; i >= 0; i--) { const f = floaters[i]; f.t -= dt; f.y -= 22 * dt; if (f.t <= 0) floaters.splice(i, 1); }
@@ -1125,6 +1253,7 @@ function drawStatic() {
     ctx.fillStyle = '#111'; ctx.font = '800 22px Poppins, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ROLE().sign, sx + sw / 2, sy + sh / 2 + 2);
     ctx.fillStyle = '#ff2625'; rr(ctx, sx + sw - 70, sy + sh - 6, 74, 18, 4); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.fillText('met SNX', sx + sw - 33, sy + sh + 3);
   } else drawSign(sx, sy, sw, sh);
+  drawPromo();
   if (isDemo()) return;
   // krat
   const kx = KRAT[0] * TS, ky = KRAT[1] * TS;
@@ -1140,6 +1269,38 @@ function drawStatic() {
   // lantaarns
   LAMPS.forEach(([x, y]) => { ctx.fillStyle = '#333'; ctx.fillRect(x * TS + 14, y * TS - 14, 4, 42); ctx.fillStyle = '#222'; rr(ctx, x * TS + 9, y * TS - 22, 14, 10, 3); ctx.fillStyle = S.min > 1110 ? '#ffe28a' : '#ddd'; ctx.fillRect(x * TS + 11, y * TS - 20, 10, 6); });
 }
+function drawPromo() {
+  const x = PROMO[0] * TS, y = PROMO[1] * TS, T = performance.now() / 1000;
+  ctx.fillStyle = '#555'; ctx.fillRect(x + 7, y + 14, 3, 16); ctx.fillRect(x + 22, y + 14, 3, 16);
+  ctx.fillStyle = '#8e44ad'; rr(ctx, x, y - 4, 32, 22, 4);
+  ctx.fillStyle = '#fff'; ctx.fillRect(x + 4, y, 10, 13); ctx.fillRect(x + 17, y + 1, 11, 12);
+  ctx.fillStyle = '#ff2625'; ctx.fillRect(x + 5, y + 2, 8, 3); ctx.fillRect(x + 18, y + 3, 9, 3);
+  if (promoCD <= 0) { const b = Math.sin(T * 5) * 2; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('📣', x + 16, y - 14 + b); }
+  else { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(x + 2, y - 10, 28, 4); ctx.fillStyle = '#8e44ad'; ctx.fillRect(x + 2, y - 10, 28 * (1 - promoCD / (isDemo() ? 25 : 60)), 4); }
+  if (boostT > 0) {           // flyers op de grond en in de lucht
+    for (let i = 0; i < 9; i++) { const fx = (14.5 + (i * 37 % 15)) * TS, fy = (17.3 + (i * 13 % 3)) * TS + Math.sin(T * 2 + i) * 4;
+      ctx.save(); ctx.translate(fx, fy); ctx.rotate(Math.sin(T + i) * 0.6); ctx.fillStyle = '#fff'; ctx.fillRect(-5, -6, 10, 12); ctx.fillStyle = '#ff2625'; ctx.fillRect(-4, -5, 8, 3); ctx.restore(); }
+  }
+}
+function drawKid(c) {
+  const T = performance.now() / 1000, happy = c.mood === 'blij' && c.moodT > 0;
+  const jump = happy ? -Math.abs(Math.sin(T * 10)) * 9 : 0;
+  ctx.save(); ctx.translate(c.x - 14, c.y + 2); ctx.scale(0.68, 0.68);
+  drawPerson({ x: 0, y: jump / 0.68, dir: c.dir, moving: c.moving, anim: c.anim + 0.3 }, c.kid);
+  ctx.restore();
+}
+function drawGuides() {
+  const T = performance.now() / 1000, b = Math.sin(T * 6) * 4;
+  for (const t of guideTargets()) {
+    const col = t.promo ? '#8e44ad' : t.talk ? '#1fa7a7' : '#2e9d4f';
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.globalAlpha = 0.55 + 0.35 * Math.sin(T * 6);
+    ctx.beginPath(); ctx.ellipse(t.x, t.y, 15, 6, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+    const ay = t.y - (t.talk ? 136 : 62) + b;
+    ctx.fillStyle = col; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(t.x - 4, ay - 10); ctx.lineTo(t.x + 4, ay - 10); ctx.lineTo(t.x + 4, ay); ctx.lineTo(t.x + 10, ay); ctx.lineTo(t.x, ay + 11); ctx.lineTo(t.x - 10, ay); ctx.lineTo(t.x - 4, ay); ctx.closePath();
+    ctx.stroke(); ctx.fill();
+  }
+}
 function drawSign(sx, sy, sw, sh) {
   ctx.fillStyle = '#111'; rr(ctx, sx - 3, sy - 3, sw + 6, sh + 6, 8);
   ctx.fillStyle = '#ff2625'; rr(ctx, sx, sy, sw, sh, 6);
@@ -1148,6 +1309,22 @@ function drawSign(sx, sy, sw, sh) {
   const barW = ctx.measureText('bar').width;
   if (imgOk(lg)) { const h = sh - 14, w = h * lg.naturalWidth / lg.naturalHeight, tot = w + 6 + barW, ox = sx + (sw - tot) / 2; ctx.drawImage(lg, ox, sy + 7, w, h); ctx.fillStyle = '#fff'; ctx.fillText('bar', ox + w + 6, sy + sh / 2 + 2); }
   else { ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('SNXbar', sx + sw / 2, sy + sh / 2 + 2); }
+}
+function drawSay(c) {
+  if (!c.say) return;
+  ctx.font = '600 10px Poppins, sans-serif';
+  const words = c.say.text.split(' '), lines = []; let ln = '';
+  for (const w of words) { const t = ln ? ln + ' ' + w : w; if (ctx.measureText(t).width > 128 && ln) { lines.push(ln); ln = w; } else ln = t; }
+  lines.push(ln);
+  const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 14, h = lines.length * 12 + 8;
+  const hasOrder = c.state === 'wait' && c.want.length;
+  const x = c.x - w / 2, y = c.y - (hasOrder ? 78 : 48) - h;
+  const q = !!c.question;
+  ctx.fillStyle = q ? '#1fa7a7' : '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 8) : ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(c.x + 6, y + h - 1); ctx.lineTo(c.x + 14, y + h + 7); ctx.lineTo(c.x + 14, y + h - 1); ctx.fill();
+  ctx.fillStyle = q ? '#fff' : '#111'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  lines.forEach((l, i) => ctx.fillText(l, x + 7, y + 5 + i * 12));
 }
 function drawBubble(c) {
   const n = c.want.length; if (!n) return;
@@ -1177,15 +1354,18 @@ function render() {
   fryers.forEach(drawFryer);
   // y-gesorteerde figuren
   const ents = [{ e: player, look: PLAYER_LOOK, carry: player.tray }];
-  customers.forEach(c => ents.push({ e: c, look: c.look }));
+  customers.forEach(c => { ents.push({ e: c, look: c.look }); if (c.kid) ents.push({ e: { y: c.y + 2 }, kidOf: c }); });
   staff.forEach(s => ents.push({ e: s, look: s.look, carry: s.carry }));
   ents.sort((a, b) => a.e.y - b.e.y);
-  for (const o of ents) { drawPerson(o.e, o.look); if (o.carry && o.carry.length) drawCarry(o.e, o.carry); }
+  for (const o of ents) { if (o.kidOf) { drawKid(o.kidOf); continue; } drawPerson(o.e, o.look); if (o.carry && o.carry.length) drawCarry(o.e, o.carry); }
   ctx.drawImage(fg, 0, 0);
   customers.forEach(c => { if (c.state === 'wait' || c.state === 'enter' && c.path.length <= 2) drawBubble(c); if (c.mood && c.moodT > 0) { ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(c.mood === 'boos' ? '😠' : c.mood === 'blij' ? '😋' : '🙂', c.x, c.y - 44); } });
+  customers.forEach(drawSay);
   staff.forEach(s => { ctx.font = '700 9px Poppins'; ctx.textAlign = 'center'; ctx.fillStyle = '#111'; ctx.fillText(s.name, s.x, s.y + 9); });
   floaters.forEach(f => { ctx.font = '800 13px Poppins'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.strokeText(f.text, f.x, f.y); ctx.fillStyle = f.col; ctx.fillText(f.text, f.x, f.y); });
-  if (focus) { const b = Math.sin(performance.now() / 160) * 3; ctx.fillStyle = '#ff2625'; ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(focus.x - 6, focus.y - 50 + b - (focus.r > 60 ? 22 : 0)); ctx.lineTo(focus.x + 6, focus.y - 50 + b - (focus.r > 60 ? 22 : 0)); ctx.lineTo(focus.x, focus.y - 42 + b - (focus.r > 60 ? 22 : 0)); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  drawGuides();
+  if (focus && focus.kind && focus.kind !== 'info') { const col = { pick: '#2b6fd6', give: '#2e9d4f', fry: '#f28c18', promo: '#8e44ad', talk: '#1fa7a7' }[focus.kind];
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.ellipse(focus.x, focus.y, 20, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
   // nacht en licht
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   const m = S.min;
@@ -1233,11 +1413,20 @@ function hud() {
   const slots = []; for (let i = 0; i < trayCap(); i++) { const p = player.tray[i]; slots.push(`<div class="slot">${p ? `<img src="assets/${PRODUCTS[p].img}.webp" alt="">` : ''}</div>`); }
   const sh = slots.join('');
   if ($('#tSlots').dataset.h !== sh) { $('#tSlots').innerHTML = sh; $('#tSlots').dataset.h = sh; }
-  if (demo) $('#tStock').innerHTML = S.mode === 'rt' ? 'Schap<br>' + ['b', 'k', 'r'].map(k => `${PRODUCTS[k].name.split(' ')[0]} <b style="color:${S.demo.shelf[k] ? '#111' : '#d12325'}">${S.demo.shelf[k]}</b>`).join(' · ') : ROLE().tray + '<br>' + player.tray.length + '/' + trayCap();
+  if (demo) $('#tStock').innerHTML = S.mode === 'rt' ? 'Je draagt ' + player.tray.length + '/' + trayCap() + '<br>Schap ' + ['b', 'k', 'r'].map(k => `<img src="assets/${PRODUCTS[k].img}.webp" style="width:14px;height:14px;object-fit:contain;vertical-align:-3px"><b style="color:${S.demo.shelf[k] ? '#111' : '#d12325'}">${S.demo.shelf[k]}</b>`).join(' ') : 'Je draagt<br>' + player.tray.length + '/' + trayCap();
   else $('#tStock').innerHTML = 'Voorraad<br>' + Object.keys(PRODUCTS).filter(k => S.unlocked[k]).map(k => `${PRODUCTS[k].name.split(' ')[0]} <b>${S.stock[k]}</b>`).join(' · ');
   const pr = $('#prompt');
-  if (focus && !modalOpen) { pr.style.display = 'block'; pr.innerHTML = (isTouch ? '' : '<b>E</b>') + focus.label; $('#act').textContent = focus.label.length > 22 ? 'ACTIE' : focus.label; }
-  else { pr.style.display = 'none'; $('#act').textContent = 'ACTIE'; }
+  const act = $('#act'), ICON = { pick: '✋', give: '🤲', fry: '🔥', promo: '📣', talk: '💬', info: 'ℹ️' };
+  if (focus && !modalOpen) {
+    const k = focus.kind || 'info';
+    pr.style.display = 'block'; pr.className = k; pr.innerHTML = (isTouch ? '' : '<b>E</b>') + focus.label;
+    const short = { pick: 'PAK', give: S.mode === 'gh' && isDemo() ? 'LAAD IN' : S.mode === 'rt' && isDemo() ? 'VUL' : 'GEEF', fry: 'BAK', promo: 'ACTIE!', talk: 'PRAAT', info: 'INFO' }[k];
+    act.className = k; act.innerHTML = `<span class="ic">${ICON[k]}</span>${short}`;
+  } else {
+    const c = modalOpen ? '' : coachText();
+    if (c) { pr.style.display = 'block'; pr.className = 'coach'; pr.innerHTML = '💡 ' + c; } else pr.style.display = 'none';
+    act.className = ''; act.innerHTML = '<span class="ic">·</span>LOOP';
+  }
 }
 
 // ---------- lus ----------
