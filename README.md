@@ -31,6 +31,7 @@ Na het eerste bezoek werkt het spel ook offline; de ranglijst heeft internet nod
 `paardenrace.html`: wedden op 6 SNX-paarden (Betterbal Bliksem, K-Rocket, BOB Burger, Verzenddoos Express, Now You Can, Have It All),
 zoals in een Engels wedkantoor: fractional odds (5/2, EVS), Win of Each-way (1/4 odds, plaats 1-2), vaste prijs bij inzet,
 koersen bewegen tot de start. Speelgeld (SNX-munten, start 1000, saldo blijft in de browser). Namen staan bovenaan in `HORSES`.
+Talen: NL, EN en Arabisch (rechts-naar-links). Speler kiest zelf; vaste taal via de link: `paardenrace.html?lang=en` of `?lang=ar`.
 Na publicatie: `https://<github-pages-url>/paardenrace.html`.
 
 ## Online zetten
