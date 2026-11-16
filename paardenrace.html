@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff2625">
+<title>SNX Derby</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800&display=swap">
+<style>
+/* SNX Derby: racecard + bet slip like a British betting shop, race drawn on a canvas. Brand: SNX red, white, ink, Poppins. */
+:root {
+  --snx: #ff2625;
+  --snx-dark: #d12325;
+  --ink: #111111;
+  --paper: #ffffff;
+  --steen: #e7e5e0;
+  --turf: #5aae46;
+  --up: #1f8a3b;
+  --font: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--snx); color: var(--ink); font-family: var(--font); -webkit-tap-highlight-color: transparent; }
+button { font-family: inherit; cursor: pointer; }
+[hidden] { display: none !important; }
+
+.top { display: flex; align-items: center; gap: 12px; padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
+  max-width: 1080px; margin: 0 auto; }
+.top .logo { height: 44px; width: auto; }
+.top .brand { flex: 1; min-width: 0; color: #fff; }
+.top .brand b { display: block; font-weight: 800; font-size: 24px; line-height: 1; text-transform: uppercase; text-shadow: 0 2px 0 var(--ink); }
+.top .brand span { font-size: 12px; font-weight: 600; }
+@media (max-width: 480px) { .top { gap: 8px; } .top .logo { height: 34px; } .top .brand b { font-size: 19px; } .top .brand span { display: none; } #mute { padding: 5px 6px; font-size: 10px; } }
+.bank { background: var(--paper); border: 3px solid var(--ink); border-radius: 14px; box-shadow: 0 4px 0 var(--ink);
+  padding: 4px 10px; text-align: right; line-height: 1.05; }
+.bank small { display: block; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--snx-dark); }
+.bank b { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.bank span { font-size: 11px; font-weight: 600; margin-left: 2px; }
+#mute { background: transparent; border: 2px solid #fff; color: #fff; border-radius: 10px; font-weight: 800; font-size: 11px;
+  letter-spacing: .06em; padding: 6px 8px; text-transform: uppercase; }
+
+main { max-width: 1080px; margin: 0 auto; padding: 0 16px 28px; display: grid; gap: 14px; }
+.race-head { display: flex; align-items: center; gap: 10px; color: #fff; }
+.race-head div { flex: 1; min-width: 0; }
+.race-head b { display: block; font-size: 20px; font-weight: 800; text-transform: uppercase; line-height: 1.1; text-shadow: 0 2px 0 var(--ink); }
+.race-head span { font-size: 13px; font-weight: 600; }
+.link { background: var(--ink); color: #fff; border: 0; border-radius: 999px; padding: 8px 14px; font-weight: 800; font-size: 13px; white-space: nowrap; }
+
+.stage { position: relative; background: var(--ink); border: 3px solid var(--ink); border-radius: 18px; overflow: hidden; box-shadow: 0 6px 0 var(--ink); }
+#cv { display: block; width: 100%; height: clamp(280px, 78vw, 430px); }
+.ticker { background: var(--ink); color: #fff; padding: 8px 12px 4px; font-weight: 700; font-size: 15px; min-height: 2.4em; }
+.order { background: var(--ink); color: #fff; padding: 0 12px 10px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; font-weight: 700; min-height: 30px; }
+.order span { display: inline-flex; align-items: center; gap: 4px; background: #2a2a2a; border-radius: 999px; padding: 2px 8px 2px 2px; }
+.ctrl { position: absolute; right: 10px; top: 10px; display: flex; gap: 6px; }
+.ctrl button { background: rgba(17,17,17,.75); color: #fff; border: 2px solid #fff; border-radius: 10px; font-weight: 800; font-size: 12px; padding: 5px 9px; }
+.ctrl button.on { background: #fff; color: var(--ink); }
+
+.grid { display: grid; gap: 14px; align-items: start; }
+@media (min-width: 860px) { .grid { grid-template-columns: 1.25fr 1fr; } .slip { position: sticky; top: 12px; } }
+.card { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; box-shadow: 0 6px 0 var(--ink); padding: 14px; }
+.card h2 { margin: 0 0 10px; font-size: 18px; font-weight: 800; text-transform: uppercase; color: var(--snx-dark); display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card h2 small { font-size: 11px; color: var(--ink); font-weight: 700; letter-spacing: .04em; }
+
+.runners { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.runner { display: grid; grid-template-columns: 34px 46px 1fr auto; align-items: center; gap: 10px; border: 2px solid var(--ink); border-radius: 14px; padding: 6px 8px; background: #fff; }
+.runner.sel { background: #fff1f0; outline: 3px solid var(--snx); outline-offset: -1px; }
+.runner.done { opacity: .85; }
+.silk { width: 34px; height: 34px; border-radius: 9px; border: 2px solid var(--ink); display: grid; place-items: center; font-weight: 800; font-size: 15px; }
+.silk i { font-style: normal; background: #fff; color: var(--ink); border-radius: 999px; width: 21px; height: 21px; display: grid; place-items: center; border: 1.5px solid var(--ink); font-size: 12px; }
+.pic { width: 46px; height: 40px; object-fit: contain; }
+.roundel { width: 40px; height: 40px; border-radius: 50%; background: var(--snx); display: grid; place-items: center; border: 2px solid var(--ink); justify-self: center; }
+.roundel img { width: 30px; }
+.nm { min-width: 0; }
+.nm b { display: block; font-weight: 800; font-size: 15px; line-height: 1.15; }
+.nm small { display: block; font-size: 12px; font-weight: 500; color: #444; }
+.nm small em { font-style: normal; font-weight: 800; color: var(--ink); letter-spacing: .04em; }
+.odds { min-width: 74px; background: var(--ink); color: #fff; border: 0; border-radius: 12px; padding: 8px 8px; font-weight: 800; font-size: 17px; font-variant-numeric: tabular-nums;
+  box-shadow: 0 3px 0 var(--snx-dark); position: relative; }
+.odds:disabled { cursor: default; box-shadow: none; }
+.odds .mv { position: absolute; top: -8px; right: -6px; font-size: 10px; border-radius: 999px; padding: 1px 5px; background: #fff; border: 1.5px solid var(--ink); }
+.odds .mv.up { color: var(--up); }
+.odds .mv.dn { color: var(--snx-dark); }
+.odds.flash { animation: flash .6s; }
+@keyframes flash { 50% { background: var(--snx); } }
+.pos { font-weight: 800; font-size: 13px; color: var(--snx-dark); }
+
+.slip .pick { border: 2px dashed var(--ink); border-radius: 12px; padding: 10px; font-weight: 600; font-size: 14px; min-height: 48px; }
+.slip .pick b { font-weight: 800; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--ink); border-radius: 12px; overflow: hidden; margin-top: 10px; }
+.seg button { background: #fff; border: 0; padding: 9px 4px; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+.seg button + button { border-left: 2px solid var(--ink); }
+.seg button.on { background: var(--ink); color: #fff; }
+.chips { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 10px; }
+.chips button { aspect-ratio: 1; border-radius: 50%; border: 3px dashed #fff; background: var(--snx); color: #fff; font-weight: 800; font-size: 15px;
+  box-shadow: 0 0 0 2px var(--ink), 0 3px 0 2px var(--ink); max-width: 64px; justify-self: center; width: 100%; }
+.chips button.on { background: var(--ink); }
+.chips button:disabled { opacity: .35; cursor: default; }
+.info { font-size: 13px; font-weight: 600; margin: 10px 0 0; min-height: 2.6em; }
+.btn { width: 100%; margin-top: 10px; font-size: 18px; font-weight: 800; text-transform: uppercase; border-radius: 999px; background: #fff; color: var(--snx-dark);
+  border: 3px solid var(--ink); padding: 10px 14px 9px; box-shadow: 0 5px 0 var(--ink); }
+.btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.go { background: var(--snx); color: #fff; font-size: 22px; }
+.btn.alt { background: var(--ink); color: #fff; }
+.slip h3 { margin: 14px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; display: flex; justify-content: space-between; }
+.bets { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.bets li { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; background: var(--steen); border-radius: 10px; padding: 6px 8px; font-size: 13px; font-weight: 600; }
+.bets li b { font-weight: 800; }
+.bets li .x { border: 0; background: var(--ink); color: #fff; border-radius: 8px; width: 26px; height: 26px; font-weight: 800; }
+.bets .empty { background: transparent; padding: 0; font-weight: 500; color: #555; display: block; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.foot { color: #fff; font-size: 12px; font-weight: 600; text-align: center; margin: 4px 0 0; }
+.foot a { color: #fff; }
+
+dialog { border: 3px solid var(--ink); border-radius: 20px; box-shadow: 0 8px 0 var(--ink); padding: 18px; width: min(440px, calc(100% - 32px)); max-height: calc(100% - 32px); }
+dialog::backdrop { background: rgba(17,17,17,.6); }
+dialog h2 { margin: 0 0 10px; font-size: 24px; font-weight: 800; text-transform: uppercase; color: var(--snx-dark); }
+dialog p, dialog li { font-size: 14px; font-weight: 500; line-height: 1.4; }
+dialog ul { padding-left: 18px; margin: 8px 0; }
+.places { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; }
+.places li { display: grid; grid-template-columns: 40px 34px 1fr auto; gap: 8px; align-items: center; font-weight: 700; border-bottom: 1px solid var(--steen); padding-bottom: 6px; }
+.places .p { font-size: 20px; font-weight: 800; color: var(--snx-dark); }
+.net { text-align: center; border-radius: 14px; padding: 10px; margin: 8px 0; background: var(--ink); color: #fff; }
+.net b { display: block; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.net.win { background: var(--up); }
+.payouts { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+.payouts li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.payouts li.won b { color: var(--up); }
+</style>
+</head>
+<body>
+<header class="top">
+  <img class="logo" src="assets/logo_white.webp" alt="SNX">
+  <div class="brand"><b>SNX Derby</b><span>Wed op je favoriete snack</span></div>
+  <button id="mute" type="button" aria-pressed="false">Geluid aan</button>
+  <div class="bank" aria-live="polite"><small>Saldo</small><b id="bal">1000</b><span>munten</span></div>
+</header>
+
+<main>
+  <section class="race-head">
+    <div><b id="raceName">Race 1</b><span id="raceMeta"></span></div>
+    <button class="link" id="helpBtn" type="button">Hoe wed ik?</button>
+  </section>
+
+  <section class="stage" aria-label="Renbaan">
+    <canvas id="cv"></canvas>
+    <div class="ctrl" id="ctrl" hidden>
+      <button id="fast" type="button" aria-pressed="false">2×</button>
+      <button id="skip" type="button">Naar uitslag</button>
+    </div>
+    <div class="ticker" id="ticker" aria-live="polite">Kies een paard, zet in en start de race.</div>
+    <div class="order" id="order"></div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Racekaart <small id="placeRule">Each-way: 1/4 odds, plaats 1-2</small></h2>
+      <ol class="runners" id="runners"></ol>
+    </section>
+
+    <section class="card slip" aria-label="Wedbriefje">
+      <h2>Wedbriefje</h2>
+      <div class="pick" id="pick">Tik op een quotering om een paard te kiezen.</div>
+      <div class="seg" role="group" aria-label="Soort weddenschap">
+        <button type="button" data-type="win" class="on" aria-pressed="true">Win</button>
+        <button type="button" data-type="ew" aria-pressed="false">Each-way</button>
+      </div>
+      <div class="chips" id="chips">
+        <button type="button" data-chip="10">10</button>
+        <button type="button" data-chip="25" class="on">25</button>
+        <button type="button" data-chip="50">50</button>
+        <button type="button" data-chip="100">100</button>
+        <button type="button" data-chip="250">250</button>
+      </div>
+      <p class="info" id="info"></p>
+      <button class="btn alt" id="place" type="button" disabled>Plaats inzet</button>
+      <h3><span>Je inzetten</span><span id="betTotal"></span></h3>
+      <ul class="bets" id="bets"></ul>
+      <button class="btn go" id="go" type="button">Start de race</button>
+      <button class="btn" id="refill" type="button" hidden>Saldo bijvullen (+500)</button>
+    </section>
+  </div>
+
+  <p class="foot">Speelgeld: SNX-munten hebben geen waarde en zijn niet in te wisselen. Proef het echte werk op <a href="https://www.snxfood.com" target="_blank" rel="noopener">snxfood.com</a></p>
+</main>
+
+<dialog id="result">
+  <h2 id="resTitle">Uitslag</h2>
+  <ol class="places" id="places"></ol>
+  <div class="net" id="net"><span>Resultaat</span><b>0</b></div>
+  <ul class="payouts" id="payouts"></ul>
+  <button class="btn go" id="next" type="button">Volgende race</button>
+</dialog>
+
+<dialog id="help">
+  <h2>Hoe wed ik?</h2>
+  <ul>
+    <li><b>Kies een paard</b> door op de quotering te tikken. Kies je inzet en tik op Plaats inzet. Je mag op meerdere paarden wedden.</li>
+    <li><b>Quotering 5/2</b>: zet 10 in, win 25 en krijg je 10 terug = 35. <b>EVS</b> (evens) verdubbelt je inzet.</li>
+    <li><b>Win</b>: je wint alleen als je paard als eerste finisht.</li>
+    <li><b>Each-way</b>: twee inzetten, dus het kost het dubbele. De ene op winst, de andere op een plaats (1e of 2e) tegen 1/4 van de quotering.</li>
+    <li><b>Vaste prijs</b>: je quotering ligt vast zodra je inzet. Tot de start bewegen de koersen, net als in de wedkantoren in Engeland.</li>
+    <li>Je speelt met <b>SNX-munten</b>: speelgeld, zonder waarde.</li>
+  </ul>
+  <button class="btn" id="helpClose" type="button">Begrepen</button>
+</dialog>
+
+<script>
+'use strict';
+// ---------- Horses: every runner is an SNX product or brand item. Edit names here. ----------
+const HORSES = [
+  { id: 'bal',    name: 'Betterbal Bliksem',   jockey: 'J. Krokant', img: 'assets/bal.webp',    coat: '#7a4a2a', mane: '#2b1a10', silk: ['#ff2625', '#ffffff', 'hoops'] },
+  { id: 'kroket', name: 'K-Rocket',            jockey: 'T. Frituur', img: 'assets/kroket.webp', coat: '#a5582c', mane: '#4a2510', silk: ['#111111', '#ff2625', 'stripes'] },
+  { id: 'burger', name: 'BOB Burger',          jockey: 'B. Bun',     img: 'assets/burger.webp', coat: '#3a2a22', mane: '#120c09', silk: ['#ffffff', '#ff2625', 'sash'] },
+  { id: 'doos',   name: 'Verzenddoos Express', jockey: 'D. Doos',    img: 'assets/doos.webp',   coat: '#bdb6ad', mane: '#6f6862', silk: ['#ff2625', '#111111', 'quarters'] },
+  { id: 'now',    name: 'Now You Can',         jockey: 'N. Kan',     img: null,                 coat: '#c79a5e', mane: '#6b4a22', silk: ['#ffffff', '#111111', 'stripes'] },
+  { id: 'all',    name: 'Have It All',         jockey: 'H. Alles',   img: null,                 coat: '#5b3a24', mane: '#1d120a', silk: ['#111111', '#ffffff', 'hoops'] },
+];
+const RACES = ['Betterbal Stakes', 'K-Rocket Cup', 'BOB Burger Handicap', 'Snack Rush Sprint', 'Verzenddoos Derby',
+  'Now You Can Gold Cup', 'Frituur Festival Mile', 'SNX Grand Prix', 'Have It All Trophy', 'Krokant Classic'];
+const DISTS = [['5f', 5, 14], ['6f', 6, 15], ['7f', 7, 16], ['1m', 8, 17], ['1m 2f', 10, 18.5], ['1m 4f', 12, 20]];
+const GOINGS = ['Goed', 'Goed tot zacht', 'Goed tot snel', 'Zacht'];
+const FR = [[1,5],[2,9],[1,4],[2,7],[1,3],[4,11],[2,5],[4,9],[1,2],[8,15],[4,7],[8,13],[4,6],[8,11],[4,5],[5,6],[10,11],[1,1],
+  [11,10],[6,5],[5,4],[11,8],[6,4],[13,8],[7,4],[15,8],[2,1],[9,4],[5,2],[11,4],[3,1],[10,3],[7,2],[4,1],[9,2],[5,1],[11,2],[6,1],
+  [13,2],[7,1],[15,2],[8,1],[9,1],[10,1],[11,1],[12,1],[14,1],[16,1],[20,1],[25,1],[33,1],[40,1],[50,1]];
+const OVERROUND = 1.17, PLACES = 2, PLACE_FRAC = 4, D = 1000;
+const fracTxt = (f) => f[0] === f[1] ? 'EVS' : f[0] + '/' + f[1];
+const snapIdx = (dec) => { let best = 0; FR.forEach((f, i) => { if (f[0] / f[1] <= dec - 1) best = i; }); return best; };
+const $ = (id) => document.getElementById(id);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+
+// ---------- Saved state (per browser) ----------
+const KEY = 'snx-derby-v1';
+function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* private mode: play without saving */ } }
+const S = Object.assign({ bal: 1000, race: 1, form: {}, ratings: {}, pending: [] }, load() || {});
+HORSES.forEach((h) => {
+  if (S.ratings[h.id] == null) S.ratings[h.id] = gauss() * 0.3;
+  if (!S.form[h.id]) S.form[h.id] = Array.from({ length: 4 }, () => 1 + Math.floor(Math.random() * 6)).join('');
+});
+if (S.pending.length) { S.bal += S.pending.reduce((a, b) => a + b.cost, 0); S.pending = []; } // refund bets of an unfinished race
+save();
+
+// ---------- Images ----------
+const IMG = {};
+HORSES.concat([{ id: 'logo', img: 'assets/logo_white.webp' }]).forEach((h) => {
+  if (!h.img) return;
+  const im = new Image(); im.onload = () => draw(); im.src = h.img; IMG[h.id] = im;
+});
+
+// ---------- Race setup ----------
+let race, bets = [], sel = null, betType = 'win', stake = 25, phase = 'card';
+function newRace() {
+  const n = S.race, d = pick(DISTS);
+  const str = HORSES.map((h) => S.ratings[h.id] + gauss() * 0.55);
+  const ex = str.map((v) => Math.exp(1.6 * v)), sum = ex.reduce((a, b) => a + b, 0);
+  race = {
+    no: n, name: RACES[(n - 1) % RACES.length], dist: d[0], furlongs: d[1], base: d[2], going: pick(GOINGS),
+    runners: HORSES.map((h, i) => {
+      const p = ex[i] / sum, oi = snapIdx(1 / (p * OVERROUND));
+      return { h, i, p, oi, open: oi, mv: 0, x: -3, ph: Math.random() * 6, done: false, place: 0 };
+    }),
+  };
+  bets = []; sel = null; phase = 'card';
+  $('raceName').textContent = 'Race ' + n + ' · ' + race.name;
+  $('raceMeta').textContent = race.dist + ' · Terrein: ' + race.going + ' · ' + HORSES.length + ' lopers';
+  $('ticker').textContent = 'Kies een paard, zet in en start de race.';
+  $('order').innerHTML = '';
+  $('ctrl').hidden = true;
+  cam = -VIEW * 0.42;
+  renderCard(); renderSlip(); draw();
+}
+
+// ---------- Racecard ----------
+function silkCSS(s) {
+  const [a, b, p] = s;
+  if (p === 'hoops') return `repeating-linear-gradient(0deg, ${a} 0 6px, ${b} 6px 12px)`;
+  if (p === 'stripes') return `repeating-linear-gradient(90deg, ${a} 0 6px, ${b} 6px 12px)`;
+  if (p === 'sash') return `linear-gradient(135deg, ${a} 0 38%, ${b} 38% 62%, ${a} 62%)`;
+  if (p === 'quarters') return `conic-gradient(${a} 0 25%, ${b} 0 50%, ${a} 0 75%, ${b} 0)`;
+  return a;
+}
+function riderHTML(h) {
+  return h.img ? `<img class="pic" src="${h.img}" alt="">` : `<span class="roundel"><img src="assets/logo_white.webp" alt=""></span>`;
+}
+function renderCard() {
+  const ul = $('runners'); ul.innerHTML = '';
+  const finished = phase === 'done';
+  race.runners.forEach((r) => {
+    const f = FR[r.oi], li = document.createElement('li');
+    li.className = 'runner' + (sel === r.i ? ' sel' : '') + (finished ? ' done' : '');
+    const mv = r.mv ? `<span class="mv ${r.mv < 0 ? 'up' : 'dn'}">${r.mv < 0 ? '▼' : '▲'}</span>` : '';
+    const right = finished ? `<span class="pos">${ordinal(r.place)}</span>`
+      : `<button class="odds" type="button" data-i="${r.i}" ${phase !== 'card' ? 'disabled' : ''} aria-label="${r.h.name} op ${fracTxt(f)}">${fracTxt(f)}${mv}</button>`;
+    li.innerHTML = `<span class="silk" style="background:${silkCSS(r.h.silk)}"><i>${r.i + 1}</i></span>${riderHTML(r.h)}
+      <div class="nm"><b>${r.h.name}</b><small>Jockey ${r.h.jockey} · Vorm <em>${S.form[r.h.id].split('').join('-')}</em></small></div>${right}`;
+    ul.appendChild(li);
+  });
+}
+const ordinal = (n) => n + 'e';
+$('runners').addEventListener('click', (e) => {
+  const b = e.target.closest('.odds'); if (!b || phase !== 'card') return;
+  sel = +b.dataset.i; renderCard(); renderSlip();
+});
+
+// Prices drift until the off, like the boards in a betting shop. Bets keep the price they were struck at.
+setInterval(() => {
+  if (phase !== 'card' || !race || document.hidden) return;
+  const r = pick(race.runners), step = Math.random() < 0.5 ? -1 : 1;
+  const ni = Math.min(Math.max(r.oi + step, r.open - 2, 0), r.open + 2, FR.length - 1);
+  if (ni === r.oi) return;
+  r.mv = ni < r.open ? -1 : ni > r.open ? 1 : 0; r.oi = ni;
+  renderCard(); renderSlip();
+  const btn = document.querySelector(`.odds[data-i="${r.i}"]`); if (btn) btn.classList.add('flash');
+}, 3200);
+
+// ---------- Bet slip ----------
+const cost = () => stake * (betType === 'ew' ? 2 : 1);
+function potential(f, type, st) {
+  const win = st * (1 + f[0] / f[1]);
+  return type === 'ew' ? win + st * (1 + f[0] / f[1] / PLACE_FRAC) : win;
+}
+function renderSlip() {
+  $('bal').textContent = S.bal;
+  document.querySelectorAll('.seg button').forEach((b) => { const on = b.dataset.type === betType; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  document.querySelectorAll('#chips button').forEach((b) => {
+    const v = +b.dataset.chip; b.classList.toggle('on', v === stake);
+    b.disabled = phase !== 'card' || v * (betType === 'ew' ? 2 : 1) > S.bal;
+  });
+  if (sel == null) {
+    $('pick').innerHTML = 'Tik op een quotering om een paard te kiezen.';
+    $('info').textContent = '';
+  } else {
+    const r = race.runners[sel], f = FR[r.oi];
+    $('pick').innerHTML = `<b>${r.h.name}</b> @ <b>${fracTxt(f)}</b> · ${betType === 'ew' ? 'Each-way' : 'Win'}`;
+    const c = cost(), w = Math.floor(potential(f, 'win', stake)), all = Math.floor(potential(f, betType, stake));
+    $('info').textContent = betType === 'ew'
+      ? `${stake} each-way kost ${c}. Wint ${r.h.name}: ${all} terug. Alleen 2e: ${Math.floor(stake * (1 + f[0] / f[1] / PLACE_FRAC))} terug.`
+      : `Inzet ${c}. Wint ${r.h.name}: ${w} terug.`;
+  }
+  $('place').disabled = phase !== 'card' || sel == null || cost() > S.bal;
+  const ul = $('bets'); ul.innerHTML = '';
+  if (!bets.length) ul.innerHTML = '<li class="empty">Nog geen inzet. Je mag ook zonder inzet kijken.</li>';
+  bets.forEach((b, k) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span><b>${HORSES[b.i].name}</b> ${b.type === 'ew' ? b.stake + ' E/W' : b.stake + ' Win'} @ ${fracTxt(b.f)}</span><span>${b.cost}</span>` +
+      (phase === 'card' ? `<button class="x" type="button" data-k="${k}" aria-label="Inzet verwijderen">×</button>` : '<span></span>');
+    ul.appendChild(li);
+  });
+  const tot = bets.reduce((a, b) => a + b.cost, 0);
+  $('betTotal').textContent = tot ? 'Totaal ' + tot : '';
+  $('go').disabled = phase !== 'card';
+  $('refill').hidden = !(phase === 'card' && S.bal < 10 && !bets.length);
+}
+document.querySelector('.seg').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  betType = b.dataset.type;
+  if (cost() > S.bal) stake = [250, 100, 50, 25, 10].find((v) => v * (betType === 'ew' ? 2 : 1) <= S.bal) || 10;
+  renderSlip();
+});
+$('chips').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b || b.disabled) return; stake = +b.dataset.chip; renderSlip(); });
+$('place').addEventListener('click', () => {
+  if (sel == null || cost() > S.bal || phase !== 'card') return;
+  const r = race.runners[sel];
+  bets.push({ i: sel, type: betType, stake, cost: cost(), f: FR[r.oi].slice() });
+  S.bal -= cost(); S.pending = bets; save();
+  if (cost() > S.bal) stake = [250, 100, 50, 25, 10].find((v) => v * (betType === 'ew' ? 2 : 1) <= S.bal) || 10;
+  renderSlip(); chip();
+});
+$('bets').addEventListener('click', (e) => {
+  const b = e.target.closest('.x'); if (!b || phase !== 'card') return;
+  const [x] = bets.splice(+b.dataset.k, 1); S.bal += x.cost; S.pending = bets; save(); renderSlip();
+});
+$('refill').addEventListener('click', () => { S.bal += 500; save(); renderSlip(); });
+
+// ---------- Race simulation ----------
+// The finishing order is drawn first from the true chances (Plackett-Luce), then every horse gets a smooth
+// running line that ends on that order, with front-runners, closers and mid-race wobbles for the drama.
+function sampleOrder(ps) {
+  const left = ps.map((_, i) => i), out = [];
+  while (left.length) {
+    let r = Math.random() * left.reduce((a, i) => a + ps[i], 0), j = 0;
+    for (; j < left.length - 1; j++) { r -= ps[left[j]]; if (r <= 0) break; }
+    out.push(left.splice(j, 1)[0]);
+  }
+  return out;
+}
+let t = 0, speed = 1, said, lastLeader, leadSince, nextCall, finishGap;
+function startRace() {
+  if (phase !== 'card') return;
+  audio(); bell();
+  document.querySelector('.stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  phase = 'running'; S.pending = bets; save();
+  const order = sampleOrder(race.runners.map((r) => r.p));
+  let T = race.base * rnd(0.97, 1.03);
+  order.forEach((i, k) => {
+    const r = race.runners[i];
+    if (k > 0) T += Math.random() < 0.2 ? rnd(0.04, 0.1) : rnd(0.12, 0.55);
+    r.T = T; r.place = k + 1; r.done = false; r.x = 0; r.max = 0;
+    r.style = k === 0 ? pick([-1, -1, 0, 1]) : pick([-1, 0, 1, 1]);
+    r.waves = [0, 1, 2].map(() => ({ a: rnd(0.004, 0.012), m: rnd(0.6, 2.4), ph: rnd(0, 6.28) }));
+  });
+  race.order = order;
+  finishGap = race.runners[order[1]].T - race.runners[order[0]].T;
+  t = 0; speed = 1; said = {}; lastLeader = -1; leadSince = 0; nextCall = 3;
+  $('fast').classList.remove('on'); $('fast').setAttribute('aria-pressed', 'false');
+  $('ctrl').hidden = false;
+  renderCard(); renderSlip();
+  say('En ze zijn weg! De ' + race.name + ' over ' + race.dist + ' is begonnen.');
+  last = performance.now(); requestAnimationFrame(loop);
+}
+function progress(r, t) {
+  const u = t / r.T;
+  if (u >= 1) { const tau = Math.min(t - r.T, 3); return D + (D / r.T) * tau * (1 - tau / 6) * 0.9; }
+  const base = (u < 0.06 ? (u * u) / 0.12 : u - 0.03) / 0.97;
+  const env = Math.sin(Math.PI * u);
+  let w = r.style * 0.03 * env * env * (r.style > 0 ? (1 - u) * 1.6 : 1);
+  r.waves.forEach((v) => { w += v.a * env * Math.sin(2 * Math.PI * v.m * u + v.ph); });
+  const f = Math.max(r.max, base + w); r.max = f; // never run backwards
+  return D * f;
+}
+let last = 0;
+function loop(now) {
+  if (phase !== 'running') return;
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  t += dt * speed;
+  race.runners.forEach((r) => {
+    const nx = progress(r, t);
+    r.v = (nx - r.x) / Math.max(dt * speed, 1e-3); r.x = nx;
+    r.ph += dt * speed * (8 + Math.min(r.v, 80) * 0.12);
+    if (!r.done && t >= r.T) { r.done = true; if (r.place === 1) onWinner(r); }
+  });
+  call();
+  draw();
+  if (t > race.runners[race.order[race.order.length - 1]].T + 1.2) return finish();
+  requestAnimationFrame(loop);
+}
+function standings() { return race.runners.slice().sort((a, b) => b.x - a.x || a.place - b.place); }
+function say(txt) { $('ticker').textContent = txt; }
+let orderTick = 0;
+function call() {
+  const st = standings(), lead = st[0], second = st[1], frac = lead.x / D;
+  if (performance.now() - orderTick > 200) {
+    orderTick = performance.now();
+    $('order').innerHTML = st.map((r, k) => `<span><span class="silk" style="width:20px;height:20px;border-radius:6px;border-width:1.5px;background:${silkCSS(r.h.silk)}"></span>${k + 1}. ${r.h.name}</span>`).join('');
+  }
+  if (lead.done) return;
+  if (lead.i !== lastLeader) {
+    if (lastLeader !== -1 && t - leadSince > 1.2 && t > 2.5) say(pick([`${lead.h.name} neemt de leiding over!`, `En daar gaat ${lead.h.name} naar voren!`, `${lead.h.name} schiet langs ${second.h.name}!`]));
+    lastLeader = lead.i; leadSince = t;
+  }
+  if (frac > 0.5 && !said.half) { said.half = 1; return say(`Halverwege: ${lead.h.name} leidt, ${second.h.name} zit eraan vast, ${st[2].h.name} ligt derde.`); }
+  if (frac > 0.8 && !said.last) { said.last = 1; return say(`De laatste furlong! ${lead.h.name} voorop, maar ${second.h.name} komt eraan!`); }
+  if (t > nextCall && frac < 0.78) {
+    nextCall = t + 3.2;
+    say(pick([`${lead.h.name} voert het veld aan.`, `${lead.h.name} op kop, ${second.h.name} volgt op een halve lengte.`,
+      `${st[st.length - 1].h.name} hangt achteraan en moet aan de bak.`, `${second.h.name} ligt op de loer achter ${lead.h.name}.`]));
+  }
+}
+function onWinner(r) {
+  cheer();
+  const second = race.runners[race.order[1]];
+  say(finishGap < 0.1 ? `Fotofinish tussen ${r.h.name} en ${second.h.name}! ... ${r.h.name} wint met een neus!`
+    : `${r.h.name} wint de ${race.name}!`);
+}
+function finish() {
+  phase = 'done'; $('ctrl').hidden = true;
+  race.runners.forEach((r) => { r.done = true; r.x = Math.max(r.x, D); });
+  // payouts
+  let back = 0; const lines = [];
+  bets.forEach((b) => {
+    const r = race.runners[b.i], o = b.f[0] / b.f[1];
+    let ret = 0;
+    if (r.place === 1) ret += b.stake * (1 + o);
+    if (b.type === 'ew' && r.place <= PLACES) ret += b.stake * (1 + o / PLACE_FRAC);
+    ret = Math.floor(ret); back += ret;
+    lines.push({ b, r, ret });
+  });
+  S.bal += back; S.pending = [];
+  // form and ratings: winners get a little better, the last a little worse
+  race.runners.forEach((r) => {
+    S.form[r.h.id] = (S.form[r.h.id] + r.place).slice(-5);
+    const adj = r.place === 1 ? 0.06 : r.place === HORSES.length ? -0.05 : 0;
+    S.ratings[r.h.id] = Math.max(-0.7, Math.min(0.7, S.ratings[r.h.id] * 0.97 + adj));
+  });
+  S.race += 1; save();
+  draw(); renderCard(); renderSlip();
+  showResult(lines, back);
+}
+function showResult(lines, back) {
+  const staked = bets.reduce((a, b) => a + b.cost, 0), net = back - staked;
+  $('resTitle').textContent = finishGap < 0.1 ? 'Fotofinish!' : 'Uitslag';
+  $('places').innerHTML = race.order.map((i, k) => {
+    const r = race.runners[i];
+    return `<li><span class="p">${k + 1}e</span><span class="silk" style="width:30px;height:30px;background:${silkCSS(r.h.silk)}"><i>${i + 1}</i></span><span>${r.h.name}</span><span>${fracTxt(FR[r.oi])}</span></li>`;
+  }).join('');
+  const nb = $('net');
+  nb.className = 'net' + (net > 0 ? ' win' : '');
+  nb.innerHTML = staked
+    ? `<span>${net > 0 ? 'Winst' : net === 0 ? 'Quitte' : 'Verlies'}</span><b>${net > 0 ? '+' : ''}${net}</b><span>Uitbetaald ${back} · nieuw saldo ${S.bal}</span>`
+    : `<span>Geen inzet deze race</span><b>${S.bal}</b><span>Je saldo</span>`;
+  $('payouts').innerHTML = lines.map(({ b, r, ret }) =>
+    `<li class="${ret ? 'won' : ''}"><span>${r.h.name} · ${b.type === 'ew' ? b.stake + ' E/W' : b.stake + ' Win'} @ ${fracTxt(b.f)}</span><b>${ret ? '+' + ret : '0'}</b></li>`).join('');
+  setTimeout(() => $('result').showModal(), 700);
+}
+$('next').addEventListener('click', () => { $('result').close(); newRace(); });
+$('result').addEventListener('cancel', (e) => { e.preventDefault(); $('result').close(); newRace(); });
+$('go').addEventListener('click', startRace);
+$('fast').addEventListener('click', () => { speed = speed === 1 ? 2 : 1; $('fast').classList.toggle('on', speed === 2); $('fast').setAttribute('aria-pressed', speed === 2); });
+$('skip').addEventListener('click', () => {
+  if (phase !== 'running') return;
+  t = race.runners[race.order[race.order.length - 1]].T + 0.8;
+  race.runners.forEach((r) => { r.x = progress(r, t); if (r.place === 1 && !r.done) onWinner(r); r.done = true; });
+  finish();
+});
+$('helpBtn').addEventListener('click', () => $('help').showModal());
+$('helpClose').addEventListener('click', () => $('help').close());
+
+// ---------- Sound (WebAudio, no files) ----------
+let ac = null, muted = true;
+try { muted = localStorage.getItem(KEY + '-mute') !== '0'; } catch (e) { /* default muted */ }
+function syncMute() { $('mute').textContent = muted ? 'Geluid aan' : 'Geluid uit'; $('mute').setAttribute('aria-pressed', String(!muted)); }
+syncMute();
+$('mute').addEventListener('click', () => { muted = !muted; try { localStorage.setItem(KEY + '-mute', muted ? '1' : '0'); } catch (e) { /* ignore */ } syncMute(); audio(); });
+function audio() { if (muted) return null; if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state === 'suspended') ac.resume(); return ac; }
+function tone(f, at, dur, vol, type) {
+  const a = audio(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || 'sine'; o.frequency.value = f;
+  g.gain.setValueAtTime(0, a.currentTime + at); g.gain.linearRampToValueAtTime(vol, a.currentTime + at + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + at + dur);
+  o.connect(g).connect(a.destination); o.start(a.currentTime + at); o.stop(a.currentTime + at + dur + 0.05);
+}
+function bell() { for (let k = 0; k < 6; k++) { tone(1320, k * 0.09, 0.08, 0.12, 'square'); } }
+function chip() { tone(880, 0, 0.06, 0.1, 'triangle'); tone(1320, 0.05, 0.08, 0.08, 'triangle'); }
+function cheer() {
+  const a = audio(); if (!a) return;
+  const len = a.sampleRate * 2.2, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+  for (let k = 0; k < len; k++) d[k] = (Math.random() * 2 - 1) * Math.sin(Math.PI * k / len);
+  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  f.type = 'bandpass'; f.frequency.value = 1100; f.Q.value = 0.6; g.gain.value = 0.25;
+  s.buffer = buf; s.connect(f).connect(g).connect(a.destination); s.start();
+}
+
+// ---------- Drawing ----------
+const cv = $('cv'), ctx = cv.getContext('2d');
+let W = 0, H = 0, dpr = 1, VIEW = 220, cam = -40;
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  VIEW = Math.max(180, Math.min(320, W * 0.55));
+  draw();
+}
+window.addEventListener('resize', resize);
+
+// crowd dots, fixed so the stand does not flicker
+const CROWD = Array.from({ length: 140 }, () => ({ x: Math.random(), y: Math.random(), c: pick(['#ffffff', '#111111', '#ffd2cf', '#f4c9a0', '#8a5a3c', '#ffe08a']) }));
+
+function draw() {
+  if (!W || !race) return;
+  const c = ctx; c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // camera follows the leader
+  const lead = race.runners.reduce((a, r) => (r.x > a.x ? r : a), race.runners[0]);
+  const target = Math.min(Math.max(lead.x - VIEW * 0.66, -VIEW * 0.42), D + VIEW * 0.3 - VIEW);
+  cam = phase === 'running' ? cam + (target - cam) * 0.12 : (phase === 'card' ? -VIEW * 0.42 : cam);
+  const k = W / VIEW, sx = (wx) => (wx - cam) * k;
+
+  const standB = H * 0.24, railY = H * 0.29, trackT = H * 0.35, trackB = H * 0.965, laneH = (trackB - trackT) / HORSES.length;
+  // sky
+  const g = c.createLinearGradient(0, 0, 0, standB); g.addColorStop(0, '#ffe3e0'); g.addColorStop(1, '#fff6f5');
+  c.fillStyle = g; c.fillRect(0, 0, W, standB);
+  // grandstand (parallax)
+  const px = cam * k * 0.35, tile = 260;
+  c.fillStyle = '#d12325'; c.fillRect(0, H * 0.075, W, standB - H * 0.075);
+  for (let x0 = -((px % tile) + tile) % tile - tile; x0 < W + tile; x0 += tile) {
+    CROWD.forEach((d) => { c.fillStyle = d.c; c.beginPath(); c.arc(x0 + d.x * tile, H * 0.1 + d.y * (standB - H * 0.115), Math.max(1.6, H * 0.008), 0, 7); c.fill(); });
+    c.fillStyle = '#ffffff'; c.fillRect(x0 + 6, H * 0.04, tile - 12, H * 0.035);
+    c.fillStyle = '#111111'; c.fillRect(x0 + 6, H * 0.075, tile - 12, 3);
+    if (k) { c.fillStyle = '#111'; c.font = `800 ${Math.max(9, H * 0.028)}px Poppins, sans-serif`; c.textBaseline = 'middle'; c.fillText('SNX DERBY', x0 + 16, H * 0.058); }
+  }
+  // advertising boards along the far rail
+  const boardW = 140 * (k / 1.6), by = standB, bh = railY - standB;
+  const b0 = Math.floor(cam * k / boardW) - 1;
+  for (let b = b0; b * boardW - cam * k < W; b++) {
+    const x0 = b * boardW - cam * k, red = b % 2 === 0;
+    c.fillStyle = red ? '#ff2625' : '#ffffff'; c.fillRect(x0, by, boardW, bh);
+    c.fillStyle = red ? '#ffffff' : '#ff2625';
+    c.font = `800 ${Math.max(8, bh * (red ? 0.62 : 0.4))}px Poppins, sans-serif`; c.textBaseline = 'middle'; c.textAlign = 'center';
+    c.fillText(red ? 'SNX' : 'NOW, YOU CAN HAVE IT ALL!', x0 + boardW / 2, by + bh / 2 + 1, boardW - 8);
+    c.fillStyle = '#111'; c.fillRect(x0, by, 1.5, bh);
+  }
+  c.textAlign = 'left';
+  // turf with mowing stripes
+  c.fillStyle = '#5aae46'; c.fillRect(0, railY, W, H - railY);
+  const sw = 40 * k, s0 = Math.floor(cam / 40);
+  c.fillStyle = '#51a23e';
+  for (let s = s0; s * 40 < cam + VIEW + 40; s++) if (s % 2 === 0) c.fillRect(sx(s * 40), railY, sw, H - railY);
+  // far rail
+  c.fillStyle = '#ffffff'; c.fillRect(0, railY, W, Math.max(3, H * 0.012));
+  for (let p = Math.floor(cam / 18) * 18; p < cam + VIEW + 18; p += 18) c.fillRect(sx(p), railY, 2, H * 0.03);
+  // furlong poles
+  const fl = D / race.furlongs;
+  for (let j = race.furlongs - 1; j >= 1; j--) {
+    const x = sx(D - j * fl); if (x < -30 || x > W + 30) continue;
+    c.fillStyle = '#111'; c.fillRect(x - 1.5, railY - H * 0.07, 3, H * 0.07);
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(x, railY - H * 0.08, H * 0.03, 0, 7); c.fill(); c.strokeStyle = '#111'; c.lineWidth = 2; c.stroke();
+    c.fillStyle = '#111'; c.font = `800 ${H * 0.028}px Poppins, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(j + 'f', x, railY - H * 0.079); c.textAlign = 'left';
+  }
+  // finish line and post
+  const fx = sx(D);
+  if (fx > -40 && fx < W + 40) {
+    c.fillStyle = '#ffffff'; c.fillRect(fx - 2, railY, 4, H - railY);
+    const sq = Math.max(4, H * 0.016);
+    for (let yy = railY, n = 0; yy < H; yy += sq, n++) { c.fillStyle = n % 2 ? '#111' : '#fff'; c.fillRect(fx + 2, yy, sq, sq); c.fillStyle = n % 2 ? '#fff' : '#111'; c.fillRect(fx + 2 + sq, yy, sq, sq); }
+    c.fillStyle = '#ff2625'; c.fillRect(fx - 3, H * 0.03, 6, railY - H * 0.03);
+    c.fillStyle = '#ffffff'; c.strokeStyle = '#111'; c.lineWidth = 2;
+    c.beginPath(); c.arc(fx, H * 0.06, H * 0.045, 0, 7); c.fill(); c.stroke();
+    c.fillStyle = '#ff2625'; c.beginPath(); c.arc(fx, H * 0.06, H * 0.022, 0, 7); c.fill();
+  }
+  // starting stalls
+  const st0 = sx(0);
+  if (st0 > -60 && st0 < W + 60) {
+    for (let i = 0; i < HORSES.length; i++) {
+      const y = trackT + laneH * i;
+      c.fillStyle = 'rgba(231,229,224,.55)'; c.fillRect(st0 - 22 * k, y + laneH * 0.1, 22 * k, laneH * 0.9);
+      c.strokeStyle = '#111'; c.lineWidth = 1.5; c.strokeRect(st0 - 22 * k, y + laneH * 0.1, 22 * k, laneH * 0.9);
+    }
+  }
+  // runners, back lane first
+  const size = Math.min(laneH * 1.5, W * 0.17);
+  race.runners.forEach((r) => {
+    const base = trackT + laneH * (r.i + 0.92), x = sx(r.x);
+    if (x < -size * 1.2 || x > W + size * 1.6) return;
+    c.fillStyle = 'rgba(17,17,17,.22)'; c.beginPath(); c.ellipse(x - size * 0.45, base, size * 0.42, size * 0.06, 0, 0, 7); c.fill();
+    c.save(); c.translate(x - size * 0.8, base - size * 0.46);
+    drawHorse(c, size, r, phase === 'running' || (phase === 'done' && r.x < D + 200));
+    c.restore();
+  });
+  // stall gates in front until the off
+  if (phase === 'card' && st0 > -60 && st0 < W + 60) {
+    for (let i = 0; i < HORSES.length; i++) {
+      const y = trackT + laneH * i;
+      c.fillStyle = '#ff2625'; c.fillRect(st0, y + laneH * 0.05, 5, laneH * 0.95);
+      c.fillStyle = '#fff'; c.fillRect(st0 + 1.5, y + laneH * 0.3, 2, laneH * 0.4);
+      c.fillStyle = '#111'; c.font = `800 ${Math.max(9, laneH * 0.36)}px Poppins, sans-serif`; c.textBaseline = 'middle';
+      c.fillText(String(i + 1), st0 + 8, y + laneH * 0.3);
+    }
+  }
+  // near rail
+  c.fillStyle = '#ffffff'; c.fillRect(0, H - Math.max(4, H * 0.014), W, Math.max(4, H * 0.014));
+  // photo-finish banner
+  if (phase !== 'card' && finishGap < 0.1 && race.runners[race.order[0]].done) {
+    c.fillStyle = '#111'; c.fillRect(0, H * 0.4, W, H * 0.12);
+    c.fillStyle = '#fff'; c.font = `800 ${H * 0.07}px Poppins, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('FOTOFINISH', W / 2, H * 0.465); c.textAlign = 'left';
+  }
+}
+
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16), ch = (s) => Math.max(0, Math.min(255, Math.round(((n >> s) & 255) * f)));
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+}
+function silkFill(c, x, y, w, h, s) {
+  const [a, b, p] = s;
+  c.save(); c.beginPath(); c.rect(x, y, w, h); c.clip();
+  c.fillStyle = a; c.fillRect(x, y, w, h); c.fillStyle = b;
+  if (p === 'hoops') for (let yy = y + h / 5; yy < y + h; yy += (2 * h) / 5) c.fillRect(x, yy, w, h / 5);
+  if (p === 'stripes') for (let xx = x + w / 6; xx < x + w; xx += w / 3) c.fillRect(xx, y, w / 6, h);
+  if (p === 'quarters') { c.fillRect(x + w / 2, y, w / 2, h / 2); c.fillRect(x, y + h / 2, w / 2, h / 2); }
+  if (p === 'sash') { c.beginPath(); c.moveTo(x, y); c.lineTo(x + w * 0.35, y); c.lineTo(x + w, y + h); c.lineTo(x + w * 0.65, y + h); c.closePath(); c.fill(); }
+  c.restore();
+}
+// Side-view galloping horse in unit space (body length about 1), product as the rider.
+function drawHorse(c, s, r, moving) {
+  const h = r.h, ph = r.ph, dark = shade(h.coat, 0.72);
+  c.save(); c.scale(s, s); c.lineCap = 'round'; c.lineJoin = 'round';
+  c.translate(0, moving ? -Math.abs(Math.sin(ph)) * 0.045 : 0);
+  const leg = (x, y, p, front, col) => {
+    const sw = moving ? Math.sin(p) : 0;
+    const a1 = (front ? 0.12 : -0.08) + sw * (front ? 0.62 : 0.5);
+    const bend = moving ? (front ? 0.25 + 0.9 * Math.max(0, -Math.cos(p)) : 0.15 + 0.6 * Math.max(0, Math.cos(p))) : 0.05;
+    const kx = x + Math.sin(a1) * 0.22, ky = y + Math.cos(a1) * 0.22;
+    const a2 = front ? a1 - bend : a1 + bend * 0.7;
+    const fx = kx + Math.sin(a2) * 0.21, fy = ky + Math.cos(a2) * 0.21;
+    c.strokeStyle = col; c.lineWidth = 0.075;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(kx, ky); c.lineTo(fx, fy); c.stroke();
+    c.strokeStyle = '#111'; c.lineWidth = 0.08; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx + 0.02, fy + 0.025); c.stroke();
+  };
+  // far legs
+  leg(0.27, 0.06, ph + 0.55, true, dark);
+  leg(-0.3, 0.05, ph + Math.PI + 0.55, false, dark);
+  // tail
+  const wave = Math.sin(ph * 0.5 + r.i) * 0.04;
+  c.strokeStyle = h.mane; c.lineWidth = 0.075;
+  c.beginPath(); c.moveTo(-0.4, -0.08); c.quadraticCurveTo(-0.6, -0.08 + wave, -0.64, (moving ? 0.02 : 0.18) + wave); c.stroke();
+  // body, chest, quarters
+  c.fillStyle = h.coat;
+  c.beginPath(); c.ellipse(0, 0, 0.4, 0.16, 0, 0, 7); c.fill();
+  c.beginPath(); c.ellipse(0.27, -0.02, 0.16, 0.15, 0, 0, 7); c.fill();
+  c.beginPath(); c.ellipse(-0.27, -0.03, 0.17, 0.16, 0, 0, 7); c.fill();
+  // neck and head
+  c.beginPath(); c.moveTo(0.2, -0.1); c.lineTo(0.5, -0.4); c.lineTo(0.63, -0.34); c.lineTo(0.41, 0.04); c.closePath(); c.fill();
+  c.save(); c.translate(0.62, -0.35); c.rotate(0.62); c.beginPath(); c.ellipse(0.07, 0, 0.15, 0.064, 0, 0, 7); c.fill();
+  c.fillStyle = dark; c.beginPath(); c.ellipse(0.18, 0.005, 0.045, 0.05, 0, 0, 7); c.fill(); c.restore();
+  c.beginPath(); c.moveTo(0.53, -0.42); c.lineTo(0.53, -0.51); c.lineTo(0.585, -0.43); c.closePath(); c.fill();
+  c.fillStyle = '#111'; c.beginPath(); c.arc(0.64, -0.37, 0.016, 0, 7); c.fill();
+  // mane
+  c.strokeStyle = h.mane; c.lineWidth = 0.05;
+  c.beginPath(); c.moveTo(0.24, -0.15); c.quadraticCurveTo(0.38, -0.3 + wave * 0.5, 0.52, -0.43); c.stroke();
+  // near legs
+  leg(0.29, 0.07, ph, true, h.coat);
+  leg(-0.28, 0.06, ph + Math.PI, false, h.coat);
+  // saddle cloth in racing silks with number
+  silkFill(c, -0.17, -0.19, 0.27, 0.19, h.silk);
+  c.strokeStyle = '#111'; c.lineWidth = 0.014; c.strokeRect(-0.17, -0.19, 0.27, 0.19);
+  c.fillStyle = '#fff'; c.beginPath(); c.arc(-0.035, -0.09, 0.058, 0, 7); c.fill(); c.stroke();
+  c.save(); c.scale(1 / s, 1 / s); c.fillStyle = '#111'; c.font = `800 ${Math.round(s * 0.08)}px Poppins, sans-serif`;
+  c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(r.i + 1), -0.035 * s, -0.087 * s); c.restore();
+  // reins
+  c.strokeStyle = '#111'; c.lineWidth = 0.012;
+  c.beginPath(); c.moveTo(0.1, -0.3); c.quadraticCurveTo(0.42, -0.26, 0.7, -0.31); c.stroke();
+  // rider: the product itself
+  const rb = moving ? Math.sin(ph * 2) * 0.012 : 0;
+  const im = IMG[h.id];
+  if (im && im.complete && im.naturalWidth) {
+    const hh = h.id === 'doos' ? 0.3 : 0.36, ww = Math.min(0.46, hh * im.naturalWidth / im.naturalHeight);
+    const hgt = ww * im.naturalHeight / im.naturalWidth;
+    c.drawImage(im, -0.05 - ww / 2, -0.2 - hgt + rb, ww, hgt);
+  } else {
+    c.fillStyle = '#ff2625'; c.strokeStyle = '#fff'; c.lineWidth = 0.025;
+    c.beginPath(); c.arc(-0.04, -0.36 + rb, 0.16, 0, 7); c.fill(); c.stroke();
+    const lg = IMG.logo;
+    if (lg && lg.complete && lg.naturalWidth) { const lw = 0.25, lh = lw * lg.naturalHeight / lg.naturalWidth; c.drawImage(lg, -0.04 - lw / 2, -0.36 - lh / 2 + rb, lw, lh); }
+  }
+  c.restore();
+}
+
+// ---------- Go ----------
+newRace();
+resize();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
+</body>
+</html>
