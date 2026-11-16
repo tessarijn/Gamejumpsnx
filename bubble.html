@@ -122,14 +122,14 @@ const $ = (id) => document.getElementById(id);
 // ---------- assets ----------
 function img(src) { const i = new Image(); i.src = src; return i; }
 const IMG = { bal: img('assets/bal.webp'), kroket: img('assets/kroket.webp'), burger: img('assets/burger.webp'),
-  logo: img('assets/logo_white.webp'), doos: img('assets/doos.webp'), backdrop: img('assets/backdrop.webp') };
+  chicken: img('assets/chickenbite.webp'), doos: img('assets/doos.webp'), backdrop: img('assets/backdrop.webp') };
 
 // Each snack has its own bubble colour, so matches read at a glance (and not only by photo).
 const TYPES = [
   { name: 'Betterbal', img: 'bal',    bg: '#ffffff', ring: '#ff2625', scale: 0.86 },
   { name: 'K-Rocket',  img: 'kroket', bg: '#111111', ring: '#111111', scale: 0.95 },
   { name: 'BOB Burger',img: 'burger', bg: '#ffc93c', ring: '#111111', scale: 0.86 },
-  { name: 'SNX',       img: 'logo',   bg: '#ff2625', ring: '#ffffff', scale: 0.82 },
+  { name: 'ChickenBite', img: 'chicken', bg: '#ff2625', ring: '#ffffff', scale: 0.92 },
 ];
 const DOOS = -1;
 

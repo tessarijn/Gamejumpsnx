@@ -12,7 +12,7 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 
 ## SNX Snack Blaster (`bubble.html`)
 Bubble shooter met SNX-snacks. Eén bestand, gebruikt dezelfde `assets/`.
-- Sleep om te mikken, laat los om te schieten. 3+ dezelfde snacks (Betterbal, K-Rocket, BOB Burger, SNX-logo) knallen weg.
+- Sleep om te mikken, laat los om te schieten. 3+ dezelfde snacks (Betterbal, K-Rocket, BOB Burger, ChickenBite) knallen weg.
 - Snacks die los komen te hangen vallen: dubbele punten.
 - 8+ in één schot = Verzenddoos als volgende schot: blaast alles in de buurt weg.
 - Elke paar missers schuift er een nieuwe rij in. Snacks over de stippellijn = game over. Bord leeg = volgend level (+500 × level).
