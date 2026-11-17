@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ff2625">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Club Cup">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>SNX Club Cup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800&display=swap">
+<style>
+/* SNX Club Cup: drie korte sportspellen (padel, golf, penalty) als één toernooi. Huisstijl gelijk aan Snack Rush. */
+:root {
+  --ink: #111111;
+  --snx: #ff2625;
+  --rood-donker: #d12325;
+  --cream: #ffffff;
+  --steen: #e7e5e0;
+  --font-display: 'Poppins', 'Arial Black', sans-serif;
+  --font-ui: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; margin: 0; background: var(--ink); color: var(--cream); overflow: hidden;
+  touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent; font-family: var(--font-ui); }
+[hidden] { display: none !important; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: flex-start;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));
+  pointer-events: none; font-variant-numeric: tabular-nums; }
+.hud .score { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 5vh, 64px); line-height: 1; color: var(--cream);
+  text-shadow: 0 3px 0 var(--ink), 0 0 12px rgba(17,17,17,.5); }
+.hud .small { font-size: clamp(14px, 2vh, 26px); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--cream);
+  text-shadow: 0 2px 0 var(--ink); }
+.hud .right { text-align: right; display: grid; gap: 6px; justify-items: end; }
+#mute { pointer-events: auto; background: rgba(17,17,17,.55); color: var(--cream); border: 2px solid var(--cream); border-radius: 8px;
+  font: 800 clamp(13px, 1.6vh, 20px) var(--font-ui); letter-spacing: .08em; padding: 3px 8px; }
+.screen { position: fixed; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 16px; background: rgba(17,17,17,.35); }
+.card > * { min-width: 0; }
+.lead input[type=text], .lead input[type=email] { width: 100%; box-sizing: border-box; }
+.card { width: min(360px, 100%); max-height: 100%; overflow-y: auto; background: var(--snx) url('assets/backdrop.webp') center top / cover no-repeat; color: var(--ink);
+  border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 8px 0 var(--ink); padding: 22px 20px 20px; text-align: center; display: grid; gap: 12px; box-sizing: border-box; }
+.card .logo { width: 100%; margin: 0; display: block; padding: 2px 18%; box-sizing: border-box; }
+.card h1 { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: 38px; line-height: .95; margin: 0; color: #fff;
+  text-wrap: balance; text-shadow: 0 3px 0 var(--ink); }
+.card h1 span { display: block; margin-top: 8px; font-family: var(--font-ui); font-weight: 800; color: var(--ink); text-shadow: none; font-size: 15px; letter-spacing: .06em; }
+.card h2 { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: clamp(24px, 8.5vw, 32px); line-height: 1; margin: 0; color: #fff; text-shadow: 0 3px 0 var(--ink); }
+.card p { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.25; }
+.sports { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.sports div { background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 2px 6px; font-weight: 700; font-size: 12px; line-height: 1.15; }
+.sports b { display: block; font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: 16px; color: var(--rood-donker); }
+.sports i { display: block; font-style: normal; font-size: 22px; line-height: 1.1; }
+.legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.legend div { background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 4px 2px 6px; font-weight: 700; font-size: 12px; line-height: 1.1; }
+.legend img { display: block; height: 30px; margin: 0 auto 2px; }
+.controls { text-align: left; display: grid; gap: 6px; font-size: 14px; font-weight: 600; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 10px; }
+.controls kbd { display: inline-block; min-width: 76px; font: 800 11px var(--font-ui); letter-spacing: .04em; text-transform: uppercase;
+  background: var(--ink); color: var(--cream); border-radius: 6px; padding: 1px 6px; margin-right: 6px; text-align: center; }
+.btn { font-family: var(--font-display); font-size: 24px; font-weight: 800; border-radius: 30px; background: #fff; color: var(--rood-donker); border: 4px solid var(--ink);
+  padding: 10px 16px 8px; box-shadow: 0 5px 0 var(--ink); cursor: pointer; }
+.btn:hover { background: var(--ink); color: #fff; }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.btn:focus-visible, #mute:focus-visible { outline: 3px solid var(--snx); outline-offset: 3px; }
+.step { font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink); }
+.prev { background: var(--ink); color: #fff !important; border-radius: 12px; padding: 8px 10px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stats div { background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 6px; font-weight: 800; font-size: 13px;
+  text-transform: uppercase; letter-spacing: .06em; }
+.stats b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 24px; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.stats .total { grid-column: 1 / -1; background: var(--ink); color: #fff; }
+.lead { display: grid; gap: 8px; text-align: left; background: #fff; border: 2px solid var(--ink); border-radius: 14px; padding: 12px; }
+.lead h3 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 17px; text-transform: uppercase; color: var(--rood-donker); }
+.lead p { font-size: 14px; font-weight: 500; }
+.lead label { display: grid; gap: 2px; font-size: 13px; font-weight: 600; }
+.lead input[type=text], .lead input[type=email] { font: 500 16px var(--font-ui); padding: 8px 10px; border: 2px solid var(--ink); border-radius: 10px;
+  -webkit-user-select: text; user-select: text; background: #fff; color: var(--ink); }
+.lead input:focus-visible { outline: 3px solid var(--snx); outline-offset: 1px; }
+.lead .check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; font-weight: 500; line-height: 1.35; }
+.lead .check a { color: var(--rood-donker); font-weight: 700; }
+.lead .check input { width: 20px; height: 20px; flex: none; accent-color: var(--snx); margin: 0; }
+.lead .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.lead .btn { font-size: 17px; padding: 9px 12px 7px; background: var(--snx); color: #fff; box-shadow: 0 4px 0 var(--ink); }
+.lead .btn:hover { background: var(--ink); }
+.msg { font-size: 15px; font-weight: 600; margin: 0; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 10px; }
+.msg.err { color: var(--rood-donker); }
+.board { text-align: left; display: grid; gap: 6px; }
+.board h3 { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 19px; text-transform: uppercase; color: #fff; text-shadow: 0 2px 0 var(--ink); }
+.board ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-variant-numeric: tabular-nums; }
+.board li { display: flex; gap: 8px; font-size: 14px; font-weight: 600; padding: 4px 8px; border-radius: 8px; background: #fff; border: 1px solid var(--steen); }
+.board li b { width: 22px; color: var(--rood-donker); }
+.board li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.board li small { font-weight: 500; opacity: .7; }
+.board li.me { background: var(--ink); color: #fff; border-color: var(--ink); }
+.board li.me b { color: #fff; }
+.board .empty { font-size: 13px; font-weight: 500; }
+details.terms { text-align: left; font-size: 12px; font-weight: 500; line-height: 1.4; background: #fff; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 10px; }
+details.terms summary { cursor: pointer; font-weight: 700; }
+details.terms p { font-size: 12px; font-weight: 500; margin: 6px 0 0; }
+.site { font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--ink); }
+.site a { color: inherit; }
+.banner { position: fixed; left: 50%; top: 42%; pointer-events: none; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(22px, 4vh, 52px); color: #fff; background: var(--snx); border: 3px solid var(--ink);
+  border-radius: 40px; padding: .15em .8em; box-shadow: 0 4px 0 var(--ink); opacity: 0; transform: translate(-50%, -50%) scale(.6); transition: opacity .2s, transform .2s; }
+.banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+@media (prefers-reduced-motion: reduce) { .banner { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="SNX Club Cup speelveld"></canvas>
+
+<div class="hud" id="hud" hidden>
+  <div>
+    <div class="small" id="hudSport">Padel</div>
+    <div class="score" id="hudScore">0</div>
+    <div class="small" id="hudTotal"></div>
+  </div>
+  <div class="right">
+    <button id="mute" type="button">GELUID AAN</button>
+    <div class="small" id="hudInfo"></div>
+  </div>
+</div>
+<div class="banner" id="banner">WINNER!</div>
+
+<div class="screen" id="menu">
+  <div class="card">
+    <img class="logo" src="assets/logo_white.webp" alt="SNX">
+    <h1>CLUB CUP<span>3 sporten, 1 toernooi. Speel voor je club.</span></h1>
+    <div class="sports">
+      <div><i>🎾</i><b>Padel</b>Sla terug, gebruik het glas</div>
+      <div><i>⛳</i><b>Golf</b>3 holes putten</div>
+      <div><i>⚽</i><b>Penalty</b>6 strafschoppen</div>
+    </div>
+    <div class="legend">
+      <div><img src="assets/bal.webp" alt="">+10 punten</div>
+      <div><img src="assets/kroket.webp" alt="">+25 en power</div>
+      <div><img src="assets/burger.webp" alt="">+50 punten</div>
+    </div>
+    <p>Pak de SNX-snacks onderweg. Je totaalscore telt voor jou én voor je club.</p>
+    <button class="btn" id="startBtn" type="button">SPEEL</button>
+    <div class="site"><a href="https://www.snxfood.com" target="_blank" rel="noopener">snxfood.com</a></div>
+  </div>
+</div>
+
+<div class="screen" id="intro" hidden>
+  <div class="card">
+    <p class="prev" id="introPrev" hidden></p>
+    <div class="step" id="introStep">Sport 1 van 3</div>
+    <h2 id="introTitle">PADEL</h2>
+    <p id="introSub"></p>
+    <div class="controls" id="introControls"></div>
+    <button class="btn" id="goBtn" type="button">START</button>
+  </div>
+</div>
+
+<div class="screen" id="over" hidden>
+  <div class="card">
+    <h2>TOERNOOI KLAAR</h2>
+    <div class="stats">
+      <div>Padel<b id="sPadel">0</b></div>
+      <div>Golf<b id="sGolf">0</b></div>
+      <div>Penalty<b id="sPenalty">0</b></div>
+      <div>Record<b id="sBest">0</b></div>
+      <div class="total">Totaal<b id="sTotal">0</b></div>
+    </div>
+    <div class="lead" id="leadBox" hidden>
+      <h3>Speel mee voor je club</h3>
+      <p>Zet je score op de ranglijst en kies je sportclub. De club met de meeste spelers staat bovenaan.</p>
+      <form id="leadForm" novalidate>
+        <div style="display:grid;gap:8px">
+          <label for="fVoornaam">Voornaam<input id="fVoornaam" type="text" autocomplete="given-name" maxlength="60"></label>
+          <label for="fEmail">E-mailadres<input id="fEmail" type="email" autocomplete="email" maxlength="254" required></label>
+          <label for="fNick">Naam op de ranglijst<input id="fNick" type="text" maxlength="16" placeholder="2 tot 16 tekens" required></label>
+          <label for="fClub">Je sportclub<input id="fClub" type="text" maxlength="40" list="clubList" placeholder="Bijv. Padel Club Utrecht" required></label>
+          <datalist id="clubList"></datalist>
+          <div class="hp" aria-hidden="true"><label for="fWebsite">Website<input id="fWebsite" type="text" tabindex="-1" autocomplete="off"></label></div>
+          <label class="check" for="fTerms"><input id="fTerms" type="checkbox" required><span>Ik ga akkoord met de <a href="#voorwaarden" id="termsLink">actievoorwaarden en privacy</a>.</span></label>
+          <label class="check" for="fMarketing"><input id="fMarketing" type="checkbox"><span>Ja, stuur mij ook SNX-nieuws en acties (niet verplicht). Afmelden kan altijd.</span></label>
+          <button class="btn" id="leadBtn" type="submit">ZET ME OP DE LIJST</button>
+        </div>
+      </form>
+    </div>
+    <p class="msg" id="leadMsg" hidden></p>
+    <button class="btn" id="againBtn" type="button">NOG EEN TOERNOOI</button>
+    <div class="board">
+      <h3>Top 5 clubs <span id="boardYear"></span></h3>
+      <ol id="clubBoard"><li class="empty">Ranglijst laden…</li></ol>
+      <h3>Top 10 spelers</h3>
+      <ol id="board"><li class="empty">Ranglijst laden…</li></ol>
+    </div>
+    <details class="terms" id="voorwaarden">
+      <summary>Actievoorwaarden en privacy</summary>
+      <p><b>1. Organisator.</b> SNX Club Cup is een spel van SNX B.V., Groenekanseweg 70, 3732 AG De Bilt, KvK 98692224 (hierna: SNX).</p>
+      <p><b>2. Meedoen.</b> Meedoen is gratis en kan vanaf 16 jaar. Je doet mee door een score in te sturen en akkoord te gaan met deze voorwaarden. Per persoon één e-mailadres; meerdere accounts per persoon zijn niet toegestaan. Medewerkers van SNX en hun gezinsleden dingen niet mee naar prijzen.</p>
+      <p><b>3. Ranglijsten.</b> Er is een spelersranglijst en een clubranglijst, beide per kalenderjaar. Per speler telt de hoogste totaalscore. Een club stijgt door meer spelers; bij gelijk aantal telt de som van de beste scores. Op de ranglijst staan alleen je schermnaam en de club die je opgeeft. SNX mag een schermnaam of clubnaam die beledigend is, een merk of andermans naam bevat, of niet bij een echte sportclub hoort, aanpassen, samenvoegen of verwijderen.</p>
+      <p><b>4. Prijzen.</b> SNX kan prijzen koppelen aan de ranglijsten. Welke prijs, voor welke periode en voor hoeveel winnaars of clubs maakt SNX vooraf bekend in het spel of op snxfood.com. Een prijs is niet overdraagbaar en niet inwisselbaar voor geld.</p>
+      <p><b>5. Eerlijk spel.</b> Valsspelen is niet toegestaan. Wie hacks, scripts, bots of andere hulpmiddelen gebruikt, scores of het spel manipuleert, of met meerdere accounts speelt, wordt zonder bericht uitgesloten van deelname en van prijzen. SNX controleert winnende scores.</p>
+      <p><b>6. Uitslag.</b> Over de uitslag wordt niet gecorrespondeerd. Klachten over de actie kun je mailen naar orders@snxfood.com.</p>
+      <p><b>7. Aansprakelijkheid en wijzigingen.</b> SNX is niet aansprakelijk voor storingen, verloren scores of technische fouten in het spel. SNX mag de actie en deze voorwaarden op elk moment wijzigen of beëindigen.</p>
+      <p><b>8. Privacy.</b> Voor de ranglijsten en om winnaars te bereiken bewaren we je voornaam, e-mailadres, schermnaam, club en scores. Alleen als je daar apart voor kiest, sturen we je ook SNX-nieuws en acties; afmelden kan via elke mail. We bewaren je gegevens tot uiterlijk 12 maanden na het einde van de actie. Inzage of verwijderen: mail orders@snxfood.com.</p>
+      <p><b>9. Recht.</b> Op deze actie is Nederlands recht van toepassing.</p>
+    </details>
+    <div class="site"><a href="https://www.snxfood.com" target="_blank" rel="noopener">snxfood.com</a></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rand = (a, b) => a + Math.random() * (b - a);
+const FONT = "'Poppins', 'Arial Black', sans-serif";
+
+// ---------- assets ----------
+const IMG = {};
+for (const k of ['bal', 'kroket', 'burger', 'logo_white']) { const im = new Image(); im.onload = () => { IMG[k] = im; }; im.src = 'assets/' + k + '.webp'; }
+const SNACK = { bal: { pts: 10 }, kroket: { pts: 25 }, burger: { pts: 50 } };
+const pickSnack = () => { const r = Math.random(); return r < 0.5 ? 'bal' : r < 0.8 ? 'kroket' : 'burger'; };
+function drawSnack(kind, x, y, w, t) {
+  const im = IMG[kind];
+  const bob = Math.sin(t * 4) * w * 0.08;
+  ctx.fillStyle = 'rgba(0,0,0,.25)';
+  ctx.beginPath(); ctx.ellipse(x, y + w * 0.42, w * 0.4, w * 0.12, 0, 0, Math.PI * 2); ctx.fill();
+  if (im) { const h = w * im.height / im.width; ctx.drawImage(im, x - w / 2, y - h / 2 - bob, w, h); }
+  else { ctx.fillStyle = '#c47a2c'; ctx.beginPath(); ctx.arc(x, y - bob, w * 0.35, 0, Math.PI * 2); ctx.fill(); }
+}
+
+// ---------- layout ----------
+let W = 0, H = 0, DPR = 1;
+const R = { x: 0, y: 0, w: 0, h: 0 }; // play area: portrait, centred
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  R.h = H; R.w = Math.min(W, H * 0.62); R.x = (W - R.w) / 2; R.y = 0;
+}
+
+// ---------- audio ----------
+let actx = null, muted = false;
+function audio() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; } }
+  if (actx && actx.state === 'suspended') actx.resume();
+}
+function tone(f1, f2, dur, type = 'square', vol = 0.06, delay = 0) {
+  if (!actx || muted) return;
+  const t0 = actx.currentTime + delay;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f1, t0); o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t0 + dur);
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g).connect(actx.destination); o.start(t0); o.stop(t0 + dur + 0.02);
+}
+const sfx = {
+  hit: () => { tone(900, 300, 0.06, 'square', 0.06); tone(200, 80, 0.08, 'triangle', 0.08); },
+  bounce: () => tone(260, 180, 0.05, 'triangle', 0.04),
+  glass: () => tone(1400, 900, 0.12, 'sine', 0.05),
+  whiff: () => tone(500, 200, 0.12, 'sawtooth', 0.025),
+  snack: () => { tone(660, 990, 0.08, 'square', 0.05); tone(990, 1320, 0.08, 'square', 0.04, 0.06); },
+  good: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.1, 'square', 0.05, i * 0.07)),
+  bad: () => { tone(300, 90, 0.35, 'sawtooth', 0.08); },
+  putt: () => tone(700, 500, 0.05, 'triangle', 0.07),
+  cup: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.09, 'triangle', 0.06, i * 0.06)),
+  kick: () => tone(160, 60, 0.12, 'square', 0.1),
+  post: () => { tone(1800, 1700, 0.25, 'sine', 0.06); tone(2400, 2300, 0.2, 'sine', 0.03); },
+};
+
+// ---------- shared effects ----------
+let parts = [];
+function burst(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = 60 + Math.random() * 160;
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, life: 0.6, max: 0.6, color, r: 2 + Math.random() * 3 });
+  }
+}
+function popText(x, y, text, color = '#ffffff') { parts.push({ x, y, vx: 0, vy: -60, life: 0.9, max: 0.9, text, color }); }
+function updateParts(dt) {
+  for (const p of parts) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; if (!p.text) p.vy += 300 * dt; }
+  parts = parts.filter(p => p.life > 0);
+}
+function drawParts() {
+  for (const p of parts) {
+    ctx.globalAlpha = Math.max(0, p.life / p.max);
+    if (p.text) {
+      ctx.font = `800 ${Math.round(R.w * 0.06)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 4; ctx.strokeStyle = '#111111'; ctx.strokeText(p.text, p.x, p.y);
+      ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y);
+    } else { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.r, p.r); }
+  }
+  ctx.globalAlpha = 1;
+}
+function banner(text) {
+  const b = $('banner'); b.textContent = text; b.classList.add('show');
+  clearTimeout(banner.t); banner.t = setTimeout(() => b.classList.remove('show'), 1000);
+}
+function drawPerson(x, y, s, shirt, dir, swing) {
+  // simple sporty figure, feet at (x, y), height ~ s
+  ctx.save(); ctx.translate(x, y);
+  ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(0, 0, s * 0.28, s * 0.08, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#111'; ctx.fillRect(-s * 0.13, -s * 0.42, s * 0.1, s * 0.42); ctx.fillRect(s * 0.03, -s * 0.42, s * 0.1, s * 0.42);
+  ctx.fillStyle = shirt; ctx.strokeStyle = '#111'; ctx.lineWidth = Math.max(1.5, s * 0.03);
+  ctx.beginPath(); ctx.roundRect(-s * 0.2, -s * 0.8, s * 0.4, s * 0.42, s * 0.08); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f2c9a0'; ctx.beginPath(); ctx.arc(0, -s * 0.92, s * 0.13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // arm + racket
+  const a = (dir || 1) * (-0.6 + (swing || 0) * 2.2);
+  ctx.save(); ctx.translate(s * 0.18 * (dir || 1), -s * 0.68); ctx.rotate(a);
+  ctx.strokeStyle = '#111'; ctx.lineWidth = s * 0.05; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -s * 0.3); ctx.stroke();
+  ctx.fillStyle = '#ff2625'; ctx.beginPath(); ctx.ellipse(0, -s * 0.42, s * 0.11, s * 0.14, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = Math.max(1.5, s * 0.03); ctx.stroke();
+  ctx.restore();
+  ctx.restore();
+}
+
+// =====================================================================
+// PADEL: perspective court, the back glass gives you a second chance.
+// Court coords: u = 0..1 across, v = 0 (opponent back wall) .. 1 (your back wall), z = height.
+// =====================================================================
+const GRAV = 3.0;
+const padel = {
+  id: 'padel', name: 'Padel', step: 'Sport 1 van 3',
+  sub: 'Sla de bal terug zodra hij in je ring zit. Te laat? Het glas achter je geeft een tweede kans.',
+  controls: [['Tik', 'Sla terug'], ['Swipe ← →', 'Mik links of rechts, weg van je tegenstander'], ['Via het glas', '+15 bonus'], ['K-Rocket', 'Volgende slag is een smash']],
+  init() {
+    Object.assign(this, { time: 45, lives: 3, score: 0, rally: 0, ball: null, wait: 1.0, finished: false, endT: 0,
+      me: { u: 0.5, v: 0.87, swing: 0 }, op: { u: 0.5, v: 0.12, swing: 0 }, snacks: [], snackT: 2.5, power: false, cool: 0, pointT: 0, t: 0, trail: [] });
+  },
+  P(u, v, z = 0) {
+    const top = R.y + R.h * 0.2, bot = R.y + R.h * 0.9;
+    const s = 0.6 + 0.4 * v;
+    return { x: R.x + R.w / 2 + (u - 0.5) * R.w * 0.84 * s, y: top + v * (bot - top) - z * R.h * 0.2 * s, s };
+  },
+  info() { return Math.max(0, Math.ceil(this.time)) + ' s · ' + '●'.repeat(this.lives) + '○'.repeat(3 - this.lives); },
+  opShot() {
+    const b = this.ball;
+    const u0 = b ? b.u : this.op.u, v0 = b ? Math.min(b.v, 0.25) : 0.12, z0 = 0.35;
+    const T = Math.max(0.78, 1.3 - this.rally * 0.035);
+    const tu = rand(0.15, 0.85), tv = rand(0.7, 0.8);
+    this.ball = { u: u0, v: v0, z: z0, du: (tu - u0) / T, dv: (tv - v0) / T, dz: (-z0 + 0.5 * GRAV * T * T) / T, owner: 'op', bounces: 0, glass: false, landU: tu };
+    this.op.swing = 1; sfx.hit();
+  },
+  myShot(dxN) {
+    const b = this.ball;
+    let tu = dxN === null ? b.u + (0.5 - b.u) * 0.4 + rand(-0.08, 0.08) : b.u + dxN * 1.8;
+    tu = clamp(tu, 0.1, 0.9);
+    const tv = rand(0.14, 0.3);
+    const smash = this.power; this.power = false;
+    const T = smash ? 0.42 : Math.max(0.62, 1.0 - this.rally * 0.02);
+    const z0 = Math.max(0.25, b.z);
+    Object.assign(b, { du: (tu - b.u) / T, dv: (tv - b.v) / T, dz: (-z0 + 0.5 * GRAV * T * T) / T, z: z0, owner: 'me', bounces: 0, landU: tu, smash, opRet: 0 });
+    this.rally++;
+    const p = this.P(b.u, b.v, b.z);
+    let pts = 10;
+    if (b.glass) { pts += 15; popText(p.x, p.y - 30, 'VIA HET GLAS! +25', '#fff'); } else popText(p.x, p.y - 30, '+10');
+    b.glass = false;
+    this.score += pts; this.me.swing = 1; sfx.hit();
+    if (smash) banner('SMASH!');
+    // snacks on the opponent side: collected when your shot lands close to them
+    for (const s of this.snacks) {
+      if (s.got || Math.hypot(s.u - tu, (s.v - tv) * 1.4) > 0.14) continue;
+      s.got = true; this.score += SNACK[s.kind].pts; sfx.snack();
+      const q = this.P(s.u, s.v); popText(q.x, q.y - 20, '+' + SNACK[s.kind].pts, '#fff'); burst(q.x, q.y, '#ffffff', 12);
+      if (s.kind === 'kroket') { this.power = true; banner('POWER SHOT!'); }
+    }
+  },
+  winPoint() {
+    const pts = 50 + this.rally * 5;
+    this.score += pts; sfx.good(); banner('WINNER! +' + pts);
+    this.rally = 0; this.pointT = 0.9;
+  },
+  losePoint(reason) {
+    this.lives--; sfx.bad(); banner(reason);
+    this.rally = 0; this.pointT = 1.0;
+    if (this.lives <= 0) this.endT = 1.1;
+  },
+  inZone() {
+    const b = this.ball;
+    return b && b.owner === 'op' && !b.dead && Math.abs(b.v - this.me.v) < 0.11 && Math.abs(b.u - this.me.u) < 0.17 && b.z < 0.9;
+  },
+  onTap(dxN) {
+    if (this.finished || this.endT > 0 || this.pointT > 0 || this.cool > 0) return;
+    if (this.inZone()) this.myShot(dxN);
+    else if (this.ball && this.ball.owner === 'op') { this.cool = 0.35; this.me.swing = 1; sfx.whiff(); }
+  },
+  update(dt) {
+    this.t += dt;
+    this.me.swing = Math.max(0, this.me.swing - dt * 4); this.op.swing = Math.max(0, this.op.swing - dt * 4);
+    this.cool = Math.max(0, this.cool - dt);
+    if (this.endT > 0) { this.endT -= dt; if (this.endT <= 0) this.finished = true; return; }
+    this.time -= dt;
+    if (this.time <= 0) { this.time = 0; this.endT = 0.6; banner('TIJD!'); return; }
+    // snacks
+    this.snackT -= dt;
+    if (this.snackT <= 0 && this.snacks.filter(s => !s.got).length < 2) {
+      this.snacks.push({ u: rand(0.18, 0.82), v: rand(0.16, 0.32), kind: pickSnack(), life: 7, got: false });
+      this.snackT = rand(3, 5);
+    }
+    for (const s of this.snacks) s.life -= dt;
+    this.snacks = this.snacks.filter(s => s.life > 0 && !s.got);
+    // players move
+    const b = this.ball;
+    const opTarget = b && b.owner === 'me' ? b.landU : 0.5;
+    const os = Math.min(0.95, 0.5 + this.rally * 0.035);
+    this.op.u += clamp(opTarget - this.op.u, -os * dt, os * dt);
+    const meTarget = b && b.owner === 'op' && !b.dead ? b.u : 0.5;
+    this.me.u += clamp(meTarget - this.me.u, -1.6 * dt, 1.6 * dt);
+    if (this.pointT > 0) {
+      this.pointT -= dt;
+      if (b) { b.u += b.du * dt; b.v += b.dv * dt; b.dz -= GRAV * dt; b.z = Math.max(0, b.z + b.dz * dt); }
+      if (this.pointT <= 0) { this.ball = null; this.wait = 0.5; }
+      return;
+    }
+    if (!b) { this.wait -= dt; if (this.wait <= 0) this.opShot(); return; }
+    // ball physics
+    b.u += b.du * dt; b.v += b.dv * dt; b.dz -= GRAV * dt; b.z += b.dz * dt;
+    if (b.u < 0.02 && b.du < 0) { b.u = 0.02; b.du = -b.du * 0.7; sfx.glass(); }
+    if (b.u > 0.98 && b.du > 0) { b.u = 0.98; b.du = -b.du * 0.7; sfx.glass(); }
+    if (b.v > 1 && b.dv > 0) { b.v = 1; b.dv = -b.dv * 0.6; b.du *= 0.8; b.glass = true; sfx.glass(); }
+    if (b.v < 0 && b.dv < 0) { b.v = 0; b.dv = -b.dv * 0.6; }
+    if (b.z <= 0 && b.dz < 0) {
+      b.z = 0; b.dz = -b.dz * 0.6; b.bounces++; sfx.bounce();
+      if (b.owner === 'op' && b.bounces >= 2) { b.dead = true; this.losePoint(b.glass ? 'GEMIST' : 'TE LAAT'); return; }
+      if (b.owner === 'me' && b.bounces === 1) {
+        const reach = 0.13 + Math.min(0.06, this.rally * 0.004);
+        if (!b.smash && Math.abs(this.op.u - b.u) < reach) b.opRet = 0.22; else { this.winPoint(); return; }
+      }
+    }
+    if (b.owner === 'me' && b.opRet > 0) { b.opRet -= dt; if (b.opRet <= 0) this.opShot(); }
+    this.trail.push({ u: b.u, v: b.v, z: b.z }); if (this.trail.length > 8) this.trail.shift();
+  },
+  render() {
+    const t = this.t;
+    // backdrop: hall
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(R.x, R.y, R.w, R.h);
+    const c = [this.P(0, 0), this.P(1, 0), this.P(1, 1), this.P(0, 1)];
+    // back glass of opponent (above v=0)
+    const gh = R.h * 0.09;
+    ctx.fillStyle = 'rgba(180,220,255,.16)'; ctx.fillRect(c[0].x, c[0].y - gh, c[1].x - c[0].x, gh);
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.strokeRect(c[0].x, c[0].y - gh, c[1].x - c[0].x, gh);
+    if (IMG.logo_white) { const w = (c[1].x - c[0].x) * 0.28; const h = w * IMG.logo_white.height / IMG.logo_white.width; ctx.globalAlpha = 0.8; ctx.drawImage(IMG.logo_white, R.x + R.w / 2 - w / 2, c[0].y - gh / 2 - h / 2, w, h); ctx.globalAlpha = 1; }
+    // floor
+    ctx.fillStyle = '#d12325';
+    ctx.beginPath(); ctx.moveTo(c[0].x, c[0].y); ctx.lineTo(c[1].x, c[1].y); ctx.lineTo(c[2].x, c[2].y); ctx.lineTo(c[3].x, c[3].y); ctx.closePath(); ctx.fill();
+    // lines
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5;
+    const line = (u1, v1, u2, v2) => { const a = this.P(u1, v1), q = this.P(u2, v2); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(q.x, q.y); ctx.stroke(); };
+    line(0, 0.152, 1, 0.152); line(0, 0.848, 1, 0.848); line(0.5, 0.152, 0.5, 0.848);
+    ctx.beginPath(); ctx.moveTo(c[0].x, c[0].y); ctx.lineTo(c[1].x, c[1].y); ctx.lineTo(c[2].x, c[2].y); ctx.lineTo(c[3].x, c[3].y); ctx.closePath(); ctx.stroke();
+    // side glass hints
+    ctx.strokeStyle = 'rgba(180,220,255,.35)'; ctx.lineWidth = 4;
+    line(0, 0, 0, 0.3); line(1, 0, 1, 0.3); line(0, 0.7, 0, 1); line(1, 0.7, 1, 1);
+    // snacks
+    for (const s of this.snacks) { const p = this.P(s.u, s.v, 0.06); drawSnack(s.kind, p.x, p.y, R.w * 0.11 * p.s, t + s.u * 5); }
+    // landing marker of your own shot
+    const b = this.ball;
+    // opponent
+    const po = this.P(this.op.u, this.op.v);
+    drawPerson(po.x, po.y, R.h * 0.11 * po.s, '#111111', -1, this.op.swing);
+    // net
+    const n0 = this.P(0, 0.5), n1 = this.P(1, 0.5), nh = R.h * 0.035;
+    ctx.fillStyle = 'rgba(17,17,17,.55)'; ctx.fillRect(n0.x, n0.y - nh, n1.x - n0.x, nh);
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(n0.x, n0.y - nh); ctx.lineTo(n1.x, n1.y - nh); ctx.stroke();
+    ctx.fillStyle = '#111'; ctx.fillRect(n0.x - 4, n0.y - nh - 3, 6, nh + 3); ctx.fillRect(n1.x - 2, n1.y - nh - 3, 6, nh + 3);
+    // my hit ring
+    const pm = this.P(this.me.u, this.me.v);
+    const ring = this.inZone();
+    ctx.strokeStyle = ring ? '#ffffff' : 'rgba(255,255,255,.35)'; ctx.lineWidth = ring ? 5 : 3;
+    ctx.beginPath(); ctx.ellipse(pm.x, pm.y, R.w * 0.16 * pm.s, R.h * 0.05, 0, 0, Math.PI * 2); ctx.stroke();
+    if (ring) { ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill(); }
+    // ball (behind or in front of me depending on depth)
+    const drawBall = () => {
+      if (!b) return;
+      for (let i = 0; i < this.trail.length; i++) {
+        const q = this.P(this.trail[i].u, this.trail[i].v, this.trail[i].z);
+        ctx.fillStyle = `rgba(230,255,80,${i / this.trail.length * 0.35})`;
+        ctx.beginPath(); ctx.arc(q.x, q.y, R.w * 0.018 * q.s, 0, Math.PI * 2); ctx.fill();
+      }
+      const g = this.P(b.u, b.v, 0), p = this.P(b.u, b.v, b.z);
+      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(g.x, g.y, R.w * 0.022 * g.s, R.w * 0.009 * g.s, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e6ff50'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, R.w * 0.024 * p.s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    };
+    if (b && b.v < this.me.v) drawBall();
+    drawPerson(pm.x, pm.y, R.h * 0.13 * pm.s, '#ffffff', 1, this.me.swing);
+    if (b && b.v >= this.me.v) drawBall();
+    // my back glass
+    const g0 = this.P(0, 1), g1 = this.P(1, 1);
+    ctx.fillStyle = 'rgba(180,220,255,.12)'; ctx.fillRect(g0.x, g0.y, g1.x - g0.x, R.h * 0.1);
+    ctx.strokeStyle = 'rgba(180,220,255,.5)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(g0.x, g0.y); ctx.lineTo(g1.x, g1.y); ctx.stroke();
+    if (this.power) { ctx.font = `800 ${Math.round(R.w * 0.045)}px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.fillText('POWER SHOT KLAAR', R.x + R.w / 2, R.y + R.h * 0.975); }
+  },
+};
+
+// =====================================================================
+// GOLF: three putting holes, drag back and release (slingshot).
+// World units: x 0..1 across the green, y 0..GH down.
+// =====================================================================
+const HOLES = [
+  { ball: [0.5, 0.86], cup: [0.5, 0.16], sand: [[0.5, 0.5, 0.15]], walls: [], slope: null, snacks: [['bal', 0.22, 0.52], ['burger', 0.8, 0.3]] },
+  { ball: [0.2, 0.88], cup: [0.78, 0.14], sand: [[0.15, 0.2, 0.09]], walls: [[0, 0.6, 0.62, 0.035], [0.38, 0.36, 0.62, 0.035]], slope: null, snacks: [['kroket', 0.85, 0.5], ['bal', 0.15, 0.48]] },
+  { ball: [0.5, 0.88], cup: [0.32, 0.15], sand: [[0.58, 0.2, 0.08]], walls: [[0.0, 0.3, 0.16, 0.03]], slope: [0.4, 0.64, 0.75], snacks: [['burger', 0.12, 0.5], ['kroket', 0.75, 0.75]] },
+];
+const HOLE_PTS = [0, 300, 180, 110, 60, 30];
+const golf = {
+  id: 'golf', name: 'Golf', step: 'Sport 2 van 3',
+  sub: '3 holes putten. Hoe minder slagen, hoe meer punten. Rol over de snacks voor bonuspunten.',
+  controls: [['Sleep terug', 'Richting en kracht, zoals een katapult'], ['Loslaten', 'Putten'], ['Zand', 'Remt je bal af'], ['Pijlen', 'Helling duwt je bal opzij']],
+  init() {
+    Object.assign(this, { hole: 0, score: 0, finished: false, t: 0, endT: 0 });
+    this.loadHole();
+  },
+  info() { return 'Hole ' + (this.hole + 1) + '/3 · slag ' + Math.min(5, this.strokes + (this.moving ? 0 : 1)) + '/5'; },
+  get GH() { return (R.h * 0.86) / (R.w * 0.92); },
+  S(x, y) { const u = R.w * 0.92; return { x: R.x + R.w * 0.04 + x * u, y: R.y + R.h * 0.1 + y * u, u }; },
+  loadHole() {
+    const h = HOLES[this.hole], GH = this.GH;
+    this.cfg = h;
+    this.b = { x: h.ball[0], y: h.ball[1] * GH, vx: 0, vy: 0 };
+    this.cup = { x: h.cup[0], y: h.cup[1] * GH };
+    this.sand = h.sand.map(s => ({ x: s[0], y: s[1] * GH, r: s[2] }));
+    this.walls = h.walls.map(w => ({ x: w[0], y: w[1] * GH, w: w[2], h: w[3] }));
+    this.slope = h.slope ? { y0: h.slope[0] * GH, y1: h.slope[1] * GH, f: h.slope[2] } : null;
+    this.snacks = h.snacks.map(s => ({ kind: s[0], x: s[1], y: s[2] * GH, got: false }));
+    this.strokes = 0; this.moving = false; this.sunk = false; this.holeT = 0; this.drag = null;
+  },
+  onDown(x, y) { if (!this.moving && !this.holeT && !this.endT) this.drag = { x0: x, y0: y, x, y }; },
+  onMove(x, y) { if (this.drag) { this.drag.x = x; this.drag.y = y; } },
+  onUp() {
+    const d = this.drag; this.drag = null;
+    if (!d || this.moving) return;
+    const dx = d.x0 - d.x, dy = d.y0 - d.y, L = Math.hypot(dx, dy);
+    if (L < 12) return;
+    const pw = Math.min(L / (R.w * 0.36), 1);
+    const v = 0.15 + pw * 2.1;
+    this.b.vx = dx / L * v; this.b.vy = dy / L * v;
+    this.moving = true; this.strokes++; sfx.putt();
+  },
+  inSand(x, y) { return this.sand.some(s => Math.hypot(x - s.x, y - s.y) < s.r); },
+  update(dt) {
+    this.t += dt;
+    if (this.endT > 0) { this.endT -= dt; if (this.endT <= 0) this.finished = true; return; }
+    if (this.holeT > 0) {
+      this.holeT -= dt;
+      if (this.holeT <= 0) { this.holeT = 0; if (this.hole < HOLES.length - 1) { this.hole++; this.loadHole(); } else this.endT = 0.3; }
+      return;
+    }
+    if (!this.moving) return;
+    const b = this.b, GH = this.GH, r = 0.022;
+    const steps = 4, h = dt / steps;
+    for (let i = 0; i < steps; i++) {
+      if (this.slope && b.y > this.slope.y0 && b.y < this.slope.y1) b.vx += this.slope.f * h;
+      const sp = Math.hypot(b.vx, b.vy);
+      const sand = this.inSand(b.x, b.y);
+      const dec = (sand ? 2.6 : 0.42) + sp * (sand ? 1.4 : 0.35);
+      const ns = Math.max(0, sp - dec * h);
+      if (sp > 0) { b.vx *= ns / sp; b.vy *= ns / sp; }
+      b.x += b.vx * h; b.y += b.vy * h;
+      if (b.x < r) { b.x = r; b.vx = Math.abs(b.vx) * 0.75; sfx.bounce(); }
+      if (b.x > 1 - r) { b.x = 1 - r; b.vx = -Math.abs(b.vx) * 0.75; sfx.bounce(); }
+      if (b.y < r) { b.y = r; b.vy = Math.abs(b.vy) * 0.75; sfx.bounce(); }
+      if (b.y > GH - r) { b.y = GH - r; b.vy = -Math.abs(b.vy) * 0.75; sfx.bounce(); }
+      for (const w of this.walls) {
+        const cx = clamp(b.x, w.x, w.x + w.w), cy = clamp(b.y, w.y, w.y + w.h);
+        const dx = b.x - cx, dy = b.y - cy, d = Math.hypot(dx, dy);
+        if (d < r && d > 0) {
+          const nx = dx / d, ny = dy / d; b.x = cx + nx * r; b.y = cy + ny * r;
+          const dot = b.vx * nx + b.vy * ny; if (dot < 0) { b.vx -= 1.75 * dot * nx; b.vy -= 1.75 * dot * ny; sfx.bounce(); }
+        } else if (d === 0) { b.vy = -b.vy; }
+      }
+      // cup: drops when slow enough, otherwise lips out
+      const dc = Math.hypot(b.x - this.cup.x, b.y - this.cup.y), spd = Math.hypot(b.vx, b.vy);
+      if (dc < 0.032) {
+        if (spd < 1.25) { this.sink(); return; }
+        b.vx += (b.x - this.cup.x) * 6; b.vy += (b.y - this.cup.y) * 6;
+      }
+      for (const s of this.snacks) {
+        if (s.got || Math.hypot(b.x - s.x, b.y - s.y) > 0.05) continue;
+        s.got = true; this.score += SNACK[s.kind].pts; sfx.snack();
+        const p = this.S(s.x, s.y); popText(p.x, p.y - 20, '+' + SNACK[s.kind].pts); burst(p.x, p.y, '#fff', 12);
+      }
+    }
+    if (Math.hypot(b.vx, b.vy) < 0.02) {
+      b.vx = b.vy = 0; this.moving = false;
+      if (this.strokes >= 5) { banner('HOLE MISLUKT'); sfx.bad(); this.holeT = 1.3; }
+    }
+  },
+  sink() {
+    const b = this.b; b.x = this.cup.x; b.y = this.cup.y; b.vx = b.vy = 0; this.moving = false; this.sunk = true;
+    const pts = HOLE_PTS[this.strokes] || 0; this.score += pts;
+    const names = { 1: 'HOLE IN ONE!', 2: 'BIRDIE!', 3: 'PAR' };
+    banner((names[this.strokes] || 'IN DE CUP') + ' +' + pts);
+    const p = this.S(this.cup.x, this.cup.y); burst(p.x, p.y, '#ffffff', 26); sfx.cup();
+    this.holeT = 1.4;
+  },
+  render() {
+    const t = this.t, GH = this.GH;
+    ctx.fillStyle = '#1f6b34'; ctx.fillRect(R.x, R.y, R.w, R.h);
+    const a = this.S(0, 0), z = this.S(1, GH), u = a.u;
+    // green with mowing stripes
+    ctx.save();
+    ctx.beginPath(); ctx.roundRect(a.x, a.y, z.x - a.x, z.y - a.y, u * 0.06); ctx.clip();
+    for (let i = 0; i * 0.1 < GH; i++) { ctx.fillStyle = i % 2 ? '#4cae55' : '#43a14d'; ctx.fillRect(a.x, a.y + i * 0.1 * u, z.x - a.x, 0.1 * u + 1); }
+    if (this.slope) {
+      const s0 = this.S(0, this.slope.y0), s1 = this.S(1, this.slope.y1);
+      ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fillRect(s0.x, s0.y, s1.x - s0.x, s1.y - s0.y);
+      ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 3;
+      const off = (t * 0.25) % 0.2;
+      for (let x = -0.2 + off; x < 1; x += 0.2) for (let y = this.slope.y0 + 0.06; y < this.slope.y1; y += 0.12) {
+        const p = this.S(x, y); ctx.beginPath(); ctx.moveTo(p.x, p.y - u * 0.02); ctx.lineTo(p.x + u * 0.03, p.y); ctx.lineTo(p.x, p.y + u * 0.02); ctx.stroke();
+      }
+    }
+    for (const s of this.sand) { const p = this.S(s.x, s.y); ctx.fillStyle = '#ead9a2'; ctx.beginPath(); ctx.arc(p.x, p.y, s.r * u, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = '#cdb979'; ctx.lineWidth = 3; ctx.stroke(); }
+    ctx.restore();
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 4; ctx.beginPath(); ctx.roundRect(a.x, a.y, z.x - a.x, z.y - a.y, u * 0.06); ctx.stroke();
+    for (const w of this.walls) {
+      const p = this.S(w.x, w.y);
+      ctx.fillStyle = '#111'; ctx.fillRect(p.x, p.y + 4, w.w * u, w.h * u);
+      ctx.fillStyle = '#ff2625'; ctx.fillRect(p.x, p.y, w.w * u, w.h * u);
+      ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.round(w.h * u * 0.8)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      if (w.w > 0.3) ctx.fillText('SNX', p.x + w.w * u / 2, p.y + w.h * u / 2 + 1);
+    }
+    for (const s of this.snacks) if (!s.got) { const p = this.S(s.x, s.y); drawSnack(s.kind, p.x, p.y, u * 0.1, t + s.x * 4); }
+    // cup + flag
+    const c = this.S(this.cup.x, this.cup.y);
+    ctx.fillStyle = '#0d2b14'; ctx.beginPath(); ctx.arc(c.x, c.y, 0.034 * u, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    if (!this.sunk) {
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x, c.y - u * 0.2); ctx.stroke();
+      const wv = Math.sin(t * 5) * u * 0.008;
+      ctx.fillStyle = '#ff2625'; ctx.beginPath(); ctx.moveTo(c.x, c.y - u * 0.2); ctx.lineTo(c.x + u * 0.12, c.y - u * 0.17 + wv); ctx.lineTo(c.x, c.y - u * 0.13); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.round(u * 0.035)}px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('SNX', c.x + u * 0.012, c.y - u * 0.168);
+    }
+    // aim
+    const b = this.b, p = this.S(b.x, b.y);
+    if (this.drag && !this.moving) {
+      const dx = this.drag.x0 - this.drag.x, dy = this.drag.y0 - this.drag.y, L = Math.hypot(dx, dy);
+      if (L > 6) {
+        const pw = Math.min(L / (R.w * 0.36), 1), len = u * (0.1 + pw * 0.5);
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.setLineDash([8, 8]);
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + dx / L * len, p.y + dy / L * len); ctx.stroke(); ctx.setLineDash([]);
+        // power bar
+        const bw = u * 0.5, bx = R.x + R.w / 2 - bw / 2, by = R.y + R.h * 0.965;
+        ctx.fillStyle = 'rgba(17,17,17,.6)'; ctx.fillRect(bx, by - 8, bw, 14);
+        ctx.fillStyle = pw > 0.85 ? '#ff2625' : '#fff'; ctx.fillRect(bx, by - 8, bw * pw, 14);
+        ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.strokeRect(bx, by - 8, bw, 14);
+      }
+    } else if (!this.moving && !this.sunk && !this.holeT && this.strokes === 0) {
+      ctx.font = `800 ${Math.round(u * 0.045)}px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+      ctx.fillText('Sleep terug en laat los', R.x + R.w / 2, R.y + R.h * 0.97);
+    }
+    if (!this.sunk) {
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(p.x + 2, p.y + 4, 0.024 * u, 0.014 * u, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 0.022 * u, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+  },
+};
+
+// =====================================================================
+// PENALTY: swipe from the ball towards the goal. Direction = corner, length = height.
+// Goal coords: gx -1..1 (posts), gh 0..1 (bar).
+// =====================================================================
+const penalty = {
+  id: 'penalty', name: 'Penalty', step: 'Sport 3 van 3',
+  sub: '6 strafschoppen tegen een keeper die steeds beter leest. Raak de snack in het doel voor bonuspunten.',
+  controls: [['Swipe ↑', 'Richting = hoek van het doel'], ['Korte swipe', 'Laag schot'], ['Lange swipe', 'Hoog schot, niet over de lat!'], ['Kruising', '+50 bonus']],
+  init() {
+    Object.assign(this, { shot: 0, shots: 6, score: 0, goals: 0, finished: false, t: 0, endT: 0, fly: null, swipe: null, keeper: { x: 0, dive: 0, tgt: 0 }, resultT: 0 });
+    this.newTarget();
+  },
+  info() { return 'Schot ' + Math.min(this.shot + 1, this.shots) + '/' + this.shots + ' · ' + this.goals + ' goals'; },
+  geo() {
+    const gw = R.w * 0.82, gh = gw * 0.36, top = R.y + R.h * 0.2;
+    return { gw, gh, top, bot: top + gh, cx: R.x + R.w / 2, spotY: R.y + R.h * 0.8 };
+  },
+  G(gx, gh) { const g = this.geo(); return { x: g.cx + gx * g.gw / 2, y: g.bot - gh * g.gh }; },
+  newTarget() { this.target = { kind: pickSnack(), gx: rand(-0.8, 0.8), gh: rand(0.2, 0.85) }; },
+  onDown(x, y) { if (!this.fly && !this.endT) this.swipe = { x0: x, y0: y, x, y }; },
+  onMove(x, y) { if (this.swipe) { this.swipe.x = x; this.swipe.y = y; } },
+  onUp() {
+    const s = this.swipe; this.swipe = null;
+    if (!s || this.fly || this.endT) return;
+    const dx = s.x - s.x0, dy = s.y0 - s.y;
+    if (dy < 25) return;
+    const g = this.geo();
+    // swipe direction points at the target, damped so a thumb's natural tilt does not hit the post
+    const gx = 0.7 * (dx / dy) * (g.spotY - (g.bot - g.gh / 2)) / (g.gw / 2);
+    const gh = (Math.hypot(dx, dy) / R.h - 0.1) / 0.3;
+    this.shoot(gx, Math.max(0.04, gh));
+  },
+  shoot(gx, gh) {
+    const read = Math.random() < 0.28 + this.shot * 0.07;
+    const kx = read ? clamp(gx + rand(-0.15, 0.15), -0.8, 0.8) : [-0.7, 0, 0.7][Math.floor(Math.random() * 3)];
+    const k = this.keeper; k.tgt = kx; k.dive = 0;
+    let res;
+    const ax = Math.abs(gx);
+    if (gh > 1.08 || ax > 1.06) res = 'miss';
+    else if (gh > 0.98 || ax > 0.96) res = 'post';
+    else if (Math.abs(gx - kx) < 0.32 && gh < (Math.abs(kx) > 0.3 ? 0.78 : 0.95)) res = 'save';
+    else res = 'goal';
+    this.fly = { gx, gh, t: 0, dur: 0.5, res, kx };
+    sfx.kick();
+  },
+  resolve() {
+    const f = this.fly, g = this.G(f.gx, f.gh);
+    if (f.res === 'goal') {
+      let pts = 100, label = 'GOAL!';
+      if (Math.abs(f.gx) > 0.65 && f.gh > 0.6) { pts += 50; label = 'KRUISING!'; }
+      const tp = this.G(this.target.gx, this.target.gh);
+      if (Math.hypot(g.x - tp.x, g.y - tp.y) < this.geo().gw * 0.1) {
+        const sp = SNACK[this.target.kind].pts; pts += sp; popText(tp.x, tp.y - 24, '+' + sp); burst(tp.x, tp.y, '#fff', 14); sfx.snack(); this.target.hit = true;
+      }
+      this.score += pts; this.goals++; banner(label + ' +' + pts); sfx.good(); burst(g.x, g.y, '#ffffff', 20);
+    } else if (f.res === 'save') { banner('GEKEERD!'); sfx.bad(); }
+    else if (f.res === 'post') { banner('PAAL!'); sfx.post(); }
+    else { banner('NAAST!'); sfx.bad(); }
+    this.resultT = 1.1;
+  },
+  update(dt) {
+    this.t += dt;
+    if (this.endT > 0) { this.endT -= dt; if (this.endT <= 0) this.finished = true; return; }
+    const k = this.keeper;
+    if (this.fly) {
+      const f = this.fly;
+      if (f.t < f.dur) { f.t += dt; if (f.t >= 0.12) k.dive = Math.min(1, k.dive + dt * 3.2); if (f.t >= f.dur) this.resolve(); }
+      else {
+        this.resultT -= dt;
+        if (this.resultT <= 0) {
+          this.fly = null; k.dive = 0; this.shot++;
+          if (this.shot >= this.shots) this.endT = 0.3; else this.newTarget();
+        }
+      }
+    } else { k.x = Math.sin(this.t * 1.7) * 0.12; }
+  },
+  render() {
+    const g = this.geo(), t = this.t;
+    for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? '#3d9a49' : '#46a852'; ctx.fillRect(R.x, R.y + i * R.h / 10, R.w, R.h / 10 + 1); }
+    // stands behind the goal
+    ctx.fillStyle = '#111'; ctx.fillRect(R.x, R.y, R.w, g.top - R.h * 0.02);
+    for (let i = 0; i < 40; i++) { ctx.fillStyle = ['#ff2625', '#fff', '#d12325', '#444'][i % 4]; const x = R.x + (i * 37 % 100) / 100 * R.w, y = R.y + R.h * 0.07 + (i * 53 % 100) / 100 * (g.top - R.h * 0.12); ctx.beginPath(); ctx.arc(x, y + Math.sin(t * 6 + i) * 1.5, R.w * 0.012, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#ff2625'; ctx.fillRect(R.x, g.top - R.h * 0.045, R.w, R.h * 0.03);
+    ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.round(R.h * 0.02)}px ${FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('SNX  ·  SNXFOOD.COM  ·  SNX  ·  SNXFOOD.COM', R.x + R.w / 2, g.top - R.h * 0.03);
+    // pitch lines
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(R.x, g.bot); ctx.lineTo(R.x + R.w, g.bot); ctx.stroke();
+    ctx.strokeRect(g.cx - g.gw * 0.85, g.bot, g.gw * 1.7, R.h * 0.33);
+    ctx.beginPath(); ctx.arc(g.cx, g.spotY, 4, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+    // net
+    const l = g.cx - g.gw / 2;
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.fillRect(l, g.top, g.gw, g.gh);
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+    for (let x = 0; x <= 20; x++) { ctx.beginPath(); ctx.moveTo(l + x * g.gw / 20, g.top); ctx.lineTo(l + x * g.gw / 20, g.bot); ctx.stroke(); }
+    for (let y = 0; y <= 7; y++) { ctx.beginPath(); ctx.moveTo(l, g.top + y * g.gh / 7); ctx.lineTo(l + g.gw, g.top + y * g.gh / 7); ctx.stroke(); }
+    // snack target hanging in the goal
+    if (this.target && !this.target.hit) { const p = this.G(this.target.gx, this.target.gh); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.setLineDash([5, 5]); ctx.beginPath(); ctx.arc(p.x, p.y, g.gw * 0.1, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); drawSnack(this.target.kind, p.x, p.y, g.gw * 0.13, t); }
+    // keeper
+    const k = this.keeper, f = this.fly;
+    const kx = f ? k.x + (k.tgt - k.x) * k.dive : k.x;
+    const kp = this.G(kx, 0), ks = g.gh * 0.85;
+    const lean = f ? (k.tgt - k.x) * k.dive * 1.0 : 0, rise = f ? Math.abs(k.tgt) * k.dive * g.gh * 0.25 : 0;
+    ctx.save(); ctx.translate(kp.x, kp.y - rise); ctx.rotate(lean);
+    ctx.fillStyle = '#111'; ctx.fillRect(-ks * 0.12, -ks * 0.4, ks * 0.1, ks * 0.4); ctx.fillRect(ks * 0.02, -ks * 0.4, ks * 0.1, ks * 0.4);
+    ctx.fillStyle = '#ffd400'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(-ks * 0.18, -ks * 0.78, ks * 0.36, ks * 0.42, 6); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#ffd400'; ctx.lineWidth = ks * 0.08; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-ks * 0.16, -ks * 0.72); ctx.lineTo(-ks * 0.42, -ks * 0.98); ctx.moveTo(ks * 0.16, -ks * 0.72); ctx.lineTo(ks * 0.42, -ks * 0.98); ctx.stroke(); ctx.lineCap = 'butt';
+    ctx.fillStyle = '#f2c9a0'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, -ks * 0.9, ks * 0.12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    // posts and bar (drawn over the keeper)
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(5, g.gw * 0.022); ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(l, g.bot); ctx.lineTo(l, g.top); ctx.lineTo(l + g.gw, g.top); ctx.lineTo(l + g.gw, g.bot); ctx.stroke();
+    // ball
+    let bx = g.cx, by = g.spotY, bs = R.w * 0.05;
+    if (f) {
+      const e = Math.min(1, f.t / f.dur), tp = this.G(f.gx, f.gh);
+      let ty = tp.y, tx = tp.x;
+      if (f.res === 'save' && e >= 1) { tx = kp.x; ty = kp.y - g.gh * 0.5; }
+      bx = g.cx + (tx - g.cx) * e; by = g.spotY + (ty - g.spotY) * e - Math.sin(e * Math.PI) * R.h * 0.04; bs = R.w * (0.05 - 0.028 * e);
+    }
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; if (!f) { ctx.beginPath(); ctx.ellipse(bx, by + bs * 0.8, bs * 0.9, bs * 0.3, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(bx, by, bs, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(bx, by, bs * 0.35, 0, Math.PI * 2); ctx.fill();
+    // swipe trail + hint
+    if (this.swipe) {
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.globalAlpha = 0.7;
+      ctx.beginPath(); ctx.moveTo(this.swipe.x0, this.swipe.y0); ctx.lineTo(this.swipe.x, this.swipe.y); ctx.stroke(); ctx.globalAlpha = 1; ctx.lineCap = 'butt';
+    } else if (!f && this.shot === 0) {
+      ctx.font = `800 ${Math.round(R.w * 0.045)}px ${FONT}`; ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+      ctx.fillText('Swipe omhoog naar het doel', g.cx, g.spotY + R.h * 0.1);
+    }
+  },
+};
+
+// =====================================================================
+// Tournament flow
+// =====================================================================
+const ORDER = [padel, golf, penalty];
+let state = 'menu', ri = 0, game = padel, totals = {}, runT = 0;
+let best = 0;
+try { best = parseInt(localStorage.getItem('snx_cup_best') || '0', 10) || 0; } catch (e) { best = 0; }
+const total = () => ORDER.reduce((s, g) => s + (totals[g.id] || 0), 0);
+padel.init();
+
+function startTournament() {
+  audio(); ri = 0; totals = {}; runT = 0; parts = [];
+  $('menu').hidden = true; $('over').hidden = true;
+  showIntro(null);
+}
+function showIntro(prev) {
+  game = ORDER[ri]; game.init(); state = 'intro';
+  $('hud').hidden = true;
+  $('introPrev').hidden = !prev; if (prev) $('introPrev').textContent = prev;
+  $('introStep').textContent = game.step; $('introTitle').textContent = game.name.toUpperCase(); $('introSub').textContent = game.sub;
+  const box = $('introControls'); box.textContent = '';
+  for (const [k, v] of game.controls) { const d = document.createElement('div'); const kb = document.createElement('kbd'); kb.textContent = k; d.append(kb, v); box.appendChild(d); }
+  $('intro').hidden = false;
+}
+function go() {
+  audio(); $('intro').hidden = true; $('hud').hidden = false; state = 'play';
+  $('hudSport').textContent = game.name; $('hudTotal').textContent = ri > 0 ? 'Totaal ' + total() : '';
+}
+function roundDone() {
+  totals[game.id] = Math.round(game.score);
+  ri++;
+  if (ri < ORDER.length) showIntro(game.name + ': ' + totals[game.id] + ' punten. Totaal: ' + total());
+  else finish();
+}
+$('startBtn').addEventListener('click', startTournament);
+$('againBtn').addEventListener('click', startTournament);
+$('goBtn').addEventListener('click', go);
+$('mute').addEventListener('click', () => { muted = !muted; $('mute').textContent = muted ? 'GELUID UIT' : 'GELUID AAN'; });
+
+// ---------- input (pointer: touch + mouse) ----------
+let ptr = null;
+function local(e) { return { x: e.clientX, y: e.clientY }; }
+cv.addEventListener('pointerdown', e => {
+  if (state !== 'play') return;
+  e.preventDefault(); audio();
+  try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  const p = local(e); ptr = { x0: p.x, y0: p.y, t: performance.now() };
+  if (game.onDown) game.onDown(p.x, p.y);
+});
+// move/up on window: a drag that ends outside the canvas or window still counts
+window.addEventListener('pointermove', e => { if (state === 'play' && ptr && game.onMove) { const p = local(e); game.onMove(clamp(p.x, 0, W), clamp(p.y, 0, H)); } });
+const up = e => {
+  if (state !== 'play' || !ptr) return;
+  const p = { x: clamp(e.clientX, 0, W), y: clamp(e.clientY, 0, H) };
+  if (game.onMove) game.onMove(p.x, p.y);
+  if (game.onTap) {
+    const dx = p.x - ptr.x0;
+    game.onTap(Math.abs(dx) > 25 ? clamp(dx / R.w, -0.5, 0.5) : null);
+  }
+  if (game.onUp) game.onUp(p.x, p.y);
+  ptr = null;
+};
+window.addEventListener('pointerup', up);
+window.addEventListener('pointercancel', () => { ptr = null; if (game.drag) game.drag = null; if (game.swipe) game.swipe = null; });
+window.addEventListener('keydown', e => {
+  if (e.target && /^(INPUT|TEXTAREA|BUTTON|SUMMARY)$/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === 'enter') { if (state === 'menu') startTournament(); else if (state === 'intro') go(); return; }
+  if (state === 'play' && game === padel && (k === ' ' || k === 'arrowup')) { e.preventDefault(); padel.onTap(null); }
+  if (state === 'play' && game === padel && k === 'arrowleft') padel.onTap(-0.25);
+  if (state === 'play' && game === padel && k === 'arrowright') padel.onTap(0.25);
+});
+
+// ---------- leaderboard + lead ----------
+const API = 'https://kzauqjavoaphzxnvmbua.supabase.co/functions/v1/club-cup';
+let player = null;
+try { player = JSON.parse(localStorage.getItem('snx_cup_player') || 'null'); } catch (e) { player = null; }
+let lastRun = null, myNick = null, myClub = null;
+const ERRORS = {
+  terms_required: 'Ga akkoord met de actievoorwaarden om mee te doen.',
+  invalid_email: 'Dat e-mailadres klopt niet. Kijk het even na.',
+  invalid_nickname: 'Je naam op de ranglijst moet 2 tot 16 tekens zijn: letters, cijfers, spatie, punt of streepje.',
+  invalid_club: 'Vul de naam van je sportclub in (2 tot 40 tekens).',
+  implausible_score: 'Deze score kunnen we niet controleren, dus hij telt niet mee.',
+  too_fast: 'Even rustig: wacht een paar seconden en probeer het opnieuw.',
+};
+const CLUB_RE = /^[\p{L}\p{N} &'.()\-]{2,40}$/u;
+function showMsg(text, isErr) { const m = $('leadMsg'); m.textContent = text; m.classList.toggle('err', !!isErr); m.hidden = !text; }
+function li(rank, name, sub, val, me) {
+  const el = document.createElement('li'); if (me) el.className = 'me';
+  const b = document.createElement('b'); b.textContent = rank;
+  const n = document.createElement('span'); n.textContent = name;
+  if (sub) { const s = document.createElement('small'); s.textContent = ' · ' + sub; n.appendChild(s); }
+  const v = document.createElement('strong'); v.textContent = val;
+  el.append(b, n, v); return el;
+}
+function emptyLi(text) { const el = document.createElement('li'); el.className = 'empty'; el.textContent = text; return el; }
+async function loadBoard() {
+  const ol = $('board'), cl = $('clubBoard');
+  try {
+    const r = await fetch(API, { method: 'GET' });
+    if (!r.ok) throw new Error('http');
+    const d = await r.json();
+    $('boardYear').textContent = String(new Date().getFullYear());
+    ol.textContent = ''; cl.textContent = '';
+    const top = d.top || [], clubs = d.clubs || [];
+    if (!top.length) ol.appendChild(emptyLi('Nog niemand op de lijst. Jij kunt de eerste zijn.'));
+    for (const row of top) ol.appendChild(li(row.rank, row.nickname, row.club, row.score, myNick && row.nickname === myNick));
+    if (!clubs.length) cl.appendChild(emptyLi('Nog geen clubs. Zet die van jou erop.'));
+    for (const row of clubs) cl.appendChild(li(row.rank, row.club, row.spelers + (row.spelers === 1 ? ' speler' : ' spelers'), row.punten, myClub && row.club.toLowerCase() === myClub.toLowerCase()));
+    const dl = $('clubList'); dl.textContent = '';
+    for (const c of (d.clubnamen || clubs.map(x => x.club))) { const o = document.createElement('option'); o.value = c; dl.appendChild(o); }
+  } catch (e) {
+    ol.textContent = ''; cl.textContent = '';
+    ol.appendChild(emptyLi('De ranglijst is nu niet bereikbaar.')); cl.appendChild(emptyLi('De clubranglijst is nu niet bereikbaar.'));
+  }
+}
+async function submitRun(p) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({}, p, lastRun)) });
+  let d = null; try { d = await r.json(); } catch (e) {}
+  if (!r.ok || !d || !d.ok) throw new Error((d && d.error) || 'submit_failed');
+  return d;
+}
+function rankText(d) { return d.rank ? 'Je staat op plek ' + d.rank + ' van ' + d.jaar + '.' + (d.club_rank ? ' ' + d.club + ' staat op plek ' + d.club_rank + ' bij de clubs.' : '') : 'Score ontvangen.'; }
+async function autoSubmit() {
+  if (!player || !lastRun || lastRun.score <= 0) { loadBoard(); return; }
+  myNick = player.nickname; myClub = player.club;
+  showMsg('Score versturen…');
+  try {
+    const d = await submitRun({ voornaam: player.voornaam, email: player.email, nickname: player.nickname, club: player.club, terms: true, marketing: !!player.marketing });
+    showMsg(rankText(d));
+  } catch (e) { showMsg(ERRORS[e.message] || 'Versturen lukte niet. Je score staat wel op dit toestel.', true); }
+  loadBoard();
+}
+$('termsLink').addEventListener('click', e => { e.preventDefault(); const d = $('voorwaarden'); d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+$('leadForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const p = {
+    voornaam: $('fVoornaam').value.trim(), email: $('fEmail').value.trim(), nickname: $('fNick').value.trim(), club: $('fClub').value.trim().replace(/\s+/g, ' '),
+    terms: $('fTerms').checked, marketing: $('fMarketing').checked, website: $('fWebsite').value,
+  };
+  if (!p.terms) { showMsg(ERRORS.terms_required, true); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(p.email)) { showMsg(ERRORS.invalid_email, true); $('fEmail').focus(); return; }
+  if (!/^[A-Za-z0-9 _.\-]{2,16}$/.test(p.nickname)) { showMsg(ERRORS.invalid_nickname, true); $('fNick').focus(); return; }
+  if (!CLUB_RE.test(p.club)) { showMsg(ERRORS.invalid_club, true); $('fClub').focus(); return; }
+  $('leadBtn').disabled = true; showMsg('Versturen…');
+  try {
+    const d = await submitRun(p);
+    player = { voornaam: p.voornaam, email: p.email, nickname: p.nickname, club: p.club, marketing: p.marketing };
+    try { localStorage.setItem('snx_cup_player', JSON.stringify(player)); } catch (err) {}
+    myNick = p.nickname; myClub = p.club;
+    $('leadBox').hidden = true;
+    showMsg('Top! ' + rankText(d) + (p.marketing ? ' SNX-acties komen naar ' + p.email + '.' : ''));
+    loadBoard();
+  } catch (err) {
+    showMsg(ERRORS[err.message] || 'Versturen lukte niet. Probeer het zo nog eens.', true);
+  } finally { $('leadBtn').disabled = false; }
+});
+// prefill from Snack Rush if this player already joined there (the terms box stays unticked: different action)
+try {
+  const rush = JSON.parse(localStorage.getItem('snx_rush_player') || 'null');
+  if (rush && !player) { $('fVoornaam').value = rush.voornaam || ''; $('fEmail').value = rush.email || ''; $('fNick').value = rush.nickname || ''; }
+} catch (e) {}
+
+function finish() {
+  state = 'over';
+  const final = total();
+  if (final > best) { best = final; try { localStorage.setItem('snx_cup_best', String(best)); } catch (e) {} }
+  $('sPadel').textContent = totals.padel || 0; $('sGolf').textContent = totals.golf || 0; $('sPenalty').textContent = totals.penalty || 0;
+  $('sTotal').textContent = final; $('sBest').textContent = best;
+  $('hud').hidden = true; $('over').hidden = false;
+  lastRun = { score: final, padel: totals.padel || 0, golf: totals.golf || 0, penalty: totals.penalty || 0, duration: Math.round(runT * 10) / 10 };
+  showMsg('');
+  $('leadBox').hidden = !!player || final <= 0;
+  if (player) autoSubmit(); else loadBoard();
+}
+
+// ---------- loop ----------
+function update(dt) {
+  updateParts(dt);
+  if (state === 'play') {
+    runT += dt;
+    game.update(dt);
+    $('hudScore').textContent = Math.round(game.score);
+    $('hudInfo').textContent = game.info();
+    if (game.finished) { state = 'between'; roundDone(); }
+  } else if (state === 'menu') { padel.t += dt; }
+}
+function render() {
+  ctx.fillStyle = '#ff2625'; ctx.fillRect(0, 0, W, H);
+  if (R.w < W) { ctx.fillStyle = '#d12325'; for (let x = 0; x < W; x += 40) ctx.fillRect(x, 0, 18, H); }
+  ctx.save(); ctx.beginPath(); ctx.rect(R.x, R.y, R.w, R.h); ctx.clip();
+  game.render();
+  drawParts();
+  ctx.restore();
+}
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.033, (now - last) / 1000); last = now;
+  update(dt); render();
+  requestAnimationFrame(loop);
+}
+document.addEventListener('visibilitychange', () => { last = performance.now(); });
+window.addEventListener('resize', resize);
+resize();
+requestAnimationFrame(loop);
+window.__cup = { get state() { return state; }, get game() { return game; }, go, startTournament, totals: () => totals };
+})();
+</script>
+</body>
+</html>

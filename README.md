@@ -22,6 +22,23 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 ## Backend-bron
 `supabase/functions/snack-rush/index.ts` en `supabase/migrations/` (de migratie van 8 nov moet vóór de nieuwe functie draaien).
 
+## SNX Club Cup (`clubcup.html`)
+Tweede game: drie korte sporten als één toernooi, met een spelers- én een clubklassement. Doel: consumentenleads
+plus een lijst sportclubs (padel, tennis, golf, voetbal) als ingang voor foodservice-verkoop in hun kantines.
+
+- **Padel** (45 s, 3 levens): tik als de bal in je ring zit, swipe links/rechts om te mikken. Mis je hem, dan kaatst
+  het glas achter je hem terug voor een tweede kans (+15). Terugslag +10, winner +50 (+5 per slag in de rally).
+- **Golf** (3 holes): sleep terug en laat los. Hole in one 300, birdie 180, par 110, daarna 60/30. Zand remt, pijlen = helling.
+- **Penalty** (6 schoten): swipe omhoog. Richting = hoek, lengte = hoogte. Goal 100, kruising +50. De keeper leest je steeds beter.
+- Snacks: Betterbal +10, K-Rocket +25 (bij padel ook een smash), BOB Burger +50.
+- Na het toernooi: voornaam, e-mail, schermnaam en **sportclub**. Clubs met andere hoofdletters of spaties tellen als één club.
+  Clubklassement: meeste spelers bovenaan, bij gelijkspel de som van hun beste scores.
+- Backend (nog niet live): migratie `supabase/migrations/20261117_club_cup.sql`, daarna Edge Function `club-cup`
+  (deploy met `verify_jwt = false`, net als `snack-rush`). Gebruikt dezelfde tabel `leads`.
+  ActiveCampaign: lijst `AC_CLUBCUP_LIST_ID` (standaard 39); maak tag `game-club-cup` aan en zet de id in `AC_CLUBCUP_TAG_ID`.
+  Tot de backend live is, toont de game "ranglijst niet bereikbaar"; spelen werkt wel.
+- Fase 1: geen prijs in de game. Wil je de kantinepakket-actie voor de winnende club, zet die dan eerst in de actievoorwaarden (punt 4).
+
 ## Web-app (iPhone, Samsung, Android)
 `manifest.webmanifest`, `sw.js` en `icons/` maken van de game een installeerbare web-app: spelers openen de link in hun
 browser en kunnen hem op het beginscherm zetten (Android: knop in het startscherm; iPhone: Safari > Deel > Zet op beginscherm).
