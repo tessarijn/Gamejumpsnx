@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>SNX Snack Blaster</title>
+<meta name="theme-color" content="#ff2625">
+<meta name="description" content="Schiet SNX-snacks op elkaar: drie dezelfde op een rij laten ze knallen.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800&display=swap">
+<style>
+:root {
+  --ink: #111111;
+  --snx: #ff2625;
+  --rood-donker: #d12325;
+  --steen: #e7e5e0;
+  --geel: #ffc93c;
+  --font: 'Poppins', system-ui, sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; margin: 0; background: var(--rood-donker); color: #fff; overflow: hidden;
+  touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent; font-family: var(--font); }
+[hidden] { display: none !important; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: flex-start;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px));
+  pointer-events: none; font-variant-numeric: tabular-nums; }
+.hud .score { font-weight: 800; font-size: clamp(28px, 4.6vh, 60px); line-height: 1; text-shadow: 0 3px 0 var(--ink); }
+.hud .small { font-size: clamp(13px, 1.9vh, 22px); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; text-shadow: 0 2px 0 var(--ink); }
+.hud .right { text-align: right; display: grid; gap: 6px; justify-items: end; }
+#mute { pointer-events: auto; background: rgba(17,17,17,.55); color: #fff; border: 2px solid #fff; border-radius: 8px;
+  font: 800 clamp(12px, 1.6vh, 18px) var(--font); letter-spacing: .08em; padding: 3px 8px; cursor: pointer; }
+.screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(17,17,17,.45); }
+.card { width: min(360px, 100%); max-height: 100%; overflow-y: auto; box-sizing: border-box;
+  background: var(--snx) url('assets/backdrop.webp') center / cover; border: 4px solid var(--ink); border-radius: 22px;
+  box-shadow: 0 8px 0 var(--ink); padding: 16px 16px 16px; text-align: center; display: grid; gap: 10px; }
+.card .logo { width: 100%; padding: 0 28%; box-sizing: border-box; display: block; }
+.card h1, .card h2 { font-weight: 800; text-transform: uppercase; font-size: 34px; line-height: .95; margin: 0; text-shadow: 0 3px 0 var(--ink); text-wrap: balance; }
+.card h1 span { display: block; margin-top: 8px; color: var(--ink); text-shadow: none; font-size: 15px; letter-spacing: .06em; }
+.card p { margin: 0; font-size: 15px; font-weight: 600; line-height: 1.3; }
+.legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.legend div { background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 6px 2px 4px; font-weight: 800; font-size: 11px; line-height: 1.1; }
+.legend canvas { width: 36px; height: 36px; display: block; margin: 0 auto 3px; }
+.how { text-align: left; display: grid; gap: 4px; font-size: 13px; font-weight: 600; background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 10px; }
+.how b { color: var(--rood-donker); }
+.btn { font: 800 24px var(--font); border-radius: 30px; background: #fff; color: var(--rood-donker); border: 4px solid var(--ink);
+  padding: 10px 16px 8px; box-shadow: 0 5px 0 var(--ink); cursor: pointer; }
+.btn:hover { background: var(--ink); color: #fff; }
+.btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.btn:focus-visible, #mute:focus-visible, .linkbtn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stats div { background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 6px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
+.stats b { display: block; font-size: 26px; letter-spacing: 0; font-variant-numeric: tabular-nums; color: var(--rood-donker); }
+.linkbtn { color: #fff; font-weight: 800; font-size: 14px; letter-spacing: .04em; text-decoration: underline; text-underline-offset: 3px; }
+.site { font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--ink); }
+.banner { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + max(90px, 12vh)); pointer-events: none; white-space: nowrap;
+  font-weight: 800; font-size: clamp(22px, 4vh, 48px); color: #fff; background: var(--snx); border: 3px solid var(--ink);
+  border-radius: 40px; padding: .15em .8em; box-shadow: 0 4px 0 var(--ink); opacity: 0; transform: translateX(-50%) scale(.6); transition: opacity .2s, transform .2s; }
+.banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
+@media (prefers-reduced-motion: reduce) { .banner { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="SNX Snack Blaster speelveld"></canvas>
+
+<div class="hud" id="hud" hidden>
+  <div>
+    <div class="score" id="score">0</div>
+    <div class="small" id="level">Level 1</div>
+  </div>
+  <div class="right">
+    <button id="mute" type="button">GELUID AAN</button>
+    <div class="small" id="best">Record 0</div>
+  </div>
+</div>
+<div class="banner" id="banner"></div>
+
+<div class="screen" id="menu">
+  <div class="card">
+    <img class="logo" src="assets/logo_white.webp" alt="SNX">
+    <h1>Snack Blaster<span>Drie dezelfde = knallen</span></h1>
+    <div class="legend" id="legend"></div>
+    <div class="how">
+      <div><b>Mik</b> door te slepen, <b>laat los</b> om te schieten.</div>
+      <div>Raak <b>3 of meer</b> dezelfde snacks: ze knallen weg.</div>
+      <div>Losgeschoten snacks vallen: <b>dubbele punten</b>.</div>
+      <div>8+ in één schot? Dan krijg je een <b>verzenddoos</b>: BOEM.</div>
+    </div>
+    <button class="btn" id="play" type="button">SPELEN</button>
+    <a class="linkbtn" href="./">Of speel SNX Snack Rush</a>
+    <div class="site">SNXFOOD.COM</div>
+  </div>
+</div>
+
+<div class="screen" id="over" hidden>
+  <div class="card">
+    <h2 id="overTitle">Game over</h2>
+    <div class="stats">
+      <div>Score<b id="finalScore">0</b></div>
+      <div>Record<b id="finalBest">0</b></div>
+      <div>Level<b id="finalLevel">1</b></div>
+      <div>Geknald<b id="finalPopped">0</b></div>
+    </div>
+    <p id="overMsg"></p>
+    <button class="btn" id="again" type="button">NOG EEN KEER</button>
+    <a class="linkbtn" href="https://www.snxfood.com" target="_blank" rel="noopener">Bekijk de snacks op snxfood.com</a>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const $ = (id) => document.getElementById(id);
+
+// ---------- assets ----------
+function img(src) { const i = new Image(); i.src = src; return i; }
+const IMG = { bal: img('assets/bal.webp'), kroket: img('assets/kroket.webp'), burger: img('assets/burger.webp'),
+  chicken: img('assets/chickenbite.webp'), doos: img('assets/doos.webp'), backdrop: img('assets/backdrop.webp') };
+
+// Each snack has its own bubble colour, so matches read at a glance (and not only by photo).
+const TYPES = [
+  { name: 'Betterbal', img: 'bal',    bg: '#ffffff', ring: '#ff2625', scale: 0.86 },
+  { name: 'K-Rocket',  img: 'kroket', bg: '#111111', ring: '#111111', scale: 0.95 },
+  { name: 'BOB Burger',img: 'burger', bg: '#ffc93c', ring: '#111111', scale: 0.86 },
+  { name: 'ChickenBite', img: 'chicken', bg: '#ff2625', ring: '#ffffff', scale: 0.92 },
+];
+const DOOS = -1;
+
+// ---------- storage ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+let best = +store.get('snx-blaster-best', 0) || 0;
+let muted = store.get('snx-blaster-muted', '0') === '1';
+
+// ---------- sound ----------
+let actx = null;
+function beep(freq, dur = 0.08, type = 'square', vol = 0.06, slide = 0) {
+  if (muted) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), t + dur);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+  } catch {}
+}
+const sfx = {
+  shoot: () => beep(520, 0.07, 'triangle', 0.07, 300),
+  stick: () => beep(180, 0.05, 'square', 0.04),
+  pop: (n) => { for (let i = 0; i < Math.min(n, 6); i++) setTimeout(() => beep(600 + i * 90, 0.06, 'square', 0.05), i * 45); },
+  drop: () => beep(300, 0.25, 'sawtooth', 0.04, -200),
+  boom: () => { beep(90, 0.35, 'sawtooth', 0.09, -50); beep(160, 0.2, 'square', 0.05, -100); },
+  bounce: () => beep(900, 0.03, 'sine', 0.03),
+  level: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.07), i * 110)),
+  over: () => [400, 300, 200].forEach((f, i) => setTimeout(() => beep(f, 0.2, 'sawtooth', 0.05), i * 160)),
+};
+function updateMute() { $('mute').textContent = muted ? 'GELUID UIT' : 'GELUID AAN'; }
+$('mute').addEventListener('click', (e) => { e.stopPropagation(); muted = !muted; store.set('snx-blaster-muted', muted ? '1' : '0'); updateMute(); });
+$('mute').addEventListener('pointerdown', (e) => e.stopPropagation());
+updateMute();
+
+// ---------- layout ----------
+const COLS = 9;
+let W, H, DPR, R, rowH, fieldX, fieldW, fieldTop, shooterX, shooterY, deadY;
+function layout() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const top = Math.max(76, H * 0.1);
+  fieldW = Math.min(W - 16, (H - top - 20) * 0.62, 540);
+  R = fieldW / (COLS * 2);
+  rowH = R * Math.sqrt(3);
+  fieldX = (W - fieldW) / 2;
+  fieldTop = top;
+  shooterX = W / 2;
+  shooterY = H - Math.max(R * 2.2, 54) - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sab')) || 0);
+  deadY = shooterY - R * 2.6;
+}
+window.addEventListener('resize', () => { layout(); });
+layout();
+
+// ---------- grid ----------
+// grid[r][c] = type index or null. Row parity flips when a new row is pushed in from the top.
+let grid = [], shift = 0;
+const isOdd = (r) => ((r + shift) & 1) === 1;
+const colsIn = (r) => isOdd(r) ? COLS - 1 : COLS;
+const cellX = (r, c) => fieldX + R + c * 2 * R + (isOdd(r) ? R : 0);
+const cellY = (r) => fieldTop + R + r * rowH;
+const get = (r, c) => (grid[r] && c >= 0 && c < colsIn(r)) ? grid[r][c] : null;
+function ensureRow(r) { while (grid.length <= r) grid.push(new Array(COLS).fill(null)); }
+function neighbors(r, c) {
+  const o = isOdd(r);
+  const d = o ? [[-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0], [1, 1]] : [[-1, -1], [-1, 0], [0, -1], [0, 1], [1, -1], [1, 0]];
+  const out = [];
+  for (const [dr, dc] of d) { const nr = r + dr, nc = c + dc; if (nr >= 0 && nc >= 0 && nc < colsIn(nr)) out.push([nr, nc]); }
+  return out;
+}
+function trimRows() { while (grid.length && grid[grid.length - 1].every((v) => v === null)) grid.pop(); }
+function typesOnBoard() {
+  const s = new Set();
+  for (let r = 0; r < grid.length; r++) for (let c = 0; c < colsIn(r); c++) if (grid[r][c] !== null) s.add(grid[r][c]);
+  return [...s];
+}
+function count() { let n = 0; for (let r = 0; r < grid.length; r++) for (let c = 0; c < colsIn(r); c++) if (grid[r][c] !== null) n++; return n; }
+function randType(n) { return Math.floor(Math.random() * n); }
+function makeRow(r, nTypes) {
+  const row = new Array(COLS).fill(null);
+  for (let c = 0; c < colsIn(r); c++) {
+    // small clusters: often copy the left or upper neighbour so there is something to aim at
+    let t = randType(nTypes);
+    if (c > 0 && Math.random() < 0.22) t = row[c - 1];
+    else if (grid[r - 1] && Math.random() < 0.15) { const up = grid[r - 1][Math.min(c, colsIn(r - 1) - 1)]; if (up !== null) t = up; }
+    row[c] = t;
+  }
+  return row;
+}
+function pushRowTop() {
+  shift ^= 1;
+  const n = Math.min(TYPES.length, 3 + (level >= 3 ? 1 : 0));
+  grid.unshift(null);
+  grid[0] = makeRow(0, n);
+  // keep cells valid for the new parity
+  for (let r = 0; r < grid.length; r++) if (colsIn(r) < COLS) grid[r][COLS - 1] = null;
+  shake = 0.25;
+}
+
+// ---------- state ----------
+let state = 'menu', score = 0, level = 1, popped = 0, shotsSinceRow = 0, rowEvery = 6;
+let cur = 0, next = 0, shot = null, aim = -Math.PI / 2, aiming = false;
+let fx = [], falling = [], texts = [], shake = 0, t0 = performance.now(), loadAnim = 0;
+
+function pickType() {
+  const on = typesOnBoard();
+  return on.length ? on[randType(on.length)] : randType(3);
+}
+function startLevel() {
+  grid = []; shift = 0;
+  const rows = Math.min(5 + level, 10);
+  const n = Math.min(TYPES.length, 3 + (level >= 2 ? 1 : 0));
+  for (let r = 0; r < rows; r++) { ensureRow(r); grid[r] = makeRow(r, n); }
+  rowEvery = Math.max(3, 7 - level);
+  shotsSinceRow = 0;
+  cur = pickType(); next = pickType();
+  loadAnim = 0;
+  $('level').textContent = 'Level ' + level;
+}
+function startGame() {
+  score = 0; level = 1; popped = 0; fx = []; falling = []; texts = []; shot = null;
+  startLevel();
+  state = 'play';
+  $('menu').hidden = true; $('over').hidden = true; $('hud').hidden = false;
+  updateHud();
+  banner('LEVEL 1');
+}
+function updateHud() {
+  $('score').textContent = score;
+  if (score > best) { best = score; store.set('snx-blaster-best', best); }
+  $('best').textContent = 'Record ' + best;
+}
+let bannerT = null;
+function banner(text) {
+  const b = $('banner'); b.textContent = text; b.classList.add('show');
+  clearTimeout(bannerT); bannerT = setTimeout(() => b.classList.remove('show'), 1100);
+}
+function popText(x, y, text, color = '#fff') { texts.push({ x, y, text, color, life: 1 }); }
+
+// ---------- input ----------
+function aimAt(px, py) {
+  let a = Math.atan2(py - shooterY, px - shooterX);
+  if (a > 0) a = a > Math.PI / 2 ? -Math.PI + 0.12 : -0.12; // pointer below the shooter
+  aim = Math.max(-Math.PI + 0.12, Math.min(-0.12, a));
+}
+function overNext(px, py) { return Math.hypot(px - (shooterX + R * 3.4), py - (shooterY + R * 0.4)) < R * 1.4; }
+canvas.addEventListener('pointerdown', (e) => {
+  if (state !== 'play') return;
+  if (overNext(e.clientX, e.clientY)) { if (!shot) { [cur, next] = [next, cur]; beep(700, 0.05, 'sine', 0.05); } return; }
+  aiming = true; aimAt(e.clientX, e.clientY);
+});
+canvas.addEventListener('pointermove', (e) => { if (state === 'play' && (aiming || e.pointerType === 'mouse')) aimAt(e.clientX, e.clientY); });
+canvas.addEventListener('pointerup', (e) => { if (state !== 'play' || !aiming) return; aiming = false; aimAt(e.clientX, e.clientY); fire(); });
+canvas.addEventListener('pointercancel', () => { aiming = false; });
+window.addEventListener('keydown', (e) => {
+  if (state !== 'play') return;
+  if (e.key === 'ArrowLeft') aim = Math.max(-Math.PI + 0.12, aim - 0.05);
+  else if (e.key === 'ArrowRight') aim = Math.min(-0.12, aim + 0.05);
+  else if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); fire(); }
+  else if (e.key === 'Shift' || e.key === 'x') { if (!shot) [cur, next] = [next, cur]; }
+});
+
+function fire() {
+  if (shot || loadAnim < 1) return;
+  const sp = R * 34;
+  shot = { x: shooterX, y: shooterY, vx: Math.cos(aim) * sp, vy: Math.sin(aim) * sp, t: cur };
+  cur = next; next = pickType(); loadAnim = 0;
+  sfx.shoot();
+}
+
+// ---------- shot physics + snapping ----------
+function stepShot(dt) {
+  const steps = Math.ceil((Math.hypot(shot.vx, shot.vy) * dt) / (R * 0.3));
+  for (let i = 0; i < steps; i++) {
+    shot.x += (shot.vx * dt) / steps; shot.y += (shot.vy * dt) / steps;
+    if (shot.x < fieldX + R) { shot.x = fieldX + R; shot.vx = Math.abs(shot.vx); sfx.bounce(); }
+    if (shot.x > fieldX + fieldW - R) { shot.x = fieldX + fieldW - R; shot.vx = -Math.abs(shot.vx); sfx.bounce(); }
+    if (shot.y <= fieldTop + R) return land();
+    const rr = Math.round((shot.y - fieldTop - R) / rowH);
+    for (let r = Math.max(0, rr - 1); r <= rr + 1 && r < grid.length; r++) {
+      for (let c = 0; c < colsIn(r); c++) {
+        if (grid[r][c] === null) continue;
+        if (Math.hypot(shot.x - cellX(r, c), shot.y - cellY(r)) < R * 1.7) return land();
+      }
+    }
+  }
+}
+function land() {
+  // nearest empty cell that touches the ceiling or another snack
+  const rr = Math.max(0, Math.round((shot.y - fieldTop - R) / rowH));
+  let bestCell = null, bd = Infinity;
+  for (let r = Math.max(0, rr - 1); r <= rr + 1; r++) {
+    for (let c = 0; c < colsIn(r); c++) {
+      if (get(r, c) !== null) continue;
+      const touches = r === 0 || neighbors(r, c).some(([a, b]) => get(a, b) !== null);
+      if (!touches) continue;
+      const d = Math.hypot(shot.x - cellX(r, c), shot.y - cellY(r));
+      if (d < bd) { bd = d; bestCell = [r, c]; }
+    }
+  }
+  const s = shot; shot = null;
+  if (!bestCell) return;
+  const [r, c] = bestCell;
+  ensureRow(r);
+
+  if (s.t === DOOS) return explode(r, c);
+
+  grid[r][c] = s.t;
+  sfx.stick();
+  const group = flood(r, c, (v) => v === s.t);
+  if (group.length >= 3) {
+    for (const [a, b] of group) popCell(a, b);
+    const dropped = dropFloating();
+    const pts = group.length * 10 + dropped * 20 + Math.max(0, group.length - 3) * 10;
+    score += pts * level;
+    popped += group.length + dropped;
+    popText(cellX(r, c), cellY(r), '+' + pts * level);
+    sfx.pop(group.length);
+    if (dropped) sfx.drop();
+    if (group.length + dropped >= 8 && cur !== DOOS && next !== DOOS) { next = DOOS; banner('VERZENDDOOS!'); }
+    else if (dropped >= 3) banner('LOSGESCHOTEN!');
+  } else {
+    shotsSinceRow++;
+    if (shotsSinceRow >= rowEvery) { shotsSinceRow = 0; pushRowTop(); }
+  }
+  afterMove();
+}
+function explode(r, c) {
+  const cx = cellX(r, c), cy = cellY(r);
+  let n = 0;
+  for (let a = 0; a < grid.length; a++) for (let b = 0; b < colsIn(a); b++) {
+    if (grid[a][b] === null) continue;
+    if (Math.hypot(cellX(a, b) - cx, cellY(a) - cy) < R * 3.3) { popCell(a, b); n++; }
+  }
+  const dropped = dropFloating();
+  const pts = 100 + n * 15 + dropped * 20;
+  score += pts * level; popped += n + dropped;
+  popText(cx, cy, 'BOEM +' + pts * level, '#ffc93c');
+  for (let i = 0; i < 30; i++) { const a = Math.random() * 6.28, v = R * (4 + Math.random() * 10);
+    fx.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.7, color: i % 2 ? '#ff2625' : '#fff', r: R * 0.18 }); }
+  shake = 0.4; sfx.boom();
+  afterMove();
+}
+function flood(r, c, test) {
+  const seen = new Set([r + ',' + c]), out = [[r, c]], q = [[r, c]];
+  while (q.length) {
+    const [a, b] = q.pop();
+    for (const [x, y] of neighbors(a, b)) {
+      const k = x + ',' + y;
+      if (seen.has(k)) continue; seen.add(k);
+      const v = get(x, y);
+      if (v !== null && test(v)) { out.push([x, y]); q.push([x, y]); }
+    }
+  }
+  return out;
+}
+function popCell(r, c) {
+  const t = grid[r][c], x = cellX(r, c), y = cellY(r);
+  grid[r][c] = null;
+  fx.push({ x, y, t, pop: 0 });
+  for (let i = 0; i < 6; i++) { const a = Math.random() * 6.28, v = R * (3 + Math.random() * 5);
+    fx.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.5, color: TYPES[t].bg === '#ffffff' ? '#ff2625' : TYPES[t].bg, r: R * 0.14 }); }
+}
+function dropFloating() {
+  const anchored = new Set();
+  const q = [];
+  if (grid[0]) for (let c = 0; c < colsIn(0); c++) if (grid[0][c] !== null) { anchored.add('0,' + c); q.push([0, c]); }
+  while (q.length) {
+    const [a, b] = q.pop();
+    for (const [x, y] of neighbors(a, b)) { const k = x + ',' + y; if (!anchored.has(k) && get(x, y) !== null) { anchored.add(k); q.push([x, y]); } }
+  }
+  let n = 0;
+  for (let r = 0; r < grid.length; r++) for (let c = 0; c < colsIn(r); c++) {
+    if (grid[r][c] !== null && !anchored.has(r + ',' + c)) {
+      falling.push({ x: cellX(r, c), y: cellY(r), vx: (Math.random() - 0.5) * R * 4, vy: -R * 2, t: grid[r][c], rot: 0 });
+      grid[r][c] = null; n++;
+    }
+  }
+  return n;
+}
+function afterMove() {
+  trimRows();
+  updateHud();
+  if (count() === 0) {
+    const bonus = 500 * level;
+    score += bonus; updateHud();
+    banner('LEVEL ' + (level + 1) + '  +' + bonus);
+    sfx.level();
+    level++;
+    setTimeout(() => { if (state === 'play') startLevel(); }, 700);
+    return;
+  }
+  if (next !== DOOS && !typesOnBoard().includes(next)) next = pickType();
+  if (cur !== DOOS && !typesOnBoard().includes(cur)) cur = pickType();
+  for (let r = 0; r < grid.length; r++) for (let c = 0; c < colsIn(r); c++)
+    if (grid[r][c] !== null && cellY(r) + R > deadY) return gameOver();
+}
+function gameOver() {
+  state = 'over';
+  sfx.over();
+  updateHud();
+  $('finalScore').textContent = score; $('finalBest').textContent = best;
+  $('finalLevel').textContent = level; $('finalPopped').textContent = popped;
+  const newBest = score >= best && score > 0;
+  $('overTitle').textContent = newBest ? 'Nieuw record!' : 'Game over';
+  $('overMsg').textContent = popped >= 50 ? popped + ' snacks geknald. Die hebben echt honger gekregen.' : 'De snacks zijn de streep over. Probeer het nog een keer.';
+  setTimeout(() => { $('over').hidden = false; $('hud').hidden = true; }, 600);
+}
+
+// ---------- drawing ----------
+function drawSnack(t, x, y, rad, alpha = 1, rot = 0) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y); if (rot) ctx.rotate(rot);
+  if (t === DOOS) {
+    const im = IMG.doos, w = rad * 2.3, h = w * (185 / 240);
+    ctx.fillStyle = '#111'; roundRect(-w / 2 - 2, -h / 2 - 2, w + 4, h + 4, rad * 0.25); ctx.fill();
+    if (im.complete && im.naturalWidth) ctx.drawImage(im, -w / 2, -h / 2, w, h);
+    ctx.restore(); return;
+  }
+  const T = TYPES[t];
+  ctx.beginPath(); ctx.arc(0, 0, rad * 0.97, 0, Math.PI * 2);
+  ctx.fillStyle = T.bg; ctx.fill();
+  ctx.lineWidth = Math.max(2, rad * 0.12); ctx.strokeStyle = T.ring; ctx.stroke();
+  const im = IMG[T.img];
+  if (im.complete && im.naturalWidth) {
+    const s = (rad * 2 * T.scale) / Math.max(im.naturalWidth, im.naturalHeight);
+    const w = im.naturalWidth * s, h = im.naturalHeight * s;
+    ctx.save(); ctx.beginPath(); ctx.arc(0, 0, rad * 0.9, 0, Math.PI * 2); ctx.clip();
+    ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore();
+  }
+  // gloss
+  ctx.beginPath(); ctx.ellipse(-rad * 0.38, -rad * 0.45, rad * 0.28, rad * 0.14, -0.6, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fill();
+  ctx.restore();
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function drawBackground() {
+  ctx.fillStyle = '#d12325'; ctx.fillRect(0, 0, W, H);
+  const bd = IMG.backdrop;
+  if (bd.complete && bd.naturalWidth) {
+    const s = Math.max(W, H) / bd.naturalWidth;
+    ctx.globalAlpha = 0.9; ctx.drawImage(bd, (W - bd.naturalWidth * s) / 2, (H - bd.naturalHeight * s) / 2, bd.naturalWidth * s, bd.naturalHeight * s); ctx.globalAlpha = 1;
+  }
+  // field
+  ctx.fillStyle = 'rgba(17,17,17,.38)';
+  roundRect(fieldX - 6, fieldTop - 6, fieldW + 12, shooterY + R * 1.6 - fieldTop + 6, 18); ctx.fill();
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 3; ctx.stroke();
+  // danger line
+  ctx.save(); ctx.setLineDash([10, 8]); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(fieldX, deadY); ctx.lineTo(fieldX + fieldW, deadY); ctx.stroke(); ctx.restore();
+  // row countdown pips
+  const left = rowEvery - shotsSinceRow;
+  for (let i = 0; i < rowEvery; i++) {
+    ctx.beginPath(); ctx.arc(fieldX + 10 + i * 14, shooterY + R * 0.9, 4.5, 0, 7);
+    ctx.fillStyle = i < left ? '#fff' : 'rgba(255,255,255,.25)'; ctx.fill();
+  }
+}
+function drawAim() {
+  if (shot) return;
+  let x = shooterX, y = shooterY, vx = Math.cos(aim), vy = Math.sin(aim);
+  ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.85)';
+  const step = R * 0.8; let dist = 0, bounces = 0;
+  const phase = (performance.now() / 40) % step;
+  x += vx * phase; y += vy * phase;
+  while (dist < H * 1.4 && y > fieldTop + R) {
+    x += vx * step; y += vy * step; dist += step;
+    if (x < fieldX + R) { x = 2 * (fieldX + R) - x; vx = -vx; if (++bounces > 1) break; }
+    if (x > fieldX + fieldW - R) { x = 2 * (fieldX + fieldW - R) - x; vx = -vx; if (++bounces > 1) break; }
+    let hit = false; const rr = Math.round((y - fieldTop - R) / rowH);
+    for (let r = Math.max(0, rr - 1); r <= rr + 1 && r < grid.length && !hit; r++)
+      for (let c = 0; c < colsIn(r); c++) if (grid[r][c] !== null && Math.hypot(x - cellX(r, c), y - cellY(r)) < R * 1.7) { hit = true; break; }
+    if (hit) break;
+    ctx.beginPath(); ctx.arc(x, y, Math.max(2, R * 0.12), 0, 7); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawShooter() {
+  // cannon
+  ctx.save(); ctx.translate(shooterX, shooterY); ctx.rotate(aim + Math.PI / 2);
+  ctx.fillStyle = '#111'; roundRect(-R * 0.45, -R * 2.1, R * 0.9, R * 1.6, R * 0.25); ctx.fill();
+  ctx.fillStyle = '#ff2625'; ctx.fillRect(-R * 0.3, -R * 2.0, R * 0.6, R * 0.25);
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(shooterX, shooterY, R * 1.35, 0, 7); ctx.fillStyle = '#111'; ctx.fill();
+  const k = Math.min(1, loadAnim);
+  drawSnack(cur, shooterX, shooterY, R * (0.6 + 0.4 * k));
+  // next
+  const nx = shooterX + R * 3.4, ny = shooterY + R * 0.4;
+  ctx.beginPath(); ctx.arc(nx, ny, R * 0.95, 0, 7); ctx.fillStyle = 'rgba(17,17,17,.6)'; ctx.fill();
+  drawSnack(next, nx, ny, R * 0.75);
+  ctx.fillStyle = '#fff'; ctx.font = `800 ${Math.max(10, R * 0.42)}px Poppins, sans-serif`; ctx.textAlign = 'center';
+  ctx.fillText('VOLGENDE', nx, ny + R * 1.45);
+}
+
+function frame(now) {
+  const dt = Math.min(0.033, (now - t0) / 1000); t0 = now;
+  ctx.save();
+  if (shake > 0) { shake -= dt; ctx.translate((Math.random() - 0.5) * 8 * shake, (Math.random() - 0.5) * 8 * shake); }
+  drawBackground();
+
+  if (state !== 'menu') {
+    for (let r = 0; r < grid.length; r++) for (let c = 0; c < colsIn(r); c++)
+      if (grid[r][c] !== null) drawSnack(grid[r][c], cellX(r, c), cellY(r), R);
+
+    if (state === 'play') {
+      loadAnim = Math.min(1, loadAnim + dt * 5);
+      drawAim();
+      if (shot) { stepShot(dt); if (shot) drawSnack(shot.t, shot.x, shot.y, R); }
+      drawShooter();
+    }
+  }
+
+  // pops & particles
+  fx = fx.filter((p) => {
+    if (p.t !== undefined && p.pop !== undefined) {
+      p.pop += dt * 5; drawSnack(p.t, p.x, p.y, R * (1 + p.pop * 0.5), Math.max(0, 1 - p.pop)); return p.pop < 1;
+    }
+    p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += R * 20 * dt;
+    ctx.globalAlpha = Math.max(0, p.life * 2); ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+    return p.life > 0;
+  });
+  falling = falling.filter((f) => {
+    f.vy += R * 40 * dt; f.x += f.vx * dt; f.y += f.vy * dt; f.rot += dt * 4;
+    drawSnack(f.t, f.x, f.y, R, 1, f.rot); return f.y < H + R * 2;
+  });
+  texts = texts.filter((t) => {
+    t.life -= dt; t.y -= R * 2 * dt;
+    ctx.globalAlpha = Math.max(0, t.life); ctx.font = `800 ${Math.max(16, R * 0.9)}px Poppins, sans-serif`; ctx.textAlign = 'center';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#111'; ctx.strokeText(t.text, t.x, t.y); ctx.fillStyle = t.color; ctx.fillText(t.text, t.x, t.y);
+    ctx.globalAlpha = 1; return t.life > 0;
+  });
+  ctx.restore();
+  requestAnimationFrame(frame);
+}
+
+// ---------- menu legend ----------
+function buildLegend() {
+  const host = $('legend'); host.innerHTML = '';
+  TYPES.forEach((T, i) => {
+    const d = document.createElement('div'), c = document.createElement('canvas');
+    c.width = 80; c.height = 80; d.appendChild(c); d.appendChild(document.createTextNode(T.name)); host.appendChild(d);
+    const draw = () => drawSnackOn(c.getContext('2d'), i, 40, 40, 36);
+    const im = IMG[T.img]; if (im.complete) draw(); else im.addEventListener('load', draw);
+  });
+}
+function drawSnackOn(g, t, x, y, rad) {
+  const T = TYPES[t];
+  g.beginPath(); g.arc(x, y, rad * 0.97, 0, Math.PI * 2); g.fillStyle = T.bg; g.fill();
+  g.lineWidth = rad * 0.12; g.strokeStyle = T.ring; g.stroke();
+  const im = IMG[T.img];
+  if (im.naturalWidth) { const s = (rad * 2 * T.scale) / Math.max(im.naturalWidth, im.naturalHeight);
+    g.save(); g.beginPath(); g.arc(x, y, rad * 0.9, 0, 7); g.clip();
+    g.drawImage(im, x - im.naturalWidth * s / 2, y - im.naturalHeight * s / 2, im.naturalWidth * s, im.naturalHeight * s); g.restore(); }
+}
+buildLegend();
+
+$('play').addEventListener('click', () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch {} startGame(); });
+$('again').addEventListener('click', startGame);
+$('best').textContent = 'Record ' + best;
+requestAnimationFrame(frame);
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
