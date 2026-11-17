@@ -126,6 +126,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--snx) u
     <div class="levels" id="levels"></div>
     <button class="btn" id="playBtn" type="button">Speel</button>
     <a class="site" href="./">Meer games in SNX World</a>
+    <div id="rlSlot"></div>
     <a class="site" href="https://www.snxfood.com" target="_blank" rel="noopener">WWW.SNXFOOD.COM</a>
   </div>
 </div>
@@ -160,6 +161,7 @@ html, body { height: 100%; margin: 0; overflow: hidden; background: var(--snx) u
   </div>
 </div>
 
+<script src="assets/ranglijst.js"></script>
 <script>
 'use strict';
 // ---------- data ----------
@@ -219,6 +221,7 @@ let g = [];           // g[r][c] = tile | null
 let tid = 0;
 let cfg = levelCfg(1), level = 1;
 let score = 0, moves = 0, collected = 0;
+let levelStart = performance.now();
 let busy = false, playing = false, sel = null, lastAct = 0, hint = null;
 const fx = [];        // beams, rings, particles, texts
 
@@ -715,6 +718,7 @@ function openIntro() {
 
 function startLevel() {
   cfg = levelCfg(level);
+  levelStart = performance.now();
   score = 0; collected = 0; moves = cfg.moves; sel = null; hint = null; fx.length = 0;
   $('lvlLabel').textContent = 'Level ' + level;
   $('goalImg').src = 'assets/' + TYPES[cfg.goalType].img + '.webp';
@@ -739,6 +743,10 @@ async function finishLevel(won) {
   const st = won ? Math.max(1, starsFor(score)) : 0;
   const bestScores = store.get('best', {}), stars = store.get('stars', {});
   const best = Math.max(bestScores[level] || 0, score); bestScores[level] = best; store.set('best', bestScores);
+  // ranglijst: totaal van je beste score per level, speeltijd telt op over alle levels
+  const speeltijd = store.get('tijd', 0) + (performance.now() - levelStart) / 1000; store.set('tijd', speeltijd);
+  const totaal = Object.values(bestScores).reduce((a, b) => a + (b || 0), 0);
+  SNXRanglijst.score({ score: totaal, duration: speeltijd });
   if (won) {
     stars[level] = Math.max(stars[level] || 0, st); store.set('stars', stars);
     store.set('unlocked', Math.max(store.get('unlocked', 1), Math.min(MAX_LEVEL, level + 1)));
@@ -757,6 +765,8 @@ async function finishLevel(won) {
 }
 
 $('playBtn').addEventListener('click', openIntro);
+SNXRanglijst.init({ game: 'match', titel: 'Snack Match (totaal alle levels)' });
+$('rlSlot').appendChild(SNXRanglijst.button('RANGLIJST & MEEDOEN'));
 $('startBtn').addEventListener('click', startLevel);
 $('retryBtn').addEventListener('click', openIntro);
 $('nextBtn').addEventListener('click', () => { level = Math.min(MAX_LEVEL, level + 1); openIntro(); });

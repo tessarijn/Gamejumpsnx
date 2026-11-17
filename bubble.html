@@ -108,10 +108,12 @@ html, body { height: 100%; margin: 0; background: var(--rood-donker); color: #ff
     </div>
     <p id="overMsg"></p>
     <button class="btn" id="again" type="button">NOG EEN KEER</button>
+    <div id="rlSlot"></div>
     <a class="linkbtn" href="https://www.snxfood.com" target="_blank" rel="noopener">Bekijk de snacks op snxfood.com</a>
   </div>
 </div>
 
+<script src="assets/ranglijst.js"></script>
 <script>
 (() => {
 'use strict';
@@ -236,6 +238,7 @@ function pushRowTop() {
 }
 
 // ---------- state ----------
+let runStart = performance.now();
 let state = 'menu', score = 0, level = 1, popped = 0, shotsSinceRow = 0, rowEvery = 6;
 let cur = 0, next = 0, shot = null, aim = -Math.PI / 2, aiming = false;
 let fx = [], falling = [], texts = [], shake = 0, t0 = performance.now(), loadAnim = 0;
@@ -256,6 +259,7 @@ function startLevel() {
   $('level').textContent = 'Level ' + level;
 }
 function startGame() {
+  runStart = performance.now();
   score = 0; level = 1; popped = 0; fx = []; falling = []; texts = []; shot = null;
   startLevel();
   state = 'play';
@@ -443,6 +447,7 @@ function gameOver() {
   $('overTitle').textContent = newBest ? 'Nieuw record!' : 'Game over';
   $('overMsg').textContent = popped >= 50 ? popped + ' snacks geknald. Die hebben echt honger gekregen.' : 'De snacks zijn de streep over. Probeer het nog een keer.';
   setTimeout(() => { $('over').hidden = false; $('hud').hidden = true; }, 600);
+  SNXRanglijst.score({ score, duration: (performance.now() - runStart) / 1000 });
 }
 
 // ---------- drawing ----------
@@ -598,6 +603,8 @@ buildLegend();
 
 $('play').addEventListener('click', () => { try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch {} startGame(); });
 $('again').addEventListener('click', startGame);
+SNXRanglijst.init({ game: 'blaster', titel: 'Snack Blaster' });
+$('rlSlot').appendChild(SNXRanglijst.button('RANGLIJST & MEEDOEN'));
 $('best').textContent = 'Record ' + best;
 requestAnimationFrame(frame);
 
