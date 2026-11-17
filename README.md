@@ -66,3 +66,11 @@ GitHub Pages via `.github/workflows/pages.yml` (bij push naar `main`). Daarna me
 ```
 
 Huisstijl: SNX-Visueel-Bronbestand (hoogste versie in Drive).
+
+## SNXbar Tycoon (`snxbar.html`)
+Tweede game: een farming-sim-achtige tycoon waarin je één SNXbar uitbouwt tot een Europese keten.
+- Dagritme 06:00–02:00, bar open 10:00–21:00, seizoenen van 10 dagen, weer en festivals.
+- Bakken aan de friteuse, porties pakken, klanten aan de toonbank serveren (geduldbalk, fooi, reputatie).
+- Groothandelskrat bij de deur: restporties worden 's nachts verkocht (60%). Dagelijkse B2B-opdrachten op het bord.
+- Groothandel: voorraad en koffie. Kantoor: upgrades, menukaart (K-Rocket, BOB Burger), personeel, 12 filialen in Europa.
+- Opslaan in de browser (localStorage). Online op `<github-pages-url>/snxbar.html`.

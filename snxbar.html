@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#ff2625">
+<title>SNXbar Tycoon</title>
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--snx:#ff2625;--crust:#d12325;--ink:#111;--steen:#e7e5e0;--paper:#fffaf2;--groen:#2e9d4f}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#1b1b1b;font-family:Poppins,system-ui,sans-serif;color:var(--ink);touch-action:none;-webkit-user-select:none;user-select:none}
+canvas{display:block}
+.panel{background:rgba(255,250,242,.95);border:3px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink)}
+#hudL{position:fixed;left:calc(8px + env(safe-area-inset-left));top:calc(8px + env(safe-area-inset-top));padding:6px 10px;font-size:12px;line-height:1.35;min-width:150px;font-weight:600}
+#hudL .big{font-size:17px;font-weight:800}
+#hudR{position:fixed;right:calc(8px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));padding:6px 10px;text-align:right;font-size:12px;font-weight:600;line-height:1.35}
+#hudR .big{font-size:18px;font-weight:800}
+.bar{height:8px;border:2px solid var(--ink);border-radius:6px;background:#fff;overflow:hidden;margin-top:3px}
+.bar i{display:block;height:100%;background:var(--groen)}
+#open{display:inline-block;padding:0 6px;border-radius:5px;color:#fff;font-size:11px;font-weight:800;background:#777}
+#open.on{background:var(--snx)}
+#tray{position:fixed;left:calc(8px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));padding:5px 8px;font-size:11px;font-weight:600;display:flex;gap:10px;align-items:center}
+#tray .slots{display:flex;gap:3px}
+#tray .slot{width:30px;height:30px;border:2px dashed #999;border-radius:7px;display:grid;place-items:center;background:#fff}
+#tray .slot img{width:26px;height:26px;object-fit:contain}
+#tray .stock{line-height:1.3}
+#prompt{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom));padding:5px 12px;font-weight:800;font-size:14px;white-space:nowrap;display:none;background:var(--ink);color:#fff;border-radius:10px}
+#prompt b{background:var(--snx);border-radius:5px;padding:0 6px;margin-right:6px}
+#toasts{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top));transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:92%}
+.toast{background:var(--ink);color:#fff;font-weight:600;font-size:13px;padding:6px 12px;border-radius:10px;animation:t 3.2s forwards;text-align:center}
+.toast.good{background:var(--groen)}.toast.bad{background:var(--crust)}
+@keyframes t{0%{opacity:0;transform:translateY(-6px)}8%,80%{opacity:1;transform:none}100%{opacity:0}}
+#menuBtn{position:fixed;right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:44px;height:44px;font-size:20px;font-weight:800;cursor:pointer}
+#act{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(64px + env(safe-area-inset-bottom));width:92px;height:92px;border-radius:50%;background:#9a9a9a;transition:background .15s;color:#fff;border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink);font:800 13px Poppins,sans-serif;display:none;padding:6px;line-height:1.1}
+#act:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+#joy{position:fixed;width:110px;height:110px;border-radius:50%;border:3px solid rgba(255,255,255,.7);background:rgba(0,0,0,.18);display:none;pointer-events:none}
+#joy i{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:rgba(255,255,255,.85);border:3px solid var(--ink)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:12px;z-index:10}
+#modal .box{width:min(560px,100%);max-height:92vh;overflow:auto;padding:16px 16px 14px;touch-action:pan-y}
+#modal h2{margin:0 0 6px;font-weight:800;font-size:21px;color:var(--crust)}
+#modal p{margin:6px 0;font-size:14px}
+.row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e3ddd2;font-size:13px}
+.row:last-child{border-bottom:0}
+.row img{width:40px;height:40px;object-fit:contain}
+.row .grow{flex:1;min-width:0}
+.row .grow b{display:block;font-size:14px}
+.row .muted{color:#666;font-size:12px}
+button.b{font:800 13px Poppins,sans-serif;background:var(--snx);color:#fff;border:2px solid var(--ink);border-radius:9px;padding:7px 12px;cursor:pointer;box-shadow:0 2px 0 var(--ink);white-space:nowrap}
+button.b:disabled{background:#bbb;color:#eee;cursor:not-allowed;box-shadow:none}
+button.b.alt{background:#fff;color:var(--ink)}
+button.b.dark{background:var(--ink)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tabs button{font:700 12px Poppins,sans-serif;border:2px solid var(--ink);background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:#fff}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;justify-content:flex-end}
+table.sum{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+table.sum td{padding:4px 0;border-bottom:1px solid #e3ddd2}
+table.sum td:last-child{text-align:right;font-weight:700}
+table.sum tr.tot td{font-size:16px;font-weight:800;border-bottom:0;padding-top:8px}
+.pos{color:var(--groen)}.neg{color:var(--crust)}
+#title{position:fixed;inset:0;background:var(--snx);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;z-index:20;padding:20px;text-align:center}
+#title img{width:min(260px,60vw)}
+#title h1{margin:0;font-size:clamp(30px,8vw,54px);font-weight:800;line-height:1;letter-spacing:-1px}
+#title p{margin:0;max-width:440px;font-size:14px;font-weight:500}
+#title .btns{justify-content:center}
+#title button.b{font-size:16px;padding:10px 20px;background:#fff;color:var(--ink)}
+#title a{color:#fff;font-size:12px}
+.kbd{display:inline-block;border:2px solid var(--ink);border-radius:5px;padding:0 5px;font-weight:800;font-size:12px;background:#fff}
+#hudD{position:fixed;right:calc(8px + env(safe-area-inset-right));top:calc(8px + env(safe-area-inset-top));padding:6px 10px;text-align:right;font-size:12px;font-weight:600;line-height:1.35;display:none}
+#hudD .big{font-size:18px;font-weight:800;color:var(--groen)}
+#title .roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:min(720px,100%)}
+#title .role{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);padding:12px 10px;cursor:pointer;font:inherit;text-align:center}
+#title .role:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+#title .role img{width:56px;height:46px;object-fit:contain}
+#title .role b{display:block;font-size:17px;font-weight:800;color:var(--crust)}
+#title .role span{display:block;font-size:11px;color:#555;margin-top:2px}
+#title .free{font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;opacity:.95}
+#title .free button.b{font-size:12px;padding:5px 10px}
+@media (max-width:560px){#title .roles{grid-template-columns:1fr}#title .role{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px}#title .role img{width:44px;height:36px}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:8px 0}
+.tile{border:2px solid var(--ink);border-radius:10px;padding:6px 8px;background:#fff}
+.tile b{display:block;font-size:20px;font-weight:800;color:var(--crust);line-height:1.1}
+.tile span{font-size:11px;color:#555}
+table.pt{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}
+table.pt th,table.pt td{padding:4px 3px;border-bottom:1px solid #e3ddd2;text-align:right}
+table.pt th:first-child,table.pt td:first-child{text-align:left}
+.calc{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 10px;margin:8px 0}
+.calc label{display:block;font-size:12px;font-weight:600;margin-top:6px}
+.calc input[type=range]{width:100%;accent-color:var(--snx);touch-action:pan-x}
+.calc .out{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.calc .out div{background:var(--paper);border-radius:8px;padding:5px 8px;font-size:11px}
+.calc .out b{display:block;font-size:17px;font-weight:800}
+.note{font-size:11px;color:#666}
+form.lead label{display:block;font-size:12px;font-weight:600;margin-top:8px}
+form.lead input[type=text],form.lead input[type=email],form.lead input[type=tel],form.lead select{width:100%;font:500 14px Poppins,sans-serif;padding:7px 9px;border:2px solid var(--ink);border-radius:8px;background:#fff;-webkit-user-select:text;user-select:text}
+form.lead .chk{display:flex;gap:8px;align-items:flex-start;font-weight:500;font-size:12px;margin-top:6px}
+form.lead .chk input{margin-top:3px;accent-color:var(--snx)}
+.err{color:var(--crust);font-size:12px;font-weight:600;min-height:16px}
+#act.pick{background:#2b6fd6}#act.give{background:#2e9d4f}#act.fry{background:#f28c18}#act.promo{background:#8e44ad}#act.talk{background:#1fa7a7}#prompt.talk{background:#1fa7a7}#act.info{background:#555}
+#act .ic{display:block;font-size:24px;line-height:1;margin-bottom:2px}
+#prompt{white-space:normal;max-width:92vw;text-align:center}
+#prompt.pick{background:#2b6fd6}#prompt.give{background:#2e9d4f}#prompt.fry{background:#f28c18}#prompt.promo{background:#8e44ad}
+#prompt.coach{background:rgba(255,250,242,.95);color:var(--ink);border:2px solid var(--ink);font-weight:600;font-size:13px}
+#prompt.coach b{background:#2e9d4f;color:#fff}
+@media (max-width:700px){#prompt{bottom:auto;top:calc(92px + env(safe-area-inset-top));font-size:13px}#toasts{top:calc(132px + env(safe-area-inset-top))}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="hudL" class="panel">
+  <div class="big" id="hTime">06:00</div>
+  <div id="hDay">Ma · dag 1 · Lente</div>
+  <div><span id="hWeather">Zon</span> · <span id="open">DICHT</span></div>
+  <div style="margin-top:2px">Energie</div>
+  <div class="bar"><i id="hEnergy" style="width:100%"></i></div>
+</div>
+<div id="hudR" class="panel">
+  <div class="big" id="hMoney">€ 0</div>
+  <div>Reputatie <span id="hRep">0</span></div>
+  <div>Filialen <span id="hBr">0</span>/12</div>
+</div>
+<div id="hudD" class="panel">
+  <div class="big" id="dMargin">€ 0</div>
+  <div>brutomarge</div>
+  <div id="dSold">0 verkocht</div>
+</div>
+<div id="tray" class="panel">
+  <div class="slots" id="tSlots"></div>
+  <div class="stock" id="tStock"></div>
+</div>
+<div id="prompt"></div>
+<div id="toasts"></div>
+<button id="menuBtn" class="panel" aria-label="Menu">☰</button>
+<button id="act">ACTIE</button>
+<div id="joy"><i></i></div>
+<div id="modal"><div class="box panel" id="mbox"></div></div>
+
+<div id="title">
+  <img src="assets/logo_white.webp" alt="SNX">
+  <h1>Wat levert SNX jouw zaak op?</h1>
+  <p>Kies je rol en draai een korte dienst van ±2,5 minuut. Daarna zie je je business case: verkoop, marge en wat het per jaar kan opleveren.</p>
+  <div class="roles">
+    <button class="role" data-role="gh"><img src="assets/doos.webp" alt=""><div><b>Groothandel</b><span>Cash &amp; carry, foodservice-groothandel, distributeur</span></div></button>
+    <button class="role" data-role="rt"><img src="assets/kroket.webp" alt=""><div><b>Retail</b><span>Supermarkt, tankstationshop, gemakswinkel</span></div></button>
+    <button class="role" data-role="fs"><img src="assets/burger.webp" alt=""><div><b>Foodservice</b><span>Kantine, snackbar, stadion, horeca</span></div></button>
+  </div>
+  <div class="free">Of speel de volledige game SNXbar Tycoon:
+    <button class="b" id="bCont" style="display:none">Verder spelen</button>
+    <button class="b" id="bNew">Nieuw spel</button>
+  </div>
+  <p style="font-size:12px;opacity:.9">Toetsenbord: pijltjes/WASD lopen · <b>E</b> of spatie = actie · Esc = menu<br>Telefoon: sleep links om te lopen · rode knop = actie</p>
+  <a href="https://www.snxfood.com" target="_blank" rel="noopener">snxfood.com</a>
+</div>
+
+<script>
+'use strict';
+// ---------- basis ----------
+const $ = s => document.querySelector(s);
+const cv = $('#c');
+const TS = 32, MW = 44, MH = 32;
+const MIN_S = 0.42;               // echte seconden per spelminuut
+const OPEN_AT = 600, CLOSE_AT = 1260, PASS_OUT = 1560;
+const SAVE_KEY = 'snxbar_save_v1';
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const euro = v => '€ ' + (Math.round(v * 100) / 100).toLocaleString('nl-NL', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const SEASONS = ['Lente', 'Zomer', 'Herfst', 'Winter'];
+const WEEK = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+
+const PRODUCTS = {
+  b: { name: 'Betterbal', plural: 'Betterballen', img: 'bal', price: 4, cook: 6, pack: 10, packCost: 10 },
+  k: { name: 'K-Rocket', plural: 'K-Rockets', img: 'kroket', price: 6, cook: 8, pack: 10, packCost: 15, unlock: 200, rep: 15 },
+  r: { name: 'BOB Burger', plural: 'BOB Burgers', img: 'burger', price: 11, cook: 12, pack: 6, packCost: 18, unlock: 600, rep: 35 },
+};
+const UPG = {
+  fryer:     { name: 'Extra friteuse', cost: [300, 800, 1800], desc: 'Meer bakplekken tegelijk (max 4).' },
+  basket:    { name: 'Dubbele mand', cost: [900], desc: 'Elke bakbeurt levert 2 porties.' },
+  tray:      { name: 'Groot dienblad', cost: [250], desc: 'Draag 4 porties in plaats van 2.' },
+  shoes:     { name: 'Snelle sneakers', cost: [180], desc: '25% sneller lopen.' },
+  terras:    { name: 'Terras', cost: [700], desc: 'Klanten wachten 30% langer, extra reputatie.' },
+  flyers:    { name: 'Flyers in de buurt', cost: [150], desc: '+2 klanten per uur.' },
+  social:    { name: 'Social-campagne', cost: [650], desc: '+3 klanten per uur.' },
+  billboard: { name: 'Billboard aan de snelweg', cost: [2000], desc: '+5 klanten per uur.' },
+};
+const STAFF_COST = [400, 1200], WAGE = 30;
+const CITIES = [
+  ['Rotterdam', 'NL', 1000, 60, 8], ['Antwerpen', 'BE', 1800, 95, 12], ['Brussel', 'BE', 2800, 135, 18],
+  ['Düsseldorf', 'DE', 4000, 180, 24], ['Keulen', 'DE', 5500, 230, 30], ['Lille', 'FR', 7500, 290, 36],
+  ['Parijs', 'FR', 10000, 370, 44], ['Hamburg', 'DE', 13000, 450, 50], ['Kopenhagen', 'DK', 17000, 550, 58],
+  ['Wenen', 'AT', 22000, 670, 66], ['Milaan', 'IT', 28000, 800, 74], ['Barcelona', 'ES', 35000, 950, 82],
+];
+const B2B = ['Sportkantine De Spurt', 'Bedrijfsrestaurant Noord', 'Tankstation A12', 'Schoolkantine Het Plein', 'Stadion Oost', 'Buurtsuper De Hoek', 'Festival Zomerpark', 'Zwembad De Golf'];
+
+// ================= VERKOOPINSTELLINGEN =================
+// Inkoopprijzen: inventory.snxfood.com/direct-bestellen, excl. btw (opgehaald 16 nov 2026).
+//   fs = standaardprijzen per doos (horeca direct), omgerekend naar portie
+//   rt = ?kanaal=retail (inkoop + adviesprijs incl. 9% btw)
+//   gh = ?kanaal=wholesale (palletprijs per doos); verkoopprijs = SNX-direct horecaprijs per doos
+// prices: { product: [inkoop excl. btw, verkoopprijs] }. vat: true = verkoopprijs is incl. 9% btw.
+// Verkoopprijzen bij fs zijn AANNAMES; de speler kan ze in de business case aanpassen.
+const CONFIG = {
+  leadEndpoint: null,          // later: Supabase Edge Function die B2B-leads naar ActiveCampaign stuurt
+  demoMinS: 1.0,               // echte seconden per spelminuut in de demo (150 min = 2,5 min)
+  privacyUrl: 'https://www.snxfood.com',
+  roles: {
+    fs: { title: 'Foodservice', unit: 'portie', units: 'porties', tray: 'Dienblad', start: 690, end: 840, spawn: 5.2, perDay: 80, days: 5,
+      sign: null, shift: 'lunchspits', role: 'Eigenaar / F&B-manager',
+      intro: ['Je runt een kantine of snackbar tijdens de lunchspits.', 'Kies aan de friteuse wat je bakt, pak de porties en serveer ze aan de toonbank.', 'Let op de geduldbalk boven de klant: snel helpen = tevreden gasten.'],
+      vat: true, sellNote: 'Verkoopprijs = aanname, pas aan naar jouw menukaart (incl. 9% btw).',
+      names: { b: 'Portie 6 bitterballen (25% rundvlees)', k: 'Kroket 100 gr (25% rundvlees)', r: 'Hamburger 120 gr + bun 10 cm' },
+      // bitterbal BULK 25% 300 st € 130,37 → 6 × € 0,4346 · kroket BULK 25% 100 st € 139,16 · hamburger 36×120 gr € 59,45 + bun 30 st € 26,10
+      prices: { b: [2.61, 6.50], k: [1.39, 3.95], r: [2.52, 5.95] } },
+    rt: { title: 'Retail', unit: 'verpakking', units: 'verpakkingen', tray: 'Kar', start: 960, end: 1110, spawn: 4.0, perDay: 30, days: 7,
+      sign: 'SUPERMARKT', shift: 'middagspits', role: 'Category manager / inkoper',
+      intro: ['Je bent de supermarkt in de middagspits. Shoppers pakken SNX zelf uit het diepvriesschap.', 'Haal verpakkingen uit het magazijn (achter) en vul het schap aan de toonbank.', 'Leeg schap = gemiste verkoop. Houd alle drie de producten op voorraad.'],
+      vat: true, sellNote: 'Verkoopprijs = SNX-adviesprijs incl. 9% btw.',
+      names: { b: 'Snackdoos Bitterbal 25%', k: 'Snackdoos Kroket 25%', r: 'Snackdoos Hamburger 120 gr' },
+      prices: { b: [3.85, 5.99], k: [4.31, 6.75], r: [2.56, 4.28] } },
+    gh: { title: 'Groothandel', unit: 'doos', units: 'dozen', tray: 'Kar', start: 360, end: 510, spawn: 7.0, perDay: 40, days: 5,
+      sign: 'GROOTHANDEL', shift: 'ochtendroute', role: 'Inkoper / category manager',
+      intro: ['Je runt de ochtendroute van een groothandel.', 'Klanten (snackbars, kantines, supermarkten) halen bestellingen op aan het laaddock.', 'Pak dozen uit de stellingen en laad de complete bestelling in voor de klant vertrekt.'],
+      vat: false, sellNote: 'Verkoopprijs = SNX-direct horecaprijs per doos (excl. btw); jouw eigen prijs kan afwijken.',
+      names: { b: 'Verzenddoos Bitterbal 25% (54 st)', k: 'Verzenddoos Kroket 25% (18 st)', r: 'Hamburgers 36×120 gr' },
+      prices: { b: [18.68, 23.47], k: [19.94, 23.10], r: [46.01, 59.45] } },
+  },
+};
+// Vragen, tegenwerpingen en USP's. Alleen claims die op snxfood.com staan (stand nov 2026). a[0] is het goede antwoord.
+const TALK = {
+  questions: [
+    { q: 'Wat is eigenlijk een hybride snack?', a: ['Best of Both: vlees én plantaardig eiwit en vezels. Minder vlees, net zo lekker.', 'Een snack helemaal zonder vlees.', 'Een snack met extra vet voor de smaak.'] },
+    { q: 'Is dit nou wel gezond?', a: ['De BOB Burger heeft Nutri-Score A, de bitterbal en kroket Nutri-Score B.', 'Nee, maar wel lekker.', 'Er zitten helemaal geen calorieën in.'] },
+    { q: 'Snacks zijn toch altijd ongezond?', a: ['SNX schrapt de onnodige suikers, vetten en lege koolhydraten.', 'Klopt, daar is niks aan te doen.', 'Als je er maar één eet, is het gezond.'] },
+    { q: 'Mijn gasten willen gewoon een vleessnack…', a: ['SNX belooft snacks die duurzamer, gezonder én erg lekker zijn. Laat ze proeven!', 'Dan moet je het maar niet verkopen.', 'Zeg gewoon niet wat erin zit.'] },
+    { q: 'Wat betekent BOB?', a: ['Best of Both.', 'Big Old Burger.', 'Bakken Op Barbecue.'] },
+    { q: 'Is dat niet lastig klaarmaken?', a: ['Nee: bitterballen en kroketten gaan diepgevroren de frituur in. Burgers op grill, bakplaat of in de pan.', 'Eerst 24 uur ontdooien.', 'Alleen in een speciale oven.'], roles: ['fs', 'gh', 'tycoon'] },
+    { q: 'Hoe moet ik het bewaren?', a: ['In de vriezer, bij -18 °C.', 'Gewoon in de koelkast.', 'Op kamertemperatuur in de kast.'], roles: ['rt', 'gh'] },
+    { q: 'Waar kan ik SNX als horeca bestellen?', a: ['Via groothandel VHC en Nice to Meat, of direct via het SNX-bestelportaal.', 'Alleen in de supermarkt.', 'Dat kan nog nergens.'], roles: ['gh', 'fs'] },
+  ],
+  lines: ['Lekker! Best of Both 😋', 'Mam, mag ik er nog één?', 'Nutri-Score A en tóch een burger!', 'Duurzamer én lekker, top!', 'Die bitterbal is echt goed!', 'Minder vlees? Proef je niks van!'],
+  gh: ['Mijn gasten vragen er steeds vaker om.', 'Volgende week weer, graag!', 'Snel geleverd, top!'],
+};
+const isDemo = () => !!(S && S.mode && S.mode !== 'tycoon');
+const ROLE = () => CONFIG.roles[S.mode];
+const cookTime = p => PRODUCTS[p].cook * (isDemo() ? 0.65 : 1);
+const buyPrice = p => isDemo() ? ROLE().prices[p][0] : 0;
+const sellPrice = p => isDemo() ? ROLE().prices[p][1] / (ROLE().vat ? 1.09 : 1) : PRODUCTS[p].price;   // excl. btw
+function unitName(p) {
+  if (!isDemo() || S.mode === 'fs') return PRODUCTS[p].name;
+  return (S.mode === 'gh' ? 'doos ' : 'verpakking ') + PRODUCTS[p].plural;
+}
+
+// ---------- plaatjes ----------
+const IMG = {};
+['bal', 'kroket', 'burger', 'logo_white', 'doos'].forEach(n => { const i = new Image(); i.src = 'assets/' + n + '.webp'; IMG[n] = i; });
+const imgOk = i => i && i.complete && i.naturalWidth > 0;
+
+// ---------- geluid ----------
+let AC = null, muted = false;
+function beep(f, d, type = 'square', v = 0.05, delay = 0) {
+  if (muted) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d);
+  } catch (e) { }
+}
+const sfx = {
+  cash() { beep(880, .08); beep(1320, .14, 'square', .05, .07); },
+  pick() { beep(520, .06, 'triangle', .07); },
+  fry() { beep(180, .12, 'sawtooth', .025); },
+  ready() { beep(660, .07, 'triangle', .06); beep(990, .09, 'triangle', .06, .08); },
+  bad() { beep(200, .2, 'square', .04); },
+  buy() { beep(700, .06); beep(1050, .1, 'square', .05, .06); },
+};
+
+// ---------- kaart ----------
+const G = 0, P = 1, W = 2, F = 3, WA = 4, C = 5, TR = 6, RF = 9, K = 10, FL = 11;
+const map = new Uint8Array(MW * MH);
+const SOLID = new Uint8Array(MW * MH);
+const tAt = (x, y) => (x < 0 || y < 0 || x >= MW || y >= MH) ? TR : map[y * MW + x];
+const setT = (x, y, v) => { if (x >= 0 && y >= 0 && x < MW && y < MH) map[y * MW + x] = v; };
+const rect = (x0, y0, x1, y1, v) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) setT(x, y, v); };
+
+const BUILDINGS = [
+  { id: 'home', x0: 2, y0: 3, x1: 8, y1: 8, door: 5, roof: '#8b4a3a', roof2: '#6f3a2d', wall: '#f1e3c8', label: 'THUIS' },
+  { id: 'gh', x0: 37, y0: 3, x1: 42, y1: 9, door: 39, roof: '#3c5a78', roof2: '#2e4760', wall: '#e7e5e0', label: 'GROOTHANDEL' },
+  { id: 'office', x0: 31, y0: 12, x1: 36, y1: 17, door: 33, roof: '#4a4a4a', roof2: '#333', wall: '#ffffff', label: 'KANTOOR' },
+];
+const FRYERS_POS = [[16, 7], [18, 7], [20, 7], [22, 7]];
+const SLOTS = [16, 18, 20, 22, 24, 26];    // klantplekken voor de toonbank (y = 11)
+const PROMO = [17, 17], KRAT = [19, 17], BOARD = [24, 17], FRIDGE = [[26, 7], [27, 7]];
+const TABLES = [[15, 14], [16, 14], [26, 14], [27, 14]];
+const TERRAS = [[15, 18], [17, 18], [27, 18]];
+const LAMPS = [[13, 19], [30, 19], [10, 22], [25, 22], [37, 22], [4, 19]];
+let TREES = [], FLOWERS = [];
+
+function seeded(s) { return () => (s = (s * 16807) % 2147483647) / 2147483647; }
+function buildMap() {
+  map.fill(G);
+  rect(0, 20, MW - 1, 21, P);              // hoofdweg
+  rect(21, 22, 22, MH - 1, P);             // weg naar het zuiden
+  rect(14, 17, 29, 19, P);                 // plein voor de bar
+  rect(5, 9, 5, 19, P); rect(33, 18, 33, 19, P); rect(39, 10, 39, 19, P);
+  rect(5, 24, 11, 28, WA); setT(5, 24, G); setT(11, 28, G); setT(11, 24, G); setT(5, 28, G);
+  // SNXbar
+  rect(14, 6, 29, 16, W); rect(15, 7, 28, 15, F); rect(15, 7, 28, 9, K);
+  rect(15, 10, 27, 10, C); setT(21, 16, F); setT(22, 16, F);
+  for (const b of BUILDINGS) rect(b.x0, b.y0, b.x1, b.y1, RF);
+  // bomen en bloemen
+  const r = seeded(4242); TREES = []; FLOWERS = [];
+  const free = (x, y, pad) => { for (let yy = y - pad; yy <= y + pad; yy++) for (let xx = x - pad; xx <= x + pad; xx++) { if (xx < 0 || yy < 0 || xx >= MW || yy >= MH) continue; if (map[yy * MW + xx] !== G) return false; } return true; };
+  for (let x = 0; x < MW; x++) { if (x !== 21 && x !== 22) addTree(x, MH - 1); addTree(x, 0); }
+  for (let y = 1; y < MH - 1; y++) { if (y !== 20 && y !== 21) { addTree(0, y); addTree(MW - 1, y); } }
+  for (let n = 0; n < 900 && TREES.length < 150; n++) {
+    const x = 1 + Math.floor(r() * (MW - 2)), y = 1 + Math.floor(r() * (MH - 2));
+    if (y >= 3 && y <= 19 && x >= 12 && x <= 30) continue;      // rond de bar vrij
+    if (free(x, y, 1) && r() < 0.55) addTree(x, y);
+  }
+  for (let n = 0; n < 160; n++) {
+    const x = Math.floor(r() * MW), y = Math.floor(r() * MH);
+    if (map[y * MW + x] === G) { map[y * MW + x] = FL; FLOWERS.push([x, y, Math.floor(r() * 3)]); }
+  }
+  function addTree(x, y) { if (tAt(x, y) === G || tAt(x, y) === FL) { setT(x, y, TR); TREES.push([x, y, r()]); } }
+}
+function rebuildSolid() {
+  for (let i = 0; i < MW * MH; i++) { const t = map[i]; SOLID[i] = (t === W || t === WA || t === C || t === TR || t === RF) ? 1 : 0; }
+  const s = (x, y) => SOLID[y * MW + x] = 1;
+  FRYERS_POS.forEach(([x, y]) => s(x, y)); FRIDGE.forEach(([x, y]) => s(x, y)); TABLES.forEach(([x, y]) => s(x, y));
+  s(KRAT[0], KRAT[1]); s(BOARD[0], BOARD[1]); s(PROMO[0], PROMO[1]); LAMPS.forEach(([x, y]) => s(x, y));
+  s(24, 7);                                  // spoelbak
+  if (S && S.upg.terras) TERRAS.forEach(([x, y]) => s(x, y));
+}
+const solidAt = (px, py) => { const x = Math.floor(px / TS), y = Math.floor(py / TS); if (x < 0 || y < 0 || x >= MW || y >= MH) return true; return SOLID[y * MW + x] === 1; };
+const hit = (x, y) => solidAt(x - 7, y - 6) || solidAt(x + 7, y - 6) || solidAt(x - 7, y - 0.5) || solidAt(x + 7, y - 0.5);
+
+// ---------- achtergrond (per seizoen voorgetekend) ----------
+const bg = document.createElement('canvas'); bg.width = MW * TS; bg.height = MH * TS;
+const fg = document.createElement('canvas'); fg.width = MW * TS; fg.height = MH * TS;
+const PAL = [
+  { grass: '#86cc6e', grass2: '#80c669', leaf: '#4f9e4a', leaf2: '#3f8a3e', dot: '#ffb7d2', water: '#4aa3d8' },
+  { grass: '#74c25a', grass2: '#6fbc56', leaf: '#3d8a3c', leaf2: '#2f7531', dot: '#ffe26b', water: '#3f9ad4' },
+  { grass: '#b4b65e', grass2: '#adaf59', leaf: '#d9782c', leaf2: '#b8521f', dot: '#8a3b1a', water: '#4a8fbe' },
+  { grass: '#eef3f6', grass2: '#e7eef2', leaf: '#e4ecf1', leaf2: '#c4d3dc', dot: '#ffffff', water: '#bfe3f2' },
+];
+let bgSeason = -1;
+function rr(c, x, y, w, h, r) { c.beginPath(); c.roundRect ? c.roundRect(x, y, w, h, r) : c.rect(x, y, w, h); c.fill(); }
+function drawBG(season) {
+  bgSeason = season;
+  const c = bg.getContext('2d'), pal = PAL[season], r = seeded(77);
+  c.clearRect(0, 0, bg.width, bg.height);
+  for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
+    const t = map[y * MW + x], px = x * TS, py = y * TS;
+    c.fillStyle = ((x + y) % 2) ? pal.grass : pal.grass2; c.fillRect(px, py, TS, TS);
+    if (t === G || t === FL || t === TR) {
+      c.fillStyle = 'rgba(0,0,0,.06)';
+      for (let i = 0; i < 3; i++) c.fillRect(px + Math.floor(r() * 28), py + Math.floor(r() * 28), 2, 4);
+    }
+    if (t === P) {
+      c.fillStyle = season === 3 ? '#d9d9d9' : '#cbbfa6'; c.fillRect(px, py, TS, TS);
+      c.fillStyle = season === 3 ? '#c6c6c6' : '#b6a98e';
+      c.fillRect(px, py + 15, TS, 2); c.fillRect(px + ((y % 2) ? 8 : 24), py, 2, 15); c.fillRect(px + ((y % 2) ? 24 : 8), py + 17, 2, 15);
+    }
+    if (t === WA) {
+      c.fillStyle = pal.water; c.fillRect(px, py, TS, TS);
+      c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(px + 6 + (x % 3) * 4, py + 10 + (y % 2) * 8, 10, 2);
+    }
+    if (t === F) { c.fillStyle = ((x + y) % 2) ? '#f3eee6' : '#e4ddd0'; c.fillRect(px, py, TS, TS); }
+    if (t === K) { c.fillStyle = '#d4d7da'; c.fillRect(px, py, TS, TS); c.fillStyle = '#c3c7cb'; c.fillRect(px, py, TS, 1); c.fillRect(px, py, 1, TS); }
+    if (t === W) {
+      c.fillStyle = '#d12325'; c.fillRect(px, py, TS, TS); c.fillStyle = '#ad1b1d';
+      for (let k = 0; k < 4; k++) { c.fillRect(px, py + k * 8 + 7, TS, 1); c.fillRect(px + ((k % 2) ? 4 : 20), py + k * 8, 1, 8); }
+      if (y === 6) { c.fillStyle = '#8f1416'; c.fillRect(px, py, TS, 6); }
+    }
+    if (t === C) {
+      c.fillStyle = '#ffffff'; c.fillRect(px, py + 12, TS, 20);
+      c.fillStyle = '#ff2625'; c.fillRect(px, py + 22, TS, 6);
+      c.fillStyle = '#8a5a3c'; c.fillRect(px, py + 2, TS, 12); c.fillStyle = '#a8724e'; c.fillRect(px, py + 2, TS, 4);
+    }
+  }
+  // bloemen
+  for (const [x, y, k] of FLOWERS) {
+    if (season === 3) continue;
+    const cols = [['#ff6b8a', '#ffd23f', '#ffffff'], ['#ffd23f', '#ff8c42', '#ffffff'], ['#d9782c', '#8a3b1a', '#e0b04a']][Math.min(k, 2)];
+    for (let i = 0; i < 3; i++) { c.fillStyle = cols[(i + season) % 3]; c.fillRect(x * TS + 6 + i * 8, y * TS + 8 + (i % 2) * 10, 4, 4); }
+  }
+  // gebouwen
+  for (const b of BUILDINGS) {
+    const x = b.x0 * TS, y = b.y0 * TS, w = (b.x1 - b.x0 + 1) * TS, h = (b.y1 - b.y0 + 1) * TS, fh = 2 * TS;
+    c.fillStyle = 'rgba(0,0,0,.18)'; c.fillRect(x + 6, y + 8, w, h);
+    c.fillStyle = b.wall; c.fillRect(x, y + h - fh, w, fh);
+    c.fillStyle = b.roof; c.fillRect(x - 4, y, w + 8, h - fh + 6);
+    c.fillStyle = b.roof2; for (let k = 0; k < (h - fh) / 10; k++) c.fillRect(x - 4, y + k * 10 + 8, w + 8, 2);
+    c.fillStyle = season === 3 ? '#ffffff' : b.roof2; c.fillRect(x - 4, y, w + 8, season === 3 ? 10 : 4);
+    // ramen
+    for (let wx = b.x0; wx <= b.x1; wx++) {
+      if (wx === b.door) continue;
+      if ((wx - b.x0) % 2 === 0) { c.fillStyle = '#5c4033'; c.fillRect(wx * TS + 6, y + h - fh + 26, 20, 18); c.fillStyle = '#9fd3f0'; c.fillRect(wx * TS + 8, y + h - fh + 28, 16, 14); c.fillStyle = '#fff'; c.fillRect(wx * TS + 15, y + h - fh + 28, 2, 14); }
+    }
+    // deur
+    c.fillStyle = '#5c4033'; c.fillRect(b.door * TS + 4, y + h - 42, 24, 42);
+    c.fillStyle = '#7b5643'; c.fillRect(b.door * TS + 7, y + h - 39, 18, 39); c.fillStyle = '#ffd23f'; c.fillRect(b.door * TS + 20, y + h - 20, 3, 3);
+    // bord
+    c.font = '800 11px Poppins, sans-serif'; const tw = c.measureText(b.label).width + 14;
+    c.fillStyle = '#111'; rr(c, x + w / 2 - tw / 2, y + h - fh - 4, tw, 18, 4);
+    c.fillStyle = '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(b.label, x + w / 2, y + h - fh + 5);
+  }
+  // boomstammen
+  for (const [x, y] of TREES) { c.fillStyle = 'rgba(0,0,0,.2)'; c.beginPath(); c.ellipse(x * TS + 16, y * TS + 28, 13, 5, 0, 0, 7); c.fill(); c.fillStyle = '#6b4a2f'; c.fillRect(x * TS + 12, y * TS + 10, 8, 20); }
+  // voorgrond: kruinen
+  const f = fg.getContext('2d'); f.clearRect(0, 0, fg.width, fg.height);
+  for (const [x, y, s] of TREES) {
+    const cx = x * TS + 16, cy = y * TS + 2, rad = 15 + s * 4;
+    f.fillStyle = pal.leaf2; f.beginPath(); f.arc(cx, cy + 3, rad, 0, 7); f.fill();
+    f.fillStyle = pal.leaf; f.beginPath(); f.arc(cx - 3, cy - 1, rad - 4, 0, 7); f.fill();
+    f.fillStyle = 'rgba(255,255,255,.18)'; f.beginPath(); f.arc(cx - 7, cy - 6, rad / 3, 0, 7); f.fill();
+    if (season !== 2) { f.fillStyle = pal.dot; for (let i = 0; i < 4; i++) f.fillRect(cx - 10 + ((s * 97 + i * 37) % 20), cy - 8 + ((s * 53 + i * 23) % 16), 3, 3); }
+  }
+}
+
+// ---------- staat ----------
+let S = null;
+function freshToday() { return { sales: 0, tips: 0, quest: 0, served: 0, angry: 0, lost: 0, stockCost: 0 }; }
+function newState() {
+  return { v: 1, day: 1, min: 360, money: 120, rep: 5, energy: 100, stock: { b: 20, k: 0, r: 0 }, unlocked: { b: true, k: false, r: false },
+    upg: { fryer: 0, basket: 0, tray: 0, shoes: 0, terras: 0, flyers: 0, social: 0, billboard: 0 }, staff: 0, branches: {},
+    krat: { b: 0, k: 0, r: 0 }, quest: null, today: freshToday(), total: { served: 0, earned: 0 }, weather: 'zon', won: false, tut: 0 };
+}
+const season = () => Math.floor((S.day - 1) / 10) % 4;
+const dayInSeason = () => (S.day - 1) % 10 + 1;
+const year = () => Math.floor((S.day - 1) / 40) + 1;
+const weekday = () => WEEK[(S.day - 1) % 7];
+const fryerCount = () => isDemo() ? 3 : 1 + S.upg.fryer;
+const trayCap = () => isDemo() ? (S.mode === 'fs' ? 3 : 4) : S.upg.tray ? 4 : 2;
+const branchCount = () => Object.keys(S.branches).length;
+const festival = () => (season() === 1 && dayInSeason() === 10) ? 'Zomerfestival' : (season() === 3 && dayInSeason() === 10) ? 'Wintermarkt' : null;
+function save() { if (isDemo()) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { } saved = S; const c = document.getElementById('bCont'); if (c) c.style.display = 'inline-block'; }
+function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) return s; } catch (e) { } return null; }
+
+// ---------- entiteiten ----------
+const player = { x: 0, y: 0, dir: 'down', moving: false, anim: 0, tray: [] };
+let fryers = [], customers = [], staff = [], floaters = [], slotUsed = [], rain = [];
+let promoCD = 0, boostT = 0, quietT = 0, quietHint = 0, qCD = 6, lastQ = -1;
+const LOOKS = { skin: ['#f6d2b5', '#e9b48f', '#c98d63', '#9a6440', '#6e4428'], hair: ['#2b1d14', '#5a3a22', '#b5793c', '#e2c06b', '#111', '#8a2b2b', '#cfcfcf'], shirt: ['#3b7dd8', '#2e9d4f', '#f2c14e', '#8e5bd1', '#ff8c42', '#1fa7a7', '#e85d9e', '#444', '#ffffff'], pants: ['#2c3e66', '#3a3a3a', '#5a4632', '#1f4d3a'] };
+function randomLook() { return { skin: pick(LOOKS.skin), hair: pick(LOOKS.hair), shirt: pick(LOOKS.shirt), pants: pick(LOOKS.pants), hairStyle: Math.floor(Math.random() * 3) }; }
+const PLAYER_LOOK = { skin: '#f0c7a4', hair: '#4a2e1c', shirt: '#ffffff', pants: '#222', apron: true, cap: true, hairStyle: 0 };
+
+function resetDayEntities() {
+  fryers = FRYERS_POS.map(([x, y], i) => ({ i, tx: x, ty: y, state: 'empty', p: null, t: 0, n: 0, claim: null }));
+  customers = []; floaters = []; slotUsed = SLOTS.map(() => null); player.tray = []; promoCD = 0; boostT = 0; quietT = 0; quietHint = 0; qCD = 6; lastQ = -1;
+  staff = [];
+  for (let i = 0; i < S.staff; i++) staff.push({ x: (19 + i * 3) * TS, y: 8.6 * TS, dir: 'down', moving: false, anim: 0, carry: [], task: null, idle: 0, look: { skin: pick(LOOKS.skin), hair: pick(LOOKS.hair), shirt: '#ffffff', pants: '#222', apron: true, hairStyle: i % 3 }, name: ['Sam', 'Noor'][i] });
+  player.x = 5.5 * TS; player.y = 10.3 * TS; player.dir = 'down';
+}
+
+// ---------- dag ----------
+function startDay() {
+  S.min = 360; S.today = freshToday();
+  const s = season(), r = Math.random();
+  S.weather = r < 0.6 ? 'zon' : r < 0.8 ? 'bewolkt' : (s === 3 ? 'sneeuw' : 'regen');
+  if (festival()) S.weather = 'zon';
+  S.quest = makeQuest();
+  resetDayEntities(); rebuildSolid();
+  if (bgSeason !== s) drawBG(s);
+  rain = [];
+  const fest = festival();
+  toast(`${weekday()} · dag ${dayInSeason()} van de ${SEASONS[s].toLowerCase()}${fest ? ' · ' + fest + '! Dubbel zo druk.' : ''}`);
+  if (S.day === 1) setTimeout(() => toast('Tip: loop naar je SNXbar (midden). De bar gaat om 10:00 open.'), 1500);
+}
+function makeQuest() {
+  const ks = Object.keys(PRODUCTS).filter(k => S.unlocked[k]), p = pick(ks), pr = PRODUCTS[p];
+  if (Math.random() < 0.5) {
+    const n = Math.min(20, 5 + Math.floor(S.day / 3));
+    return { type: 'sell', p, n, got: 0, reward: Math.round(n * pr.price * 0.6 + 15), done: false };
+  }
+  const n = Math.min(16, 4 + Math.floor(S.day / 4));
+  return { type: 'krat', p, n, got: 0, client: pick(B2B), reward: Math.round(n * pr.price * 0.9 + 20), done: false };
+}
+function questText(q) {
+  const pr = PRODUCTS[q.p];
+  return q.type === 'sell' ? `Verkoop ${q.n} ${pr.plural} aan klanten in de bar.` : `${q.client} bestelt ${q.n} ${pr.plural}. Lever ze vandaag in de groothandelskrat.`;
+}
+function questProgress(p, n, type) {
+  const q = S.quest; if (!q || q.done || q.type !== type || q.p !== p) return;
+  q.got = Math.min(q.n, q.got + n);
+  if (q.got >= q.n) { q.done = true; S.money += q.reward; S.today.quest += q.reward; addRep(3); sfx.cash(); toast(`Opdracht klaar! +${euro(q.reward)} en reputatie`, 'good'); }
+}
+function addRep(v) { S.rep = clamp(S.rep + v, 0, 100); }
+
+function goSleep(passedOut) {
+  closeModal();
+  const s = season();
+  const kratItems = Object.entries(S.krat).filter(([, n]) => n > 0);
+  const kratSale = kratItems.reduce((a, [p, n]) => a + n * PRODUCTS[p].price * 0.6, 0);
+  const seasonF = [1, 1.15, 1, 0.95][s];
+  let branchInc = 0;
+  for (const [name, lvl] of Object.entries(S.branches)) { const c = CITIES.find(c => c[0] === name); branchInc += c[3] * lvl * (0.7 + S.rep / 100 * 0.6) * seasonF; }
+  branchInc = Math.round(branchInc);
+  const wages = S.staff * WAGE;
+  let penalty = 0;
+  if (passedOut) penalty = Math.min(100, Math.round(S.money * 0.1));
+  const lost = player.tray.length;
+  S.money += kratSale + branchInc - wages - penalty;
+  S.total.earned += kratSale + branchInc;
+  const t = S.today;
+  const net = t.sales + t.tips + t.quest + kratSale + branchInc - wages - penalty - t.stockCost;
+  let rows = `<tr><td>Verkoop in de bar (${t.served} klanten)</td><td>${euro(t.sales)}</td></tr>
+    <tr><td>Fooien</td><td>${euro(t.tips)}</td></tr>
+    <tr><td>Groothandelskrat${kratItems.length ? ' (' + kratItems.map(([p, n]) => n + '× ' + PRODUCTS[p].name).join(', ') + ')' : ''}</td><td>${euro(kratSale)}</td></tr>
+    <tr><td>Opdrachten</td><td>${euro(t.quest)}</td></tr>
+    <tr><td>Filialen (${branchCount()})</td><td>${euro(branchInc)}</td></tr>
+    <tr><td>Inkoop groothandel</td><td class="neg">−${euro(t.stockCost)}</td></tr>
+    <tr><td>Lonen personeel</td><td class="neg">−${euro(wages)}</td></tr>`;
+  if (penalty) rows += `<tr><td>Flauwgevallen: taxi en dokter</td><td class="neg">−${euro(penalty)}</td></tr>`;
+  rows += `<tr class="tot"><td>Resultaat vandaag</td><td class="${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '' : '−'}${euro(Math.abs(net))}</td></tr>`;
+  let notes = '';
+  if (t.lost > 0) notes += `<p>⚠ ${t.lost} klanten liepen weg omdat de bar vol stond. Meer friteuses of personeel helpen.</p>`;
+  if (t.angry > 0) notes += `<p>⚠ ${t.angry} klanten gingen boos weg. Dat kost reputatie.</p>`;
+  if (lost) notes += `<p>${lost} porties op je dienblad zijn bedorven. Zet restjes voortaan in de krat.</p>`;
+  if (passedOut) notes = `<p><b>Je viel om 02:00 flauw.</b> Ga op tijd naar huis.</p>` + notes;
+  S.krat = { b: 0, k: 0, r: 0 };
+  S.day++; S.energy = passedOut ? 60 : 100;
+  modal(`<h2>Einde van dag ${dayInSeason()} · ${SEASONS[s]}</h2><table class="sum">${rows}</table>${notes}
+    <p class="muted">Kas: <b>${euro(S.money)}</b> · Reputatie ${Math.round(S.rep)}</p>
+    <div class="btns"><button class="b" data-a="next">Volgende dag</button></div>`, { next() { closeModal(); startDay(); save(); toast('Spel opgeslagen', 'good'); } }, true);
+}
+
+// ---------- klanten ----------
+function custPerHour() {
+  let r = 3 + S.rep * 0.1 + (S.upg.flyers ? 2 : 0) + (S.upg.social ? 3 : 0) + (S.upg.billboard ? 5 : 0);
+  const wd = (S.day - 1) % 7; if (wd >= 5) r *= 1.3;
+  r *= [1, 1.15, 1, 0.9][season()];
+  if (S.weather === 'regen') r *= 0.75; if (S.weather === 'sneeuw') r *= 0.8;
+  if (festival()) r *= 1.9;
+  const h = S.min / 60; if (h >= 12 && h < 13.5 || h >= 17.5 && h < 19) r *= 1.4;   // lunch- en avondspits
+  return r;
+}
+function wantedProduct() {
+  const ks = Object.keys(PRODUCTS).filter(k => S.unlocked[k]);
+  const s = season(), w = { b: 1, k: s === 3 || S.weather === 'regen' ? 1.6 : 1, r: s === 1 ? 1.3 : 0.75 };
+  let tot = ks.reduce((a, k) => a + w[k], 0), x = Math.random() * tot;
+  for (const k of ks) { x -= w[k]; if (x <= 0) return k; } return ks[0];
+}
+function spawnCustomer(promo) {
+  const free = slotUsed.map((u, i) => u ? -1 : i).filter(i => i >= 0);
+  const demo = isDemo();
+  let order = [wantedProduct()];
+  if (!demo) { if (Math.random() < 0.28 + S.day * 0.004) order.push(wantedProduct()); }
+  else if (S.mode === 'gh') { const n = 2 + Math.floor(Math.random() * 3); for (let i = 1; i < n; i++) order.push(wantedProduct()); }
+  else if (Math.random() < 0.35) order.push(wantedProduct());
+  if (demo) S.demo.orders++;
+  if (!free.length) { if (promo) return; S.today.lost++; if (demo) S.demo.missed += order.length; return; }
+  const slot = pick(free);
+  const sx = (SLOTS[slot] + 0.5) * TS;
+  const from = pick([[21.5, 27], [9, 20.6], [34, 21.4]]);
+  const path = [];
+  if (from[1] < 26) path.push([21.6 * TS, from[1] * TS]);
+  path.push([21.6 * TS, 17.2 * TS], [21.6 * TS, 12.6 * TS], [sx, 12.6 * TS], [sx, 11.75 * TS]);
+  let pat = (38 + order.length * 10) * (S.upg.terras ? 1.3 : 1);
+  const look = randomLook();
+  if (demo) {
+    pat = S.mode === 'fs' ? 30 + order.length * 10 : S.mode === 'rt' ? 16 + order.length * 6 : 34 + order.length * 8;
+    if (S.mode === 'gh') { look.shirt = '#3b4a5a'; look.vest = true; }
+    if (S.mode === 'rt') look.basket = true;
+  }
+  const c = { x: from[0] * TS, y: from[1] * TS, path, state: 'enter', slot, want: order.slice(), order: order.length, paid: 0, margin: 0, pat, maxPat: pat, look, client: demo && S.mode === 'gh' ? pick(B2B) : null, promo: !!promo,
+    kid: (!demo || S.mode !== 'gh') && Math.random() < (promo ? 0.6 : 0.3) ? { skin: look.skin, hair: pick(LOOKS.hair), shirt: pick(['#ffd23f', '#3bc2ff', '#ff6b8a', '#7ed957', '#ff8c42']), pants: pick(LOOKS.pants), hairStyle: Math.floor(Math.random() * 3) } : null, dir: 'up', moving: true, anim: Math.random() * 5, speed: rnd(85, 105), mood: null };
+  slotUsed[slot] = c; customers.push(c);
+}
+function maybeAsk(c) {
+  if (qCD > 0 || customers.some(o => o.question) || Math.random() > 0.6) return;
+  const role = isDemo() ? S.mode : 'tycoon';
+  const list = TALK.questions.map((q, i) => ({ q, i })).filter(o => (!o.q.roles || o.q.roles.includes(role)) && o.i !== lastQ);
+  const { q, i } = pick(list); lastQ = i;
+  c.question = q; c.say = { text: q.q, t: 999 }; c.pat += 12; c.maxPat += 12;
+  qCD = isDemo() ? 12 : 35;
+}
+function talkMenu(c) {
+  const q = c.question, order = [0, 1, 2].sort(() => Math.random() - 0.5);
+  modal(`<h2>💬 Vraag van ${c.client || 'een klant'}</h2><p style="font-size:16px;font-weight:600">"${q.q}"</p><p class="muted">Wat antwoord je?</p>` +
+    order.map(i => `<div class="row"><button class="b alt" style="white-space:normal;text-align:left;flex:1" data-a="ans:${i}">${q.a[i]}</button></div>`).join(''), {
+    ans(i) {
+      closeModal(); c.question = null; if (isDemo()) S.demo.qAll++;
+      if (+i === 0) {
+        if (isDemo()) S.demo.qOk++;
+        c.say = { text: 'Overtuigd! Doe er nog één bij 👍', t: 2.5 }; c.pat = c.maxPat;
+        if (c.state === 'wait') { const extra = c.want[0] || wantedProduct(); c.want.push(extra); }
+        addRep(1); sfx.ready(); toast('Goed antwoord! De klant bestelt er nog één bij.', 'good');
+      } else { c.say = { text: 'Hmm, ik twijfel…', t: 2.5 }; c.pat *= 0.6; sfx.bad(); toast('Beter antwoord: ' + q.a[0], 'bad'); }
+    } }, true);
+}
+function customerLeave(c, mood) {
+  if (c.question) { c.question = null; c.say = null; }
+  c.state = 'leave'; c.mood = mood; c.moodT = 2.5; slotUsed[c.slot] = null;
+  const to = pick([[21.5, MH + 1], [-1, 20.6], [MW + 1, 21.4]]);
+  c.path = [[c.x, 12.6 * TS], [21.4 * TS, 12.6 * TS], [21.4 * TS, 17.2 * TS], [21.4 * TS, to[1] === MH + 1 ? 20.8 * TS : to[1] * TS], [to[0] * TS, to[1] * TS]];
+}
+function serveCustomer(c, src) {   // src: array met porties (dienblad), geeft aantal gegeven porties terug
+  let given = 0;
+  for (let i = src.length - 1; i >= 0; i--) {
+    const k = c.want.indexOf(src[i]);
+    if (k >= 0) { c.want.splice(k, 1); const p = src.splice(i, 1)[0]; given++; c.paid += sellPrice(p); recordSale(c, p); questProgress(p, 1, 'sell'); }
+  }
+  if (!given) return 0;
+  sfx.pick();
+  if (!c.want.length) finishOrder(c);
+  return given;
+}
+function recordSale(c, p) {
+  if (!isDemo()) return;
+  const d = S.demo; d.sold[p]++; d.rev += sellPrice(p); d.cost += buyPrice(p); c.margin += sellPrice(p) - buyPrice(p);
+}
+function finishOrder(c) {
+  if (isDemo()) {
+    S.demo.served++; S.demo.waits.push(c.maxPat - c.pat); if (c.promo) S.demo.promoServed++; if (c.kid) S.demo.kids++;
+    if (c.kid) floaters.push({ x: c.x - 14, y: c.y - 30, text: '😄', col: '#111', t: 1.4 });
+    if (Math.random() < 0.45) c.sayLater = pick(S.mode === 'gh' ? TALK.gh : c.kid ? ['Mam, mag ik er nog één?', 'Joepie, een Betterbal!', ...TALK.lines] : TALK.lines);
+    floaters.push({ x: c.x, y: c.y - 40, text: '+' + euro(c.margin) + ' marge', col: '#2e9d4f', t: 1.4 });
+    sfx.cash(); customerLeave(c, c.pat / c.maxPat > 0.5 ? 'blij' : 'ok'); if (c.sayLater) c.say = { text: c.sayLater, t: 2.6 }; return;
+  }
+  {
+    const frac = c.pat / c.maxPat, tip = Math.round(c.paid * 0.3 * frac * 2) / 2;
+    S.money += c.paid + tip; S.today.sales += c.paid; S.today.tips += tip; S.today.served++; S.total.served++; S.total.earned += c.paid + tip;
+    addRep((frac > 0.5 ? 0.7 : 0.35) + (S.upg.terras ? 0.2 : 0));
+    floaters.push({ x: c.x, y: c.y - 40, text: '+' + euro(c.paid + tip), col: '#2e9d4f', t: 1.4 });
+    if (c.kid) { floaters.push({ x: c.x - 14, y: c.y - 30, text: '😄', col: '#111', t: 1.4 }); addRep(0.2); }
+    if (Math.random() < 0.35) c.say = { text: pick(TALK.lines), t: 2.6 };
+    sfx.cash(); customerLeave(c, frac > 0.5 ? 'blij' : 'ok');
+  }
+}
+
+// ---------- friteuses ----------
+function startFry(f, p) {
+  if (!isDemo() && S.stock[p] <= 0) { toast(`Geen ${PRODUCTS[p].plural} op voorraad. Koop bij de groothandel.`, 'bad'); sfx.bad(); return false; }
+  if (!isDemo()) S.stock[p]--; f.state = 'cook'; f.p = p; f.t = 0; f.n = S.upg.basket ? 2 : 1; sfx.fry(); return true;
+}
+function updateFryers(dt) {
+  for (const f of fryers) {
+    if (f.i >= fryerCount()) continue;
+    if (f.state === 'cook') { f.t += dt; if (f.t >= cookTime(f.p)) { f.state = 'ready'; f.t = 0; sfx.ready(); } }
+    else if (f.state === 'ready') { f.t += dt; if (f.t > 35) { f.state = 'burnt'; f.t = 0; floaters.push({ x: (f.tx + .5) * TS, y: f.ty * TS - 6, text: 'Aangebrand!', col: '#d12325', t: 1.6 }); } }
+  }
+}
+function takeFromFryer(f, tray, cap) {
+  const n = Math.min(f.n, cap - tray.length); if (n <= 0) return 0;
+  for (let i = 0; i < n; i++) tray.push(f.p);
+  f.n -= n; if (f.n <= 0) { f.state = 'empty'; f.p = null; f.t = 0; }
+  return n;
+}
+
+// ---------- personeel ----------
+function updateStaff(dt) {
+  for (const s of staff) {
+    s.moving = false;
+    if (S.min >= CLOSE_AT + 30 && !customers.some(c => c.state !== 'leave')) { s.task = null; }
+    if (!s.task) s.task = staffPlan(s);
+    const t = s.task; if (!t) continue;
+    const dx = t.x - s.x, dy = t.y - s.y, d = Math.hypot(dx, dy), sp = 95 * dt;
+    if (d > 3) { s.x += dx / d * Math.min(sp, d); s.y += dy / d * Math.min(sp, d); s.moving = true; s.anim += dt; s.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'); continue; }
+    s.idle += dt; if (s.idle < 0.35) continue; s.idle = 0;
+    if (t.f) t.f.claim = null;
+    if (t.kind === 'fry' && t.f.state === 'empty') startFry(t.f, t.p);
+    else if (t.kind === 'take' && t.f.state === 'ready') takeFromFryer(t.f, s.carry, 2);
+    else if (t.kind === 'clean' && t.f.state === 'burnt') { t.f.state = 'empty'; }
+    else if (t.kind === 'serve' && t.c.state === 'wait') serveCustomer(t.c, s.carry);
+    else if (t.kind === 'dump') { s.carry.forEach(p => S.krat[p]++); s.carry = []; }
+    s.dir = t.kind === 'serve' ? 'down' : 'up';
+    s.task = null;
+  }
+}
+function staffPlan(s) {
+  const waiting = customers.filter(c => c.state === 'wait');
+  const need = {}; waiting.forEach(c => c.want.forEach(p => need[p] = (need[p] || 0) + 1));
+  // eigen dienblad wegbrengen
+  if (s.carry.length) {
+    const c = waiting.find(c => c.want.some(p => s.carry.includes(p)));
+    if (c) return { kind: 'serve', c, x: c.x, y: 9.55 * TS };
+    s.hold = (s.hold || 0) + 1;
+    if (s.hold > 40) { s.hold = 0; return { kind: 'dump', x: 21.5 * TS, y: 8.6 * TS }; }
+    return { kind: 'wait', x: s.x, y: s.y };
+  }
+  const active = fryers.filter(f => f.i < fryerCount() && !f.claim);
+  // in de pan: wat er al ligt telt mee
+  fryers.forEach(f => { if (f.state === 'cook' || f.state === 'ready') need[f.p] = (need[f.p] || 0) - f.n; });
+  player.tray.forEach(p => need[p] = (need[p] || 0) - 1);
+  let f = active.find(f => f.state === 'ready' && (waiting.some(c => c.want.includes(f.p)) || f.t > 20));
+  if (f) { f.claim = s; return { kind: 'take', f, x: (f.tx + .5) * TS, y: (f.ty + 1.55) * TS }; }
+  f = active.find(f => f.state === 'burnt');
+  if (f) { f.claim = s; return { kind: 'clean', f, x: (f.tx + .5) * TS, y: (f.ty + 1.55) * TS }; }
+  if (S.min < CLOSE_AT) {
+    const want = Object.keys(need).filter(p => need[p] > 0 && S.stock[p] > 0).sort((a, b) => need[b] - need[a])[0];
+    f = active.find(f => f.state === 'empty');
+    if (f && want) { f.claim = s; return { kind: 'fry', f, p: want, x: (f.tx + .5) * TS, y: (f.ty + 1.55) * TS }; }
+    // voorbakken tijdens openingstijd
+    const inPan = fryers.filter(f => f.state === 'cook' || f.state === 'ready').length;
+    const pre = Object.keys(PRODUCTS).filter(k => S.unlocked[k] && S.stock[k] > 0).sort((a, b) => S.stock[b] - S.stock[a])[0];
+    if (f && pre && S.min >= OPEN_AT - 20 && inPan < Math.min(2, staff.length + 1)) { f.claim = s; return { kind: 'fry', f, p: pre, x: (f.tx + .5) * TS, y: (f.ty + 1.55) * TS }; }
+  }
+  return { kind: 'wait', x: (17 + staff.indexOf(s) * 6) * TS, y: 8.7 * TS };
+}
+
+// ---------- actie bij rust ----------
+const PROMO_TXT = {
+  fs: { label: 'Flyers ophangen', done: 'Flyers hangen! Extra klanten en gezinnen komen eraan.' },
+  rt: { label: 'Proeverij starten', done: 'Proeverij loopt! Shoppers proeven en lopen naar het schap.' },
+  gh: { label: 'Actiefolder rondsturen', done: 'Actiefolder verstuurd! Klanten komen extra bestellen.' },
+  tycoon: { label: 'Flyers ophangen (€ 5)', done: 'Flyers hangen! Het wordt even drukker.' },
+};
+const promoTxt = () => PROMO_TXT[isDemo() ? S.mode : 'tycoon'];
+function doPromo() {
+  if (promoCD > 0) { toast(`Nog ${Math.ceil(promoCD)} s voordat je een nieuwe actie kunt doen.`); return; }
+  if (!isDemo()) {
+    if (S.min < OPEN_AT || S.min >= CLOSE_AT - 30) { toast('Doe dit als de bar open is.'); return; }
+    if (S.money < 5) { toast('Je hebt € 5 nodig voor flyers.', 'bad'); return; }
+    S.money -= 5; S.today.stockCost += 5; useEnergy(5);
+  } else S.demo.promos++;
+  promoCD = isDemo() ? 25 : 60; boostT = isDemo() ? 18 : 30;
+  sfx.buy(); toast(promoTxt().done, 'good');
+  floaters.push({ x: (PROMO[0] + .5) * TS, y: PROMO[1] * TS - 20, text: '📣 Actie!', col: '#8e44ad', t: 1.6 });
+  spawnCustomer(true); setTimeout(() => S && spawnCustomer(true), 1200); setTimeout(() => S && spawnCustomer(true), 2600);
+}
+
+// ---------- uitleg: pijlen en coach ----------
+function guideTargets() {
+  const T = [], waiting = customers.filter(c => c.state === 'wait'), demo = isDemo();
+  waiting.forEach(c => { if (c.question) T.push({ x: c.x, y: c.y, talk: true }); });
+  if (player.tray.length) {
+    if (demo && S.mode === 'rt') { [...new Set(player.tray)].forEach(p => { const i = ['b', 'k', 'r'].indexOf(p); T.push({ x: (15 + i * 4.33) * TS + 64, y: 10 * TS + 6 }); }); return T; }
+    waiting.forEach(c => { if (c.want.some(p => player.tray.includes(p))) T.push({ x: c.x, y: c.y }); });
+    if (T.length) return T;
+  }
+  if (player.tray.length < trayCap()) {
+    for (const f of fryers) {
+      if (f.i >= fryerCount()) continue;
+      const pos = { x: (f.tx + .5) * TS, y: (f.ty + 1) * TS };
+      if (f.state === 'ready') T.push(pos);
+      else if (f.state === 'rack') {
+        const need = S.mode === 'rt' ? S.demo.shelf[f.p] < 2 && !player.tray.includes(f.p) : waiting.some(c => c.want.filter(p => p === f.p).length > player.tray.filter(p => p === f.p).length);
+        if (need) T.push(pos);
+      }
+    }
+    if (!T.length && (!demo || S.mode === 'fs') && waiting.length && !fryers.some(f => f.state === 'cook'))
+      fryers.forEach(f => { if (f.i < fryerCount() && f.state === 'empty') T.push({ x: (f.tx + .5) * TS, y: (f.ty + 1) * TS }); });
+  }
+  if (promoCD <= 0 && quietT > 4 && (demo || (S.min >= OPEN_AT && S.min < CLOSE_AT - 30))) T.push({ x: (PROMO[0] + .5) * TS, y: (PROMO[1] + 1) * TS, promo: true });
+  return T;
+}
+function coachText() {
+  const demo = isDemo();
+  if (!demo && S.day > 2) return '';
+  if (!demo && S.min < OPEN_AT) return 'Loop naar je SNXbar in het midden. Om 10:00 komen de eerste klanten.';
+  const waiting = customers.filter(c => c.state === 'wait'), tray = player.tray;
+  if (waiting.some(c => c.question)) return 'Een klant heeft een vraag (<b>blauwgroene pijl</b>). Loop erheen en beantwoord hem.';
+  if (promoCD <= 0 && quietT > 4) return `Rustig? Loop naar buiten: <b>${promoTxt().label}</b> (paarse pijl).`;
+  if (tray.length) {
+    if (demo && S.mode === 'rt') return 'Breng het naar het schap (toonbank) bij de groene pijl en vul het.';
+    return waiting.some(c => c.want.some(p => tray.includes(p))) ? 'Breng het naar de klant met de <b>groene pijl</b>.' : 'Niemand wil dit nu. Pak eerst wat de klanten vragen (zie hun wolkje).';
+  }
+  if (demo && S.mode === 'rt') { const e = ['b', 'k', 'r'].find(p => S.demo.shelf[p] === 0); return e ? `Schap leeg! Pak ${PRODUCTS[e].plural} in het magazijn (groene pijl).` : 'Pak verpakkingen in het magazijn achter en vul het schap.'; }
+  if (demo && S.mode === 'gh') return waiting.length ? 'Kijk in het wolkje wat de klant wil en pak die dozen (groene pijl).' : 'Wachten op klanten…';
+  if (fryers.some(f => f.state === 'ready')) return 'Klaar! Pak de porties bij de friteuse met de <b>groene pijl</b>.';
+  if (!fryers.some(f => f.state === 'cook')) return waiting.length ? 'Kijk in het wolkje wat de klant wil en bak dat aan een friteuse.' : 'Bak alvast iets aan een friteuse.';
+  return 'Aan het bakken… let op de balk boven de friteuse.';
+}
+
+// ---------- interactie ----------
+function interactables() {
+  const L = [];
+  fryers.forEach(f => {
+    const x = (f.tx + .5) * TS, y = (f.ty + 1.25) * TS;
+    if (f.i >= fryerCount()) { if (!isDemo()) L.push({ x, y, r: 30, label: 'Lege plek (friteuse kopen in het kantoor)', act() { toast('Koop een extra friteuse in het kantoor.'); } }); return; }
+    if (f.state === 'rack') { const full = player.tray.length >= trayCap(); L.push({ x, y, r: 30, kind: full ? 'info' : 'pick', label: full ? ROLE().tray + ' vol' : `Pak ${unitName(f.p)}`, act() {
+      if (player.tray.length >= trayCap()) { toast(`Je ${ROLE().tray.toLowerCase()} is vol.`); return; } player.tray.push(f.p); sfx.pick(); } }); return; }
+    if (f.state === 'empty') L.push({ x, y, r: 30, kind: 'fry', label: 'Bakken', act: () => fryerMenu(f) });
+    else if (f.state === 'cook') L.push({ x, y, r: 30, label: `${PRODUCTS[f.p].name}: nog ${Math.ceil(cookTime(f.p) - f.t)} s`, act() { } });
+    else if (f.state === 'ready') L.push({ x, y, r: 30, kind: player.tray.length >= trayCap() ? 'info' : 'pick', label: player.tray.length >= trayCap() ? 'Dienblad vol' : `Pak ${f.n}× ${PRODUCTS[f.p].name}`, act() {
+      if (player.tray.length >= trayCap()) { toast('Je dienblad is vol. Serveer eerst of zet het in de krat.'); return; }
+      takeFromFryer(f, player.tray, trayCap()); sfx.pick(); } });
+    else if (f.state === 'burnt') L.push({ x, y, r: 30, kind: 'fry', label: 'Schoonmaken', act() { f.state = 'empty'; useEnergy(2); sfx.pick(); } });
+  });
+  for (const c of customers) {
+    if (c.state !== 'wait') continue;
+    if (c.question) { L.push({ x: c.x, y: c.y, r: 74, prio: 2, kind: 'talk', label: 'Beantwoord de vraag', act: () => talkMenu(c) }); continue; }
+    if (isDemo() && S.mode === 'rt') continue;
+    const ok = player.tray.some(p => c.want.includes(p));
+    L.push({ x: c.x, y: c.y, r: 74, prio: ok ? 1 : 0, kind: ok ? 'give' : 'info', label: ok ? (c.client ? 'Inladen voor ' + c.client : 'Serveren') : (c.client || 'Klant') + ' wil: ' + c.want.map(p => PRODUCTS[p].name).join(' + '), act() {
+      if (!serveCustomer(c, player.tray)) { toast('Je hebt niet wat deze klant wil.'); return; } useEnergy(1); } });
+  }
+  L.push({ x: (PROMO[0] + .5) * TS, y: (PROMO[1] + .5) * TS, r: 42, kind: promoCD > 0 ? 'info' : 'promo', label: promoCD > 0 ? `${promoTxt().label}: nog ${Math.ceil(promoCD)} s` : promoTxt().label, act: doPromo });
+  if (isDemo()) {
+    if (S.mode === 'rt' && player.tray.length && player.y < 10 * TS && player.y > 9.2 * TS && player.x < 28 * TS)
+      L.push({ x: player.x, y: 10.1 * TS, r: 30, prio: 1, kind: 'give', label: 'Schap vullen', act() {
+        const n = player.tray.length; player.tray.forEach(p => S.demo.shelf[p]++); player.tray = []; sfx.pick(); toast(`${n} verpakkingen in het schap`); } });
+    return L;
+  }
+  L.push({ x: (KRAT[0] + .5) * TS, y: (KRAT[1] + .5) * TS, r: 40, label: player.tray.length ? 'In groothandelskrat zetten' : 'Groothandelskrat', act: kratAct });
+  L.push({ x: (BOARD[0] + .5) * TS, y: (BOARD[1] + .5) * TS, r: 40, label: 'Opdrachtenbord', act: boardMenu });
+  L.push({ x: 27 * TS, y: 8.2 * TS, r: 34, label: 'Vriezer (voorraad)', act() { toast('Voorraad: ' + Object.keys(PRODUCTS).filter(k => S.unlocked[k]).map(k => S.stock[k] + '× ' + PRODUCTS[k].name).join(' · ')); } });
+  for (const b of BUILDINGS) {
+    const x = (b.door + .5) * TS, y = (b.y1 + 1.15) * TS;
+    if (b.id === 'home') L.push({ x, y, r: 30, label: 'Naar bed', act: sleepMenu });
+    if (b.id === 'gh') L.push({ x, y, r: 30, label: 'Groothandel', act: shopMenu });
+    if (b.id === 'office') L.push({ x, y, r: 30, label: 'Kantoor: upgrades en filialen', act: () => officeMenu('bar') });
+  }
+  return L;
+}
+function findFocus() {
+  let best = null, bd = 1e9;
+  for (const it of interactables()) {
+    const d = Math.hypot(it.x - player.x, it.y - (player.y - 4));
+    if (d > it.r) continue;
+    const score = d - (it.prio ? 30 : 0);
+    if (score < bd) { bd = score; best = it; }
+  }
+  return best;
+}
+function kratAct() {
+  if (!player.tray.length) { toast('Zet hier porties in: de groothandel koopt ze vannacht voor 60% van de prijs.'); return; }
+  const cnt = {}; player.tray.forEach(p => { S.krat[p]++; cnt[p] = (cnt[p] || 0) + 1; });
+  player.tray = []; sfx.pick();
+  Object.entries(cnt).forEach(([p, n]) => questProgress(p, n, 'krat'));
+  toast('In de krat: ' + Object.entries(S.krat).filter(([, n]) => n).map(([p, n]) => n + '× ' + PRODUCTS[p].name).join(', '));
+}
+function useEnergy(v) { S.energy = clamp(S.energy - v, 0, 100); }
+
+// ---------- menu's ----------
+let modalOpen = false, modalHandlers = {}, modalLocked = false;
+function modal(html, handlers = {}, locked = false) {
+  $('#mbox').innerHTML = html; modalHandlers = handlers; modalLocked = locked; modalOpen = true;
+  $('#modal').style.display = 'flex'; keys.clear(); joy.active = false; $('#joy').style.display = 'none';
+}
+function closeModal() { modalOpen = false; $('#modal').style.display = 'none'; }
+$('#modal').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (b) { if (b.disabled) return; const [a, ...rest] = b.dataset.a.split(':'); (modalHandlers[a] || (() => { }))(rest.join(':')); return; }
+  if (e.target.id === 'modal' && !modalLocked) closeModal();
+});
+const imgTag = p => `<img src="assets/${PRODUCTS[p].img}.webp" alt="">`;
+
+function fryerMenu(f) {
+  const ks = Object.keys(PRODUCTS).filter(k => S.unlocked[k]);
+  if (ks.length === 1) { if (startFry(f, ks[0])) useEnergy(2); return; }
+  modal(`<h2>Wat ga je bakken?</h2>` + ks.map((k, i) => `<div class="row">${imgTag(k)}<div class="grow"><b>${PRODUCTS[k].name}</b><span class="muted">${PRODUCTS[k].cook} s · verkoop ${euro(PRODUCTS[k].price)} · voorraad ${S.stock[k]}</span></div>
+    <button class="b" data-a="fry:${k}" ${S.stock[k] ? '' : 'disabled'}>Bak <span class="kbd" style="color:#111">${i + 1}</span></button></div>`).join('') +
+    `<div class="btns"><button class="b alt" data-a="close">Sluiten</button></div>`,
+    { fry(k) { closeModal(); if (startFry(f, k)) useEnergy(2); }, close: closeModal, num(n) { const k = ks[n - 1]; if (k && S.stock[k]) this.fry(k); } });
+}
+function shopMenu() {
+  const ks = Object.keys(PRODUCTS).filter(k => S.unlocked[k]);
+  modal(`<h2>Groothandel</h2><p>Diepvriesdozen voor je friteuses. Kas: <b>${euro(S.money)}</b></p>` +
+    ks.map(k => { const p = PRODUCTS[k]; return `<div class="row">${imgTag(k)}<div class="grow"><b>Doos ${p.plural} (${p.pack}×)</b><span class="muted">${euro(p.packCost)} · op voorraad: ${S.stock[k]}</span></div>
+      <button class="b" data-a="buy:${k}:1" ${S.money >= p.packCost ? '' : 'disabled'}>1×</button><button class="b" data-a="buy:${k}:5" ${S.money >= p.packCost * 5 ? '' : 'disabled'}>5×</button></div>`; }).join('') +
+    `<div class="row"><div style="width:40px;font-size:30px;text-align:center">☕</div><div class="grow"><b>Sterke koffie</b><span class="muted">€ 5 · +40 energie</span></div><button class="b" data-a="coffee" ${S.money >= 5 ? '' : 'disabled'}>Koop</button></div>` +
+    `<div class="btns"><button class="b alt" data-a="close">Sluiten</button></div>`, {
+    buy(arg) {
+      const [k, n] = arg.split(':'), p = PRODUCTS[k], cost = p.packCost * +n;
+      if (S.money < cost) return;
+      S.money -= cost; S.today.stockCost += cost; S.stock[k] += p.pack * +n; sfx.buy(); shopMenu();
+    },
+    coffee() { if (S.money < 5) return; S.money -= 5; S.today.stockCost += 5; S.energy = clamp(S.energy + 40, 0, 100); sfx.buy(); shopMenu(); },
+    close: closeModal,
+  });
+}
+function officeMenu(tab) {
+  const T = (id, label) => `<button class="${tab === id ? 'on' : ''}" data-a="tab:${id}">${label}</button>`;
+  let body = '';
+  if (tab === 'bar') {
+    body = Object.entries(UPG).map(([id, u]) => {
+      const lvl = S.upg[id], max = u.cost.length, done = lvl >= max, cost = u.cost[lvl];
+      return `<div class="row"><div class="grow"><b>${u.name}${max > 1 ? ` (${lvl}/${max})` : ''}</b><span class="muted">${u.desc}</span></div>
+        ${done ? '<span class="muted">✔ gekocht</span>' : `<button class="b" data-a="upg:${id}" ${S.money >= cost ? '' : 'disabled'}>${euro(cost)}</button>`}</div>`;
+    }).join('');
+  } else if (tab === 'menu') {
+    body = Object.entries(PRODUCTS).map(([k, p]) => `<div class="row">${imgTag(k)}<div class="grow"><b>${p.name}</b><span class="muted">Verkoop ${euro(p.price)} · bakt ${p.cook} s${p.rep ? ' · nodig: reputatie ' + p.rep : ''}</span></div>
+      ${S.unlocked[k] ? '<span class="muted">✔ op het menu</span>' : `<button class="b" data-a="rec:${k}" ${S.money >= p.unlock && S.rep >= p.rep ? '' : 'disabled'}>${euro(p.unlock)}</button>`}</div>`).join('');
+  } else if (tab === 'team') {
+    body = `<p>Personeel bakt en serveert zelf. Loon: ${euro(WAGE)} per persoon per dag.</p>` + STAFF_COST.map((c, i) => `<div class="row"><div style="width:40px;font-size:28px;text-align:center">🧑‍🍳</div><div class="grow"><b>${['Sam', 'Noor'][i]}</b><span class="muted">Medewerker ${i + 1}</span></div>
+      ${S.staff > i ? '<span class="muted">✔ in dienst</span>' : S.staff === i ? `<button class="b" data-a="hire" ${S.money >= c ? '' : 'disabled'}>Aannemen ${euro(c)}</button>` : '<span class="muted">eerst medewerker ' + i + '</span>'}</div>`).join('');
+  } else {
+    body = `<p>Open SNXbar-filialen. Ze leveren elke nacht geld op (meer bij hogere reputatie). Niveau 2 en 3 verdubbelen en verdrievoudigen de opbrengst.</p>` +
+      CITIES.map(([name, cc, cost, inc, rep]) => {
+        const lvl = S.branches[name] || 0;
+        const nextCost = lvl ? Math.round(cost * 0.6 * lvl) : cost;
+        const btn = lvl >= 3 ? '<span class="muted">✔ max</span>' : `<button class="b ${lvl ? 'dark' : ''}" data-a="br:${name}" ${S.money >= nextCost && S.rep >= rep ? '' : 'disabled'}>${lvl ? 'Niveau ' + (lvl + 1) : 'Openen'} ${euro(nextCost)}</button>`;
+        return `<div class="row"><div style="width:40px;font:800 13px Poppins;text-align:center;border:2px solid #111;border-radius:6px;padding:6px 0;background:${lvl ? '#ff2625' : '#fff'};color:${lvl ? '#fff' : '#111'}">${cc}</div>
+          <div class="grow"><b>SNXbar ${name}${lvl ? ' · niveau ' + lvl : ''}</b><span class="muted">± ${euro(inc * Math.max(1, lvl))} per dag · reputatie ${rep} nodig</span></div>${btn}</div>`;
+      }).join('');
+  }
+  modal(`<h2>Kantoor</h2><p>Kas: <b>${euro(S.money)}</b> · Reputatie ${Math.round(S.rep)}</p>
+    <div class="tabs">${T('bar', 'Bar-upgrades')}${T('menu', 'Menukaart')}${T('team', 'Personeel')}${T('eu', 'Europa')}</div>${body}
+    <div class="btns"><button class="b alt" data-a="close">Sluiten</button></div>`, {
+    tab: t => officeMenu(t), close: closeModal,
+    upg(id) { const u = UPG[id], c = u.cost[S.upg[id]]; if (S.money < c) return; S.money -= c; S.upg[id]++; sfx.buy(); rebuildSolid(); toast(u.name + ' gekocht!', 'good'); officeMenu(tab); },
+    rec(k) { const p = PRODUCTS[k]; if (S.money < p.unlock || S.rep < p.rep) return; S.money -= p.unlock; S.unlocked[k] = true; S.stock[k] += 5; sfx.buy(); toast(p.name + ' staat op het menu! 5 gratis porties in de vriezer.', 'good'); officeMenu(tab); },
+    hire() { const c = STAFF_COST[S.staff]; if (S.money < c) return; S.money -= c; S.staff++; resetStaffOnly(); sfx.buy(); toast('Welkom in het team!', 'good'); officeMenu(tab); },
+    br(name) {
+      const [, , cost, , rep] = CITIES.find(c => c[0] === name), lvl = S.branches[name] || 0, c = lvl ? Math.round(cost * 0.6 * lvl) : cost;
+      if (S.money < c || S.rep < rep) return; S.money -= c; S.branches[name] = lvl + 1; sfx.cash();
+      toast(lvl ? `SNXbar ${name} naar niveau ${lvl + 1}!` : `SNXbar ${name} is open!`, 'good');
+      if (!S.won && branchCount() >= CITIES.length) { S.won = true; save(); return winMenu(); }
+      officeMenu(tab);
+    },
+  });
+}
+function resetStaffOnly() {
+  const i = staff.length;
+  staff.push({ x: 21.5 * TS, y: 8.6 * TS, dir: 'down', moving: false, anim: 0, carry: [], task: null, idle: 0, look: { skin: pick(LOOKS.skin), hair: pick(LOOKS.hair), shirt: '#ffffff', pants: '#222', apron: true, hairStyle: i % 3 }, name: ['Sam', 'Noor'][i] });
+}
+function boardMenu() {
+  const q = S.quest;
+  modal(`<h2>Opdrachtenbord</h2>${q ? `<div class="row">${imgTag(q.p)}<div class="grow"><b>${q.type === 'krat' ? 'Groothandel / foodservice' : 'Klanten in de bar'}</b>${questText(q)}<br><span class="muted">Voortgang ${q.got}/${q.n} · beloning ${euro(q.reward)} + reputatie</span></div>${q.done ? '✔' : ''}</div>` : ''}
+    <p class="muted">Elke dag een nieuwe opdracht. Krat-opdrachten tellen alleen porties die je vandaag in de krat zet.</p>
+    <div class="btns"><button class="b alt" data-a="close">Sluiten</button></div>`, { close: closeModal });
+}
+function sleepMenu() {
+  const early = S.min < CLOSE_AT;
+  modal(`<h2>Naar bed?</h2><p>${early ? 'De bar is nog niet dicht. Als je nu gaat slapen, eindigt de dag meteen.' : 'De dag wordt afgesloten en het spel opgeslagen.'}</p>
+    <div class="btns"><button class="b alt" data-a="close">Nog niet</button><button class="b" data-a="sleep">Slapen</button></div>`, { close: closeModal, sleep: () => goSleep(false) });
+}
+function pauseMenu() {
+  if (isDemo()) return modal(`<h2>Pauze</h2><p>${ROLE().title}-demo · ${ROLE().shift}</p>
+    <div class="btns"><button class="b alt" data-a="mute">${muted ? 'Geluid aan' : 'Geluid uit'}</button><button class="b alt" data-a="roles">Andere rol</button><button class="b dark" data-a="end">Dienst afronden</button><button class="b" data-a="close">Doorgaan</button></div>`,
+    { close: closeModal, mute() { muted = !muted; pauseMenu(); }, roles: showTitle, end: finishDemo });
+  modal(`<h2>Menu</h2>
+    <p><b>Doel:</b> bouw een SNXbar-keten met filialen in 12 Europese steden.</p>
+    <p><b>Zo werkt het:</b> bak aan de friteuse, pak de porties en serveer klanten aan de toonbank. Over? Zet porties in de groothandelskrat bij de deur: die worden 's nachts verkocht. Koop voorraad bij de groothandel, upgrades en filialen in het kantoor. Slaap thuis voor 02:00.</p>
+    <p class="muted">Dag ${S.day} · jaar ${year()} · ${S.total.served} klanten geholpen · ${euro(S.total.earned)} totale omzet</p>
+    <div class="btns"><button class="b alt" data-a="mute">${muted ? 'Geluid aan' : 'Geluid uit'}</button><button class="b alt" data-a="b2b">Zakelijk: business case</button><button class="b alt" data-a="reset">Nieuw spel</button><button class="b dark" data-a="save">Opslaan</button><button class="b" data-a="close">Doorgaan</button></div>`, {
+    close: closeModal, save() { save(); toast('Opgeslagen', 'good'); closeModal(); },
+    mute() { muted = !muted; pauseMenu(); },
+    b2b() { save(); showTitle(); },
+    reset() { modal(`<h2>Nieuw spel?</h2><p>Je huidige spel wordt gewist.</p><div class="btns"><button class="b alt" data-a="back">Terug</button><button class="b" data-a="wipe">Ja, opnieuw beginnen</button></div>`,
+      { back: pauseMenu, wipe() { S = newState(); startDay(); save(); closeModal(); } }); },
+  });
+}
+function winMenu() {
+  modal(`<h2>SNX heeft Europa veroverd!</h2><p>In ${S.day} dagen bouwde je een keten van 12 SNXbars, van Rotterdam tot Barcelona.</p>
+    <p>${S.total.served} klanten geholpen · ${euro(S.total.earned)} omzet.</p><p>Speel gerust door: upgrade je filialen naar niveau 3.</p>
+    <div class="btns"><button class="b" data-a="close">Doorgaan</button></div>`, { close: closeModal });
+}
+
+// ---------- sales-demo ----------
+function newDemo(mode) {
+  const s = newState(); s.mode = mode; s.unlocked = { b: true, k: true, r: true }; s.stock = { b: 999, k: 999, r: 999 };
+  s.min = CONFIG.roles[mode].start; s.weather = 'zon';
+  s.demo = { sold: { b: 0, k: 0, r: 0 }, rev: 0, cost: 0, served: 0, orders: 0, missed: 0, waits: [], promos: 0, promoServed: 0, kids: 0, qOk: 0, qAll: 0, shelf: { b: 3, k: 3, r: 3 } };
+  return s;
+}
+function startDemo() {
+  S.quest = null; resetDayEntities(); rebuildSolid(); if (bgSeason !== 0) drawBG(0);
+  if (S.mode !== 'fs') fryers.forEach((f, i) => { if (i < 3) { f.state = 'rack'; f.p = ['b', 'k', 'r'][i]; } });
+  player.x = 19.5 * TS; player.y = 8.75 * TS; player.dir = 'down';
+  const R = ROLE();
+  modal(`<h2>${R.title}: ${R.shift}</h2>${R.intro.map(t => `<p>• ${t}</p>`).join('')}
+    <p class="muted">Je hebt ±2,5 minuut. Rechtsboven zie je je brutomarge oplopen.</p>
+    <p class="note">${isTouch ? 'Sleep links op het scherm om te lopen, tik op de rode knop voor actie.' : 'Lopen: pijltjes of WASD · actie: E of spatie · pauze: Esc'}</p>
+    <div class="btns"><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="next">Start dienst</button></div>`,
+    { next: closeModal, roles: showTitle }, true);
+}
+function showTitle() { closeModal(); S = null; customers = []; $('#title').style.display = 'flex'; $('#prompt').style.display = 'none'; $('#act').style.display = 'none'; }
+let lastReport = null;
+function finishDemo() {
+  const R = ROLE(), d = S.demo, mode = S.mode;
+  const units = d.sold.b + d.sold.k + d.sold.r, hours = (R.end - R.start) / 60;
+  const ordered = units + d.missed, service = ordered ? Math.round(units / ordered * 100) : 0;
+  const avgWait = d.waits.length ? Math.round(d.waits.reduce((a, b) => a + b, 0) / d.waits.length) : 0;
+  const mix = {}; ['b', 'k', 'r'].forEach(p => mix[p] = units ? d.sold[p] / units : 1 / 3);
+  lastReport = { mode, units, missed: d.missed, service, avgWait, margin: d.rev - d.cost, rev: d.rev, perHour: Math.round(units / hours), mix };
+  const sp = {}; ['b', 'k', 'r'].forEach(p => sp[p] = R.prices[p][1]);
+  const exv = v => v / (R.vat ? 1.09 : 1);
+  const rows = ['b', 'k', 'r'].map(p => `<tr><td>${R.names[p]}</td><td>${d.sold[p]}</td><td>${euro(R.prices[p][0])}</td>
+    <td><input type="number" class="sp" data-p="${p}" value="${sp[p].toFixed(2)}" step="0.05" min="0" style="width:66px;font:600 12px Poppins;border:2px solid #111;border-radius:6px;padding:2px 4px"></td><td id="pm_${p}"></td><td id="pp_${p}"></td></tr>`).join('');
+  const missTxt = mode === 'rt' ? 'gemist door leeg schap' : mode === 'gh' ? 'niet geleverd' : 'gemist (wachttijd)';
+  modal(`<h2>Jouw SNX-business case · ${R.title}</h2>
+    <p>Zo ging jouw ${R.shift}:</p>
+    <div class="tiles">
+      <div class="tile"><b>${units}</b><span>${R.units} verkocht</span></div>
+      <div class="tile"><b>${euro(d.rev - d.cost)}</b><span>brutomarge</span></div>
+      <div class="tile"><b>${service}%</b><span>servicegraad (${d.missed} ${missTxt})</span></div>
+      <div class="tile"><b>${avgWait} s</b><span>gem. ${mode === 'gh' ? 'laadtijd' : 'wachttijd'} per klant</span></div>
+      <div class="tile"><b>${d.promos}×</b><span>${promoTxt().label.toLowerCase()} → ${d.promoServed} extra klanten geholpen</span></div>
+      <div class="tile"><b>${d.qOk}/${d.qAll}</b><span>vragen goed beantwoord</span></div>
+      ${mode !== 'gh' ? `<div class="tile"><b>${d.kids} 😄</b><span>blije gezinnen met kinderen</span></div>` : ''}
+    </div>
+    <table class="pt"><tr><th>Product (per ${R.unit})</th><th>Verkocht</th><th>Inkoop</th><th>Verkoop${R.vat ? ' incl. btw' : ''}</th><th>Marge</th><th>%</th></tr>${rows}</table>
+    <p class="note">Inkoopprijzen excl. btw uit de SNX-bestelportal (inventory.snxfood.com). ${R.sellNote} Marge = verkoop excl. btw − inkoop. Pas de verkoopprijs gerust aan.</p>
+    <div class="calc"><b>Reken het door voor jouw zaak</b>
+      <label>${R.units[0].toUpperCase() + R.units.slice(1)} per dag: <span id="cvU"></span></label><input type="range" id="cU" min="5" max="${R.perDay * 6}" step="5" value="${R.perDay}">
+      <label>Dagen per week open: <span id="cvD"></span></label><input type="range" id="cD" min="1" max="7" step="1" value="${R.days}">
+      <div class="out"><div>Omzet per week<b id="cRw"></b></div><div>Brutomarge per week<b id="cMw"></b></div><div>Brutomarge per jaar<b id="cMy"></b></div><div>Gem. marge per ${R.unit}<b id="cMu"></b></div></div>
+      <p class="note">Productmix uit jouw demo. Jaar = 50 weken. Omzet en marge excl. btw; indicatief.</p>
+    </div>
+    <div class="btns"><button class="b alt" data-a="again">Nog een dienst</button><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="lead">Prijslijst of proefpakket aanvragen</button></div>
+    <div class="calc" style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="grow" style="flex:1;min-width:200px"><b>Blijf spelen en bouw door</b><br><span class="note">Start je eigen SNXbar en bouw een keten van 12 filialen door Europa. Je demo-marge krijg je als startkapitaal: <b>${euro(startBonus())}</b>.</span></div>
+      <button class="b dark" data-a="build">Doorbouwen</button></div>`,
+    { again() { closeModal(); begin(newDemo(mode)); }, roles: showTitle, lead: leadForm,
+      build() { const bonus = startBonus(), st = saved && !saved.mode ? saved : newState(); st.money += bonus; closeModal(); begin(st); save(); toast(`Startkapitaal uit je demo: +${euro(bonus)}`, 'good'); } }, true);
+  const calc = () => {
+    const u = +$('#cU').value, dpw = +$('#cD').value;
+    let rev = 0, mar = 0; ['b', 'k', 'r'].forEach(p => {
+      const ex = exv(sp[p]), m = ex - R.prices[p][0];
+      rev += u * mix[p] * ex; mar += u * mix[p] * m;
+      $('#pm_' + p).textContent = euro(Math.round(m * 100) / 100); $('#pm_' + p).style.color = m < 0 ? '#d12325' : '';
+      $('#pp_' + p).textContent = ex > 0 ? Math.round(m / ex * 100) + '%' : '–'; });
+    $('#cvU').textContent = u; $('#cvD').textContent = dpw;
+    $('#cRw').textContent = euro(Math.round(rev * dpw)); $('#cMw').textContent = euro(Math.round(mar * dpw)); $('#cMy').textContent = euro(Math.round(mar * dpw * 50)); $('#cMu').textContent = euro(Math.round(mar / u * 100) / 100);
+    lastReport.calc = { perDay: u, daysPerWeek: dpw, sellPrices: { ...sp }, marginPerYear: Math.round(mar * dpw * 50) };
+  };
+  $('#cU').oninput = calc; $('#cD').oninput = calc;
+  document.querySelectorAll('#mbox input.sp').forEach(i => i.oninput = () => { sp[i.dataset.p] = Math.max(0, +i.value || 0); calc(); });
+  calc();
+}
+function startBonus() { return Math.max(50, Math.round(S.demo.rev - S.demo.cost) * 10); }
+function leadForm() {
+  const R = ROLE(), mode = S.mode;
+  const roleOpts = ['Inkoper / category manager', 'Category manager / inkoper', 'Eigenaar / F&B-manager', 'Directie', 'Anders'].filter((v, i, a) => a.indexOf(v) === i)
+    .map(o => `<option${o === R.role ? ' selected' : ''}>${o}</option>`).join('');
+  modal(`<h2>Prijslijst of proefpakket</h2>
+    <p>Laat je gegevens achter. Een SNX-accountmanager neemt contact op met de actuele prijzen voor ${R.title.toLowerCase()}.</p>
+    <form class="lead" id="lf" novalidate>
+      <label>Naam*<input type="text" name="naam" autocomplete="name" required></label>
+      <label>Bedrijf*<input type="text" name="bedrijf" autocomplete="organization" required></label>
+      <label>Functie<select name="functie">${roleOpts}</select></label>
+      <label>Zakelijk e-mailadres*<input type="email" name="email" autocomplete="email" required></label>
+      <label>Telefoon<input type="tel" name="telefoon" autocomplete="tel"></label>
+      <label>Land<select name="land"><option>Nederland</option><option>België</option><option>Duitsland</option><option>Frankrijk</option><option>Ander land</option></select></label>
+      <label style="margin-top:10px">Ik wil graag</label>
+      <div class="chk"><input type="checkbox" name="wens" value="prijslijst" checked id="w1"><label for="w1" style="margin:0;font-weight:500">De prijslijst</label></div>
+      <div class="chk"><input type="checkbox" name="wens" value="proefpakket" id="w2"><label for="w2" style="margin:0;font-weight:500">Een proefpakket</label></div>
+      <div class="chk"><input type="checkbox" name="wens" value="afspraak" id="w3"><label for="w3" style="margin:0;font-weight:500">Een afspraak met een accountmanager</label></div>
+      <div class="chk" style="margin-top:12px"><input type="checkbox" name="privacy" id="pv"><label for="pv" style="margin:0;font-weight:500">Ik ga akkoord dat SNX mijn gegevens gebruikt om contact op te nemen over deze aanvraag (<a href="${CONFIG.privacyUrl}" target="_blank" rel="noopener">privacy</a>).*</label></div>
+      <div class="chk"><input type="checkbox" name="nieuws" id="nb"><label for="nb" style="margin:0;font-weight:500">Stuur mij ook zakelijk nieuws en acties van SNX (vrijwillig).</label></div>
+      <div class="err" id="lerr"></div>
+      <div class="btns"><button type="button" class="b alt" data-a="back">Terug</button><button type="submit" class="b">Aanvraag versturen</button></div>
+    </form>`, { back: finishDemo }, true);
+  $('#lf').onsubmit = async e => {
+    e.preventDefault();
+    const f = new FormData(e.target), err = $('#lerr');
+    const v = { naam: (f.get('naam') || '').trim(), bedrijf: (f.get('bedrijf') || '').trim(), email: (f.get('email') || '').trim() };
+    if (!v.naam || !v.bedrijf) return err.textContent = 'Vul je naam en bedrijf in.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return err.textContent = 'Vul een geldig e-mailadres in.';
+    if (!f.get('privacy')) return err.textContent = 'Geef akkoord voor het gebruik van je gegevens.';
+    const payload = { ...v, functie: f.get('functie'), telefoon: f.get('telefoon'), land: f.get('land'), wensen: f.getAll('wens'), nieuwsbrief: !!f.get('nieuws'), kanaal: R.title, demo: lastReport };
+    if (!CONFIG.leadEndpoint) {
+      return modal(`<h2>Testversie</h2><p><b>Je aanvraag is niet verstuurd.</b> Deze versie is nog niet gekoppeld aan het CRM. In de live versie gaat dit naar ActiveCampaign.</p>
+        <p class="note">Wat er straks wordt meegestuurd:</p><pre style="font-size:11px;white-space:pre-wrap;background:#fff;border:2px solid #111;border-radius:8px;padding:8px">${JSON.stringify(payload, null, 1).replace(/</g, '&lt;')}</pre>
+        <div class="btns"><button class="b alt" data-a="roles">Andere rol</button><button class="b" data-a="back">Terug naar business case</button></div>`, { back: finishDemo, roles: showTitle }, true);
+    }
+    try {
+      err.textContent = 'Versturen…';
+      const r = await fetch(CONFIG.leadEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!r.ok) throw new Error(r.status);
+      modal(`<h2>Bedankt, ${v.naam.split(' ')[0].replace(/</g, '')}!</h2><p>We nemen snel contact met je op.</p><div class="btns"><button class="b" data-a="roles">Klaar</button></div>`, { roles: showTitle }, true);
+    } catch (x) { err.textContent = 'Versturen lukt nu niet. Probeer het later opnieuw.'; }
+  };
+}
+
+// ---------- invoer ----------
+const keys = new Set();
+const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+addEventListener('keydown', e => {
+  if ($('#title').style.display !== 'none') return;
+  const k = e.key.toLowerCase();
+  if (modalOpen) {
+    if (e.target.closest && e.target.closest('input,select,textarea')) return;
+    if (k === 'escape' && !modalLocked) closeModal();
+    if (/^[1-3]$/.test(k) && modalHandlers.num) modalHandlers.num(+k);
+    if ((k === 'enter' || k === ' ') && modalHandlers.next) modalHandlers.next();
+    return;
+  }
+  if (k === 'escape') { pauseMenu(); return; }
+  if (k === 'e' || k === ' ' || k === 'enter') { e.preventDefault(); doAction(); return; }
+  keys.add(k); if (k.startsWith('arrow')) e.preventDefault();
+});
+addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+addEventListener('blur', () => keys.clear());
+const joy = { active: false, id: null, ox: 0, oy: 0, dx: 0, dy: 0 };
+cv.addEventListener('touchstart', e => {
+  if (modalOpen) return;
+  for (const t of e.changedTouches) {
+    if (!joy.active && t.clientX < innerWidth * 0.6) { joy.active = true; joy.id = t.identifier; joy.ox = t.clientX; joy.oy = t.clientY; joy.dx = joy.dy = 0; const j = $('#joy'); j.style.display = 'block'; j.style.left = (t.clientX - 55) + 'px'; j.style.top = (t.clientY - 55) + 'px'; j.firstElementChild.style.transform = ''; }
+  }
+  e.preventDefault();
+}, { passive: false });
+cv.addEventListener('touchmove', e => {
+  for (const t of e.changedTouches) if (joy.active && t.identifier === joy.id) {
+    let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy), m = 45;
+    if (d > m) { dx = dx / d * m; dy = dy / d * m; }
+    joy.dx = dx / m; joy.dy = dy / m; $('#joy').firstElementChild.style.transform = `translate(${dx}px,${dy}px)`;
+  }
+  e.preventDefault();
+}, { passive: false });
+const endTouch = e => { for (const t of e.changedTouches) if (t.identifier === joy.id) { joy.active = false; joy.dx = joy.dy = 0; $('#joy').style.display = 'none'; } };
+cv.addEventListener('touchend', endTouch); cv.addEventListener('touchcancel', endTouch);
+$('#act').addEventListener('touchstart', e => { e.preventDefault(); doAction(); }, { passive: false });
+$('#act').addEventListener('click', () => doAction());
+$('#menuBtn').addEventListener('click', () => { if (!modalOpen) pauseMenu(); });
+let focus = null;
+function doAction() { if (modalOpen || !S) return; focus = findFocus(); if (focus) focus.act(); }
+
+// ---------- toasts ----------
+function toast(msg, cls = '') { const d = document.createElement('div'); d.className = 'toast ' + cls; d.textContent = msg; $('#toasts').appendChild(d); setTimeout(() => d.remove(), 3300); while ($('#toasts').children.length > 3) $('#toasts').firstChild.remove(); }
+
+// ---------- update ----------
+function update(dt) {
+  if (modalOpen) return;
+  // tijd
+  const prev = S.min, demo = isDemo();
+  S.min += dt / (demo ? CONFIG.demoMinS : MIN_S);
+  if (demo) {
+    const R = ROLE();
+    if (prev < R.end - 30 && S.min >= R.end - 30) toast('Nog 30 seconden in deze dienst!');
+    if (S.min >= R.end) { finishDemo(); return; }
+  } else {
+    if (prev < OPEN_AT && S.min >= OPEN_AT) toast('10:00 · De SNXbar is open!', 'good');
+    if (prev < CLOSE_AT && S.min >= CLOSE_AT) toast('21:00 · De bar sluit. Help de laatste klanten en ga daarna naar huis.');
+    if (prev < 1440 && S.min >= 1440) toast('Middernacht. Ga snel naar bed!', 'bad');
+    if (S.min >= PASS_OUT) { goSleep(true); return; }
+  }
+  // speler
+  let mx = 0, my = 0;
+  if (keys.has('arrowleft') || keys.has('a')) mx--; if (keys.has('arrowright') || keys.has('d')) mx++;
+  if (keys.has('arrowup') || keys.has('w')) my--; if (keys.has('arrowdown') || keys.has('s')) my++;
+  if (joy.active && Math.hypot(joy.dx, joy.dy) > 0.18) { mx = joy.dx; my = joy.dy; }
+  const ml = Math.hypot(mx, my);
+  player.moving = ml > 0;
+  if (ml > 0) {
+    if (ml > 1) { mx /= ml; my /= ml; }
+    let sp = 125 * (S.upg.shoes ? 1.25 : 1) * (S.energy <= 0 ? 0.55 : 1);
+    const nx = player.x + mx * sp * dt; if (!hit(nx, player.y)) player.x = nx;
+    const ny = player.y + my * sp * dt; if (!hit(player.x, ny)) player.y = ny;
+    player.dir = Math.abs(mx) > Math.abs(my) ? (mx > 0 ? 'right' : 'left') : (my > 0 ? 'down' : 'up');
+    player.anim += dt;
+  }
+  // klanten
+  const boost = boostT > 0 ? 2.2 : 1;
+  qCD -= dt; promoCD = Math.max(0, promoCD - dt); boostT = Math.max(0, boostT - dt);
+  if (demo) { if (S.min < ROLE().end - 6 && Math.random() < boost * dt / ROLE().spawn) spawnCustomer(boostT > 0); }
+  else if (S.min >= OPEN_AT && S.min < CLOSE_AT - 15) { if (Math.random() < boost * custPerHour() / (60 * MIN_S) * dt) spawnCustomer(boostT > 0); }
+  const busy = customers.some(c => c.state !== 'leave');
+  quietT = busy ? 0 : quietT + dt;
+  quietHint -= dt;
+  if (quietT > 4 && promoCD <= 0 && quietHint <= 0 && (demo || (S.min >= OPEN_AT && S.min < CLOSE_AT - 30))) { quietHint = 25; toast(`Rustig in de zaak? ${promoTxt().label} voor extra klanten!`); }
+  for (let i = customers.length - 1; i >= 0; i--) {
+    const c = customers[i];
+    if (c.path.length) {
+      const [tx, ty] = c.path[0], dx = tx - c.x, dy = ty - c.y, d = Math.hypot(dx, dy), st = c.speed * dt;
+      if (d <= st) { c.x = tx; c.y = ty; c.path.shift(); } else { c.x += dx / d * st; c.y += dy / d * st; }
+      c.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'); c.moving = true; c.anim += dt;
+      if (!c.path.length && c.state === 'enter') { c.state = 'wait'; c.dir = 'up'; c.moving = false; maybeAsk(c); }
+      if (!c.path.length && c.state === 'leave') { customers.splice(i, 1); continue; }
+    } else c.moving = false;
+    if (c.state === 'wait') {
+      c.pat -= dt;
+      if (demo && S.mode === 'rt') {
+        for (const p of c.want.slice()) if (S.demo.shelf[p] > 0) { S.demo.shelf[p]--; c.want.splice(c.want.indexOf(p), 1); c.paid += sellPrice(p); recordSale(c, p); }
+        if (!c.want.length) { finishOrder(c); continue; }
+      }
+      if (!demo && S.min >= CLOSE_AT + 30) { customerLeave(c, 'ok'); continue; }
+      if (c.pat <= 0) { if (demo) S.demo.missed += c.want.length; customerLeave(c, 'boos'); addRep(-1.5); S.today.angry++; sfx.bad(); floaters.push({ x: c.x, y: c.y - 40, text: demo && S.mode === 'rt' ? 'Schap leeg!' : 'Te lang!', col: '#d12325', t: 1.5 }); }
+    }
+    if (c.moodT) c.moodT -= dt;
+    if (c.say && c.say.t < 900) { c.say.t -= dt; if (c.say.t <= 0) c.say = null; }
+  }
+  updateFryers(dt); updateStaff(dt);
+  for (let i = floaters.length - 1; i >= 0; i--) { const f = floaters[i]; f.t -= dt; f.y -= 22 * dt; if (f.t <= 0) floaters.splice(i, 1); }
+  // regen/sneeuw
+  if (S.weather === 'regen' || S.weather === 'sneeuw') {
+    const n = S.weather === 'regen' ? 3 : 1;
+    for (let i = 0; i < n; i++) rain.push({ x: Math.random() * innerWidth, y: -10, v: S.weather === 'regen' ? rnd(500, 650) : rnd(40, 80), w: rnd(-20, 20) });
+    for (let i = rain.length - 1; i >= 0; i--) { const r = rain[i]; r.y += r.v * dt; r.x += r.w * dt; if (r.y > innerHeight) rain.splice(i, 1); }
+  }
+  focus = findFocus();
+}
+
+// ---------- tekenen ----------
+const ctx = cv.getContext('2d');
+let DPR = 1, SCALE = 2;
+function resize() {
+  DPR = Math.min(2, devicePixelRatio || 1);
+  cv.width = innerWidth * DPR; cv.height = innerHeight * DPR; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+  const across = innerWidth < 700 ? 11 : innerWidth < 1100 ? 17 : 22;
+  SCALE = Math.min(innerWidth / (across * TS), innerHeight / (9 * TS));
+  $('#act').style.display = isTouch ? 'block' : 'none';
+}
+addEventListener('resize', resize);
+
+function ell(x, y, rx, ry) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 7); ctx.fill(); }
+function drawProd(p, x, y, s) {
+  const im = IMG[PRODUCTS[p].img];
+  if (imgOk(im)) { const r = im.naturalWidth / im.naturalHeight, w = r >= 1 ? s : s * r, h = r >= 1 ? s / r : s; ctx.drawImage(im, x - w / 2, y - h / 2, w, h); }
+  else { ctx.fillStyle = '#c8812f'; ell(x, y, s / 2.4, s / 2.4); }
+}
+function drawPerson(e, look) {
+  const x = Math.round(e.x), y = Math.round(e.y), st = e.moving ? Math.sin(e.anim * 13) : 0, bob = e.moving ? Math.abs(st) * -1.2 : 0;
+  ctx.fillStyle = 'rgba(0,0,0,.2)'; ell(x, y, 8, 3);
+  ctx.fillStyle = look.pants; ctx.fillRect(x - 5, y - 9, 4, 8 + st * 1.5); ctx.fillRect(x + 1, y - 9, 4, 8 - st * 1.5);
+  ctx.fillStyle = look.shirt; rr(ctx, x - 7, y - 21 + bob, 14, 13, 4);
+  ctx.fillRect(x - 9, y - 19 + bob + (e.moving ? st * 1.5 : 0), 3, 9); ctx.fillRect(x + 6, y - 19 + bob - (e.moving ? st * 1.5 : 0), 3, 9);
+  if (look.vest) { ctx.fillStyle = '#ff8c1a'; ctx.fillRect(x - 7, y - 20 + bob, 14, 11); ctx.fillStyle = '#f4ff5a'; ctx.fillRect(x - 7, y - 14 + bob, 14, 2); }
+  if (look.basket) { ctx.fillStyle = '#ff2625'; rr(ctx, x + 6, y - 14 + bob, 8, 6, 2); ctx.fillStyle = '#111'; ctx.fillRect(x + 9, y - 17 + bob, 2, 3); }
+  if (look.apron && e.dir !== 'up') { ctx.fillStyle = '#ff2625'; ctx.fillRect(x - 5, y - 17 + bob, 10, 9); ctx.fillStyle = '#fff'; ctx.fillRect(x - 2, y - 14 + bob, 4, 2); }
+  const hy = y - 27 + bob;
+  ctx.fillStyle = look.skin; ell(x, hy, 7, 7);
+  ctx.fillStyle = look.hair;
+  if (e.dir === 'up') ell(x, hy, 7.3, 7.3);
+  else { ctx.beginPath(); ctx.arc(x, hy - 1, 7.4, Math.PI, 0); ctx.fill(); if (look.hairStyle === 1) { ctx.fillRect(x - 7, hy - 1, 2, 7); ctx.fillRect(x + 5, hy - 1, 2, 7); } if (look.hairStyle === 2) ell(x, hy - 8, 3.5, 3); }
+  if (look.cap) { ctx.fillStyle = '#ff2625'; ctx.beginPath(); ctx.arc(x, hy - 2, 7.6, Math.PI, 0); ctx.fill(); const bx = e.dir === 'left' ? -9 : e.dir === 'right' ? 3 : -5; if (e.dir !== 'up') ctx.fillRect(x + bx, hy - 3, 6 + (e.dir === 'down' ? 4 : 0), 2.5); ctx.fillStyle = '#fff'; if (e.dir !== 'up') ctx.fillRect(x - 1.5, hy - 7, 3, 2); }
+  ctx.fillStyle = '#111';
+  if (e.dir === 'down') { ctx.fillRect(x - 3, hy, 2, 2); ctx.fillRect(x + 1, hy, 2, 2); }
+  else if (e.dir === 'left') ctx.fillRect(x - 5, hy, 2, 2); else if (e.dir === 'right') ctx.fillRect(x + 3, hy, 2, 2);
+}
+function drawCarry(e, items) {
+  items.forEach((p, i) => drawProd(p, e.x - (items.length - 1) * 6 + i * 12, e.y - 44 - (i % 2) * 2, 15));
+}
+function drawFryer(f) {
+  const x = f.tx * TS, y = f.ty * TS, cx = x + 16;
+  if (f.state === 'rack') {
+    ctx.fillStyle = '#b7895a'; ctx.fillRect(x + 1, y + 25, 30, 6); ctx.fillStyle = '#8a6440'; ctx.fillRect(x + 4, y + 27, 4, 4); ctx.fillRect(x + 24, y + 27, 4, 4);
+    ctx.fillStyle = S.mode === 'gh' ? '#d9b98a' : '#ff2625';
+    rr(ctx, x + 2, y + 13, 13, 12, 2); rr(ctx, x + 17, y + 13, 13, 12, 2); rr(ctx, x + 9, y + 2, 14, 11, 2);
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(x + 2, y + 18, 28, 1);
+    drawProd(f.p, cx, y - 4, 20); return;
+  }
+  if (f.i >= fryerCount()) {
+    ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.setLineDash([4, 3]); ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, 26, 26); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.font = '800 16px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('+', cx, y + 16); return;
+  }
+  ctx.fillStyle = '#7f8a93'; rr(ctx, x + 2, y + 2, 28, 29, 4);
+  ctx.fillStyle = '#b9c2c9'; rr(ctx, x + 3, y + 2, 26, 24, 3);
+  ctx.fillStyle = f.state === 'burnt' ? '#3a2a1a' : '#d9a53a'; ctx.fillRect(x + 7, y + 6, 18, 14);
+  ctx.fillStyle = '#444'; ctx.fillRect(x + 13, y + 27, 6, 3);
+  const T = performance.now() / 1000;
+  if (f.state === 'cook') {
+    ctx.fillStyle = 'rgba(255,255,255,.75)';
+    for (let i = 0; i < 4; i++) { const ph = (T * 2 + i * 0.37) % 1; ell(x + 9 + i * 4.5, y + 18 - ph * 10, 1.6, 1.6); }
+    const pr = f.t / cookTime(f.p);
+    ctx.fillStyle = '#fff'; rr(ctx, x + 1, y - 9, 30, 6, 3); ctx.fillStyle = '#ff2625'; rr(ctx, x + 2, y - 8, 28 * pr, 4, 2);
+  } else if (f.state === 'ready') {
+    const b = Math.sin(T * 6) * 2;
+    drawProd(f.p, cx, y - 8 + b, 22);
+    if (f.n > 1) { ctx.fillStyle = '#111'; ell(x + 28, y - 14 + b, 7, 7); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(f.n, x + 28, y - 13.5 + b); }
+    if (f.t > 22) { ctx.fillStyle = `rgba(80,80,80,${0.3 + 0.3 * Math.sin(T * 8)})`; ell(cx + Math.sin(T * 3) * 4, y - 22, 6, 4); }
+  } else if (f.state === 'burnt') {
+    ctx.fillStyle = 'rgba(60,60,60,.6)'; for (let i = 0; i < 3; i++) { const ph = (T * 0.7 + i * 0.33) % 1; ell(cx + Math.sin(T + i) * 5, y + 4 - ph * 22, 5 + ph * 4, 4 + ph * 3); }
+  }
+}
+function drawStatic() {
+  // vriezer, spoelbak, tafels, krat, bord, lantaarns, terras
+  const fx = FRIDGE[0][0] * TS, fy = FRIDGE[0][1] * TS;
+  ctx.fillStyle = '#e9eef2'; rr(ctx, fx + 2, fy + 1, 60, 30, 4); ctx.fillStyle = '#9fd3f0'; ctx.fillRect(fx + 6, fy + 5, 52, 15);
+  Object.keys(PRODUCTS).forEach((k, i) => { if (S.unlocked[k] && S.stock[k] > 0) drawProd(k, fx + 14 + i * 18, fy + 12, 13); });
+  ctx.fillStyle = '#7a8389'; ctx.fillRect(fx + 6, fy + 23, 52, 3);
+  ctx.fillStyle = '#b9c2c9'; rr(ctx, 24 * TS + 3, 7 * TS + 3, 26, 26, 4); ctx.fillStyle = '#6fa8c8'; ctx.fillRect(24 * TS + 8, 7 * TS + 8, 16, 12); ctx.fillStyle = '#888'; ctx.fillRect(24 * TS + 15, 7 * TS + 3, 2, 6);
+  const table = (x, y, w) => { ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.fillRect(x * TS + 4, y * TS + 24, w * TS - 6, 6); ctx.fillStyle = '#8a5a3c'; rr(ctx, x * TS + 2, y * TS + 4, w * TS - 4, 20, 4); ctx.fillStyle = '#ff2625'; ctx.fillRect(x * TS + 2, y * TS + 4, w * TS - 4, 3); ctx.fillStyle = '#d12325'; [[x * TS + 8, y * TS - 4], [x * TS + w * TS - 16, y * TS - 4], [x * TS + 8, y * TS + 26], [x * TS + w * TS - 16, y * TS + 26]].forEach(([a, b]) => rr(ctx, a, b, 8, 7, 2)); };
+  table(15, 14, 2); table(26, 14, 2);
+  if (S.upg.terras) TERRAS.forEach(([x, y]) => { table(x, y, 1); ctx.fillStyle = (x % 2) ? '#ff2625' : '#fff'; ctx.beginPath(); ctx.moveTo(x * TS - 6, y * TS + 2); ctx.lineTo(x * TS + 16, y * TS - 14); ctx.lineTo(x * TS + 38, y * TS + 2); ctx.fill(); ctx.fillStyle = '#555'; ctx.fillRect(x * TS + 15, y * TS + 2, 2, 8); });
+  if (isDemo() && S.mode === 'rt') {     // diepvriesschap op de toonbank
+    ctx.fillStyle = '#e9f6ff'; ctx.fillRect(15 * TS, 10 * TS + 2, 13 * TS, 28); ctx.fillStyle = '#9fd3f0'; ctx.fillRect(15 * TS + 3, 10 * TS + 5, 13 * TS - 6, 18);
+    ['b', 'k', 'r'].forEach((p, i) => { const n = S.demo.shelf[p], x0 = (15 + i * 4.33) * TS + 6;
+      for (let j = 0; j < Math.min(n, 6); j++) drawProd(p, x0 + 10 + j * 19, 10 * TS + 14, 17);
+      ctx.fillStyle = n ? '#111' : '#d12325'; ctx.font = '800 9px Poppins'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(n ? n + '×' : 'LEEG', x0, 10 * TS + 26); });
+  }
+  if (isDemo() && S.mode === 'gh') { for (let i = 0; i < 26; i++) { ctx.fillStyle = i % 2 ? '#111' : '#f4d21a'; ctx.fillRect(15 * TS + i * 16, 10 * TS + 26, 16, 5); } }
+  const sx = 18.4 * TS, sy = 4.9 * TS, sw = 7.2 * TS, sh = 1.55 * TS;
+  if (isDemo() && ROLE().sign) {
+    ctx.fillStyle = '#111'; rr(ctx, sx - 3, sy - 3, sw + 6, sh + 6, 8); ctx.fillStyle = '#ffffff'; rr(ctx, sx, sy, sw, sh, 6);
+    ctx.fillStyle = '#111'; ctx.font = '800 22px Poppins, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(ROLE().sign, sx + sw / 2, sy + sh / 2 + 2);
+    ctx.fillStyle = '#ff2625'; rr(ctx, sx + sw - 70, sy + sh - 6, 74, 18, 4); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.fillText('met SNX', sx + sw - 33, sy + sh + 3);
+  } else drawSign(sx, sy, sw, sh);
+  drawPromo();
+  if (isDemo()) return;
+  // krat
+  const kx = KRAT[0] * TS, ky = KRAT[1] * TS;
+  ctx.fillStyle = '#2b5fa8'; rr(ctx, kx + 2, ky + 6, 28, 24, 3); ctx.fillStyle = '#3c78cf'; ctx.fillRect(kx + 2, ky + 6, 28, 5);
+  ctx.fillStyle = '#1d4277'; for (let i = 0; i < 3; i++) ctx.fillRect(kx + 6 + i * 8, ky + 14, 4, 12);
+  const kn = Object.values(S.krat).reduce((a, b) => a + b, 0);
+  if (kn) { ctx.fillStyle = '#111'; ell(kx + 28, ky + 6, 8, 8); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(kn, kx + 28, ky + 6.5); }
+  // bord
+  const bx = BOARD[0] * TS, by = BOARD[1] * TS;
+  ctx.fillStyle = '#6b4a2f'; ctx.fillRect(bx + 6, by + 14, 3, 16); ctx.fillRect(bx + 23, by + 14, 3, 16);
+  ctx.fillStyle = '#8a5a3c'; rr(ctx, bx + 1, by - 2, 30, 22, 3); ctx.fillStyle = '#f5e6c8'; ctx.fillRect(bx + 5, by + 2, 10, 12); ctx.fillRect(bx + 17, by + 4, 10, 9);
+  if (S.quest && !S.quest.done) { const b = Math.sin(performance.now() / 250) * 2; ctx.fillStyle = '#ff2625'; ell(bx + 26, by - 4 + b, 6, 6); ctx.fillStyle = '#fff'; ctx.font = '800 10px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', bx + 26, by - 3.5 + b); }
+  // lantaarns
+  LAMPS.forEach(([x, y]) => { ctx.fillStyle = '#333'; ctx.fillRect(x * TS + 14, y * TS - 14, 4, 42); ctx.fillStyle = '#222'; rr(ctx, x * TS + 9, y * TS - 22, 14, 10, 3); ctx.fillStyle = S.min > 1110 ? '#ffe28a' : '#ddd'; ctx.fillRect(x * TS + 11, y * TS - 20, 10, 6); });
+}
+function drawPromo() {
+  const x = PROMO[0] * TS, y = PROMO[1] * TS, T = performance.now() / 1000;
+  ctx.fillStyle = '#555'; ctx.fillRect(x + 7, y + 14, 3, 16); ctx.fillRect(x + 22, y + 14, 3, 16);
+  ctx.fillStyle = '#8e44ad'; rr(ctx, x, y - 4, 32, 22, 4);
+  ctx.fillStyle = '#fff'; ctx.fillRect(x + 4, y, 10, 13); ctx.fillRect(x + 17, y + 1, 11, 12);
+  ctx.fillStyle = '#ff2625'; ctx.fillRect(x + 5, y + 2, 8, 3); ctx.fillRect(x + 18, y + 3, 9, 3);
+  if (promoCD <= 0) { const b = Math.sin(T * 5) * 2; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('📣', x + 16, y - 14 + b); }
+  else { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(x + 2, y - 10, 28, 4); ctx.fillStyle = '#8e44ad'; ctx.fillRect(x + 2, y - 10, 28 * (1 - promoCD / (isDemo() ? 25 : 60)), 4); }
+  if (boostT > 0) {           // flyers op de grond en in de lucht
+    for (let i = 0; i < 9; i++) { const fx = (14.5 + (i * 37 % 15)) * TS, fy = (17.3 + (i * 13 % 3)) * TS + Math.sin(T * 2 + i) * 4;
+      ctx.save(); ctx.translate(fx, fy); ctx.rotate(Math.sin(T + i) * 0.6); ctx.fillStyle = '#fff'; ctx.fillRect(-5, -6, 10, 12); ctx.fillStyle = '#ff2625'; ctx.fillRect(-4, -5, 8, 3); ctx.restore(); }
+  }
+}
+function drawKid(c) {
+  const T = performance.now() / 1000, happy = c.mood === 'blij' && c.moodT > 0;
+  const jump = happy ? -Math.abs(Math.sin(T * 10)) * 9 : 0;
+  ctx.save(); ctx.translate(c.x - 14, c.y + 2); ctx.scale(0.68, 0.68);
+  drawPerson({ x: 0, y: jump / 0.68, dir: c.dir, moving: c.moving, anim: c.anim + 0.3 }, c.kid);
+  ctx.restore();
+}
+function drawGuides() {
+  const T = performance.now() / 1000, b = Math.sin(T * 6) * 4;
+  for (const t of guideTargets()) {
+    const col = t.promo ? '#8e44ad' : t.talk ? '#1fa7a7' : '#2e9d4f';
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.globalAlpha = 0.55 + 0.35 * Math.sin(T * 6);
+    ctx.beginPath(); ctx.ellipse(t.x, t.y, 15, 6, 0, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
+    const ay = t.y - (t.talk ? 136 : 62) + b;
+    ctx.fillStyle = col; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(t.x - 4, ay - 10); ctx.lineTo(t.x + 4, ay - 10); ctx.lineTo(t.x + 4, ay); ctx.lineTo(t.x + 10, ay); ctx.lineTo(t.x, ay + 11); ctx.lineTo(t.x - 10, ay); ctx.lineTo(t.x - 4, ay); ctx.closePath();
+    ctx.stroke(); ctx.fill();
+  }
+}
+function drawSign(sx, sy, sw, sh) {
+  ctx.fillStyle = '#111'; rr(ctx, sx - 3, sy - 3, sw + 6, sh + 6, 8);
+  ctx.fillStyle = '#ff2625'; rr(ctx, sx, sy, sw, sh, 6);
+  const lg = IMG.logo_white;
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.font = '800 26px Poppins, sans-serif';
+  const barW = ctx.measureText('bar').width;
+  if (imgOk(lg)) { const h = sh - 14, w = h * lg.naturalWidth / lg.naturalHeight, tot = w + 6 + barW, ox = sx + (sw - tot) / 2; ctx.drawImage(lg, ox, sy + 7, w, h); ctx.fillStyle = '#fff'; ctx.fillText('bar', ox + w + 6, sy + sh / 2 + 2); }
+  else { ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText('SNXbar', sx + sw / 2, sy + sh / 2 + 2); }
+}
+function drawSay(c) {
+  if (!c.say) return;
+  ctx.font = '600 10px Poppins, sans-serif';
+  const words = c.say.text.split(' '), lines = []; let ln = '';
+  for (const w of words) { const t = ln ? ln + ' ' + w : w; if (ctx.measureText(t).width > 128 && ln) { lines.push(ln); ln = w; } else ln = t; }
+  lines.push(ln);
+  const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + 14, h = lines.length * 12 + 8;
+  const hasOrder = c.state === 'wait' && c.want.length;
+  const x = c.x - w / 2, y = c.y - (hasOrder ? 78 : 48) - h;
+  const q = !!c.question;
+  ctx.fillStyle = q ? '#1fa7a7' : '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 8) : ctx.rect(x, y, w, h); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(c.x + 6, y + h - 1); ctx.lineTo(c.x + 14, y + h + 7); ctx.lineTo(c.x + 14, y + h - 1); ctx.fill();
+  ctx.fillStyle = q ? '#fff' : '#111'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  lines.forEach((l, i) => ctx.fillText(l, x + 7, y + 5 + i * 12));
+}
+function drawBubble(c) {
+  const n = c.want.length; if (!n) return;
+  const w = 10 + n * 22, x = c.x - w / 2, y = c.y - 66;
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, 26, 7) : ctx.rect(x, y, w, 26); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(c.x - 4, y + 25); ctx.lineTo(c.x, y + 31); ctx.lineTo(c.x + 4, y + 25); ctx.fill();
+  c.want.forEach((p, i) => drawProd(p, x + 16 + i * 22, y + 13, 19));
+  if (c.client) { ctx.font = '700 9px Poppins'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.strokeText(c.client, c.x, y - 4); ctx.fillStyle = '#111'; ctx.fillText(c.client, c.x, y - 4); }
+  const fr = clamp(c.pat / c.maxPat, 0, 1);
+  ctx.fillStyle = '#ddd'; ctx.fillRect(x + 4, y + 29, w - 8, 4);
+  ctx.fillStyle = fr > 0.5 ? '#2e9d4f' : fr > 0.25 ? '#f2a33a' : '#d12325'; ctx.fillRect(x + 4, y + 29, (w - 8) * fr, 4);
+}
+function render() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = '#2a4a2a'; ctx.fillRect(0, 0, cv.width, cv.height);
+  if (!S) return;
+  const vw = innerWidth / SCALE, vh = innerHeight / SCALE;
+  let camX = player.x - vw / 2, camY = player.y - 16 - vh / 2;
+  camX = MW * TS <= vw ? (MW * TS - vw) / 2 : clamp(camX, 0, MW * TS - vw);
+  camY = MH * TS <= vh ? (MH * TS - vh) / 2 : clamp(camY, 0, MH * TS - vh);
+  const k = SCALE * DPR; camX = Math.round(camX * k) / k; camY = Math.round(camY * k) / k;
+  ctx.setTransform(k, 0, 0, k, -camX * k, -camY * k);
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(bg, 0, 0);
+  drawStatic();
+  fryers.forEach(drawFryer);
+  // y-gesorteerde figuren
+  const ents = [{ e: player, look: PLAYER_LOOK, carry: player.tray }];
+  customers.forEach(c => { ents.push({ e: c, look: c.look }); if (c.kid) ents.push({ e: { y: c.y + 2 }, kidOf: c }); });
+  staff.forEach(s => ents.push({ e: s, look: s.look, carry: s.carry }));
+  ents.sort((a, b) => a.e.y - b.e.y);
+  for (const o of ents) { if (o.kidOf) { drawKid(o.kidOf); continue; } drawPerson(o.e, o.look); if (o.carry && o.carry.length) drawCarry(o.e, o.carry); }
+  ctx.drawImage(fg, 0, 0);
+  customers.forEach(c => { if (c.state === 'wait' || c.state === 'enter' && c.path.length <= 2) drawBubble(c); if (c.mood && c.moodT > 0) { ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(c.mood === 'boos' ? '😠' : c.mood === 'blij' ? '😋' : '🙂', c.x, c.y - 44); } });
+  customers.forEach(drawSay);
+  staff.forEach(s => { ctx.font = '700 9px Poppins'; ctx.textAlign = 'center'; ctx.fillStyle = '#111'; ctx.fillText(s.name, s.x, s.y + 9); });
+  floaters.forEach(f => { ctx.font = '800 13px Poppins'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.strokeText(f.text, f.x, f.y); ctx.fillStyle = f.col; ctx.fillText(f.text, f.x, f.y); });
+  drawGuides();
+  if (focus && focus.kind && focus.kind !== 'info') { const col = { pick: '#2b6fd6', give: '#2e9d4f', fry: '#f28c18', promo: '#8e44ad', talk: '#1fa7a7' }[focus.kind];
+    ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.ellipse(focus.x, focus.y, 20, 8, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); }
+  // nacht en licht
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const m = S.min;
+  let dark = isDemo() ? 0 : m >= 1080 ? clamp((m - 1080) / 240, 0, 1) * 0.58 : m < 420 ? (420 - m) / 60 * 0.25 : 0;
+  if (S.weather === 'regen' || S.weather === 'sneeuw') dark += 0.1; else if (S.weather === 'bewolkt') dark += 0.04;
+  if (dark > 0) {
+    ctx.fillStyle = `rgba(20,24,60,${dark})`; ctx.fillRect(0, 0, innerWidth, innerHeight);
+    if (m >= 1080 && !isDemo()) {
+      ctx.globalCompositeOperation = 'lighter';
+      const glow = (wx, wy, r) => { const sx = (wx - camX) * SCALE, sy = (wy - camY) * SCALE, rr2 = r * SCALE; const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, rr2); g.addColorStop(0, `rgba(255,200,110,${dark * 0.55})`); g.addColorStop(1, 'rgba(255,200,110,0)'); ctx.fillStyle = g; ctx.fillRect(sx - rr2, sy - rr2, rr2 * 2, rr2 * 2); };
+      LAMPS.forEach(([x, y]) => glow(x * TS + 16, y * TS - 16, 80));
+      glow(21.5 * TS, 11 * TS, 230);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+  }
+  if (rain.length) {
+    if (S.weather === 'regen') { ctx.strokeStyle = 'rgba(200,220,255,.55)'; ctx.lineWidth = 1.2; ctx.beginPath(); rain.forEach(r => { ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - 2, r.y + 10); }); ctx.stroke(); }
+    else { ctx.fillStyle = 'rgba(255,255,255,.9)'; rain.forEach(r => { ctx.fillRect(r.x, r.y, 3, 3); }); }
+  }
+}
+
+// ---------- HUD ----------
+let hudT = 0;
+function hud() {
+  const m = Math.floor(S.min) % 1440, h = Math.floor(m / 60), mm = Math.floor(m % 60 / 10) * 10;
+  $('#hTime').textContent = String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  const demo = isDemo();
+  $('#hudR').style.display = demo ? 'none' : 'block'; $('#hudD').style.display = demo ? 'block' : 'none';
+  if (demo) {
+    const R = ROLE(), d = S.demo, left = Math.max(0, Math.ceil((R.end - S.min) * CONFIG.demoMinS)), sold = d.sold.b + d.sold.k + d.sold.r;
+    $('#hDay').textContent = R.title + ' · ' + R.shift;
+    $('#hWeather').textContent = 'Nog ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+    const o = $('#open'); o.textContent = 'DEMO'; o.className = 'on';
+    $('#hEnergy').parentElement.style.display = 'none'; $('#hEnergy').parentElement.previousElementSibling.style.display = 'none';
+    $('#dMargin').textContent = euro(d.rev - d.cost); $('#dSold').textContent = sold + ' ' + R.units + ' verkocht';
+  } else { $('#hEnergy').parentElement.style.display = ''; $('#hEnergy').parentElement.previousElementSibling.style.display = ''; }
+  const fest = festival();
+  if (!demo) $('#hDay').textContent = `${weekday()} · dag ${dayInSeason()} · ${SEASONS[season()]}${year() > 1 ? ' · jaar ' + year() : ''}`;
+  if (!demo) $('#hWeather').textContent = fest ? '🎉 ' + fest : { zon: '☀ Zon', bewolkt: '☁ Bewolkt', regen: '🌧 Regen', sneeuw: '❄ Sneeuw' }[S.weather];
+  const open = S.min >= OPEN_AT && S.min < CLOSE_AT; const o = demo ? { } : $('#open'); o.textContent = open ? 'OPEN' : 'DICHT'; o.className = open ? 'on' : '';
+  const en = $('#hEnergy'); en.style.width = S.energy + '%'; en.style.background = S.energy > 30 ? '#2e9d4f' : '#d12325';
+  $('#hMoney').textContent = euro(Math.floor(S.money));
+  $('#hRep').textContent = Math.round(S.rep) + '/100';
+  $('#hBr').textContent = branchCount();
+  const slots = []; for (let i = 0; i < trayCap(); i++) { const p = player.tray[i]; slots.push(`<div class="slot">${p ? `<img src="assets/${PRODUCTS[p].img}.webp" alt="">` : ''}</div>`); }
+  const sh = slots.join('');
+  if ($('#tSlots').dataset.h !== sh) { $('#tSlots').innerHTML = sh; $('#tSlots').dataset.h = sh; }
+  if (demo) $('#tStock').innerHTML = S.mode === 'rt' ? 'Je draagt ' + player.tray.length + '/' + trayCap() + '<br>Schap ' + ['b', 'k', 'r'].map(k => `<img src="assets/${PRODUCTS[k].img}.webp" style="width:14px;height:14px;object-fit:contain;vertical-align:-3px"><b style="color:${S.demo.shelf[k] ? '#111' : '#d12325'}">${S.demo.shelf[k]}</b>`).join(' ') : 'Je draagt<br>' + player.tray.length + '/' + trayCap();
+  else $('#tStock').innerHTML = 'Voorraad<br>' + Object.keys(PRODUCTS).filter(k => S.unlocked[k]).map(k => `${PRODUCTS[k].name.split(' ')[0]} <b>${S.stock[k]}</b>`).join(' · ');
+  const pr = $('#prompt');
+  const act = $('#act'), ICON = { pick: '✋', give: '🤲', fry: '🔥', promo: '📣', talk: '💬', info: 'ℹ️' };
+  if (focus && !modalOpen) {
+    const k = focus.kind || 'info';
+    pr.style.display = 'block'; pr.className = k; pr.innerHTML = (isTouch ? '' : '<b>E</b>') + focus.label;
+    const short = { pick: 'PAK', give: S.mode === 'gh' && isDemo() ? 'LAAD IN' : S.mode === 'rt' && isDemo() ? 'VUL' : 'GEEF', fry: 'BAK', promo: 'ACTIE!', talk: 'PRAAT', info: 'INFO' }[k];
+    act.className = k; act.innerHTML = `<span class="ic">${ICON[k]}</span>${short}`;
+  } else {
+    const c = modalOpen ? '' : coachText();
+    if (c) { pr.style.display = 'block'; pr.className = 'coach'; pr.innerHTML = '💡 ' + c; } else pr.style.display = 'none';
+    act.className = ''; act.innerHTML = '<span class="ic">·</span>LOOP';
+  }
+}
+
+// ---------- lus ----------
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (S && $('#title').style.display === 'none') { update(dt); hudT -= dt; if (hudT <= 0) { hud(); hudT = 0.1; } }
+  render();
+  requestAnimationFrame(loop);
+}
+
+// ---------- start ----------
+buildMap();
+resize();
+let saved = load();
+if (saved) $('#bCont').style.display = 'inline-block';
+function begin(state) {
+  S = state; $('#title').style.display = 'none';
+  rebuildSolid();
+  if (isDemo()) startDemo(); else { drawBG(season()); startDay(); }
+  hud();
+  if (isTouch) $('#act').style.display = 'block';
+}
+$('#bNew').onclick = () => {
+  const b = $('#bNew');
+  if (saved && !b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'Zeker? Opgeslagen spel wissen'; return; }
+  begin(newState()); save();
+};
+$('#bCont').onclick = () => begin(saved);
+document.querySelectorAll('#title .role').forEach(b => b.onclick = () => begin(newDemo(b.dataset.role)));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S) drawBG(season()); });
+addEventListener('visibilitychange', () => { if (document.hidden && S) save(); });
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
