@@ -60,7 +60,7 @@ body.hot .rays { opacity: .35; animation-duration: 8s; }
 /* box collector meter */
 .collect { width: 100%; display: flex; align-items: center; gap: 8px; }
 .collect img { width: 36px; height: 28px; object-fit: cover; border-radius: 5px; border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); }
-.collect .track { flex: 1; display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; background: rgba(17,17,17,.55); border: 3px solid var(--ink);
+.collect .track { flex: 1; display: grid; grid-template-columns: repeat(30, 1fr); gap: 2px; background: rgba(17,17,17,.55); border: 3px solid var(--ink);
   border-radius: 10px; padding: 3px; box-shadow: 0 3px 0 var(--ink); }
 .collect .track i { height: 10px; border-radius: 3px; background: rgba(255,255,255,.12); transition: background .3s, transform .3s; }
 .collect .track i.on { background: linear-gradient(180deg, #fff6b0, var(--goud) 50%, var(--goud2)); }
@@ -213,9 +213,53 @@ body.hot .rays { opacity: .35; animation-duration: 8s; }
 .boost span { background: rgba(17,17,17,.55); border: 3px solid var(--ink); border-radius: 14px; padding: 4px 10px; font-weight: 900; font-size: 15px; text-transform: uppercase; }
 .boost b { color: var(--goud); }
 
+/* bonus stage */
+.overlay.bonus { background: radial-gradient(circle at 50% 45%, rgba(120,4,12,.92), rgba(12,0,0,.97)); }
+.overlay.bonus::before { content: ''; position: absolute; left: 50%; top: 45%; width: 200vmax; height: 200vmax; transform: translate(-50%, -50%); pointer-events: none; opacity: .14;
+  background: repeating-conic-gradient(#ffd23f 0deg 6deg, transparent 6deg 15deg); animation: spinr 30s linear infinite; }
+.picker { position: relative; }
+.chests { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 34px 2px 8px; }
+.chests .box { aspect-ratio: .95; }
+.chests .box .front { inset: 22% 0 0; }
+.chests .box .lid { top: 6%; height: 20%; }
+.box.shake { animation: shake .6s ease-in-out !important; }
+@keyframes shake { 10%, 50%, 90% { transform: rotate(-7deg) scale(1.06); } 30%, 70% { transform: rotate(7deg) scale(1.06); } }
+.box.open::before { content: ''; position: absolute; left: 50%; top: 30%; width: 220%; aspect-ratio: 1; transform: translate(-50%, -50%); z-index: 0; pointer-events: none;
+  background: repeating-conic-gradient(rgba(255,230,140,.75) 0deg 10deg, transparent 10deg 24deg); border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, #000 0 25%, transparent 65%); mask: radial-gradient(circle, #000 0 25%, transparent 65%); animation: spinr2 5s linear infinite; }
+.box.rest::before { display: none; }
+@keyframes spinr2 { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.chests .box .prize { min-width: 110%; font-size: clamp(14px, 2.3vh, 18px); padding: 8px 4px; }
+.chests .box .prize small { font-size: .6em; margin-top: 3px; text-transform: none; letter-spacing: 0; font-weight: 700; }
+.chests .box.open .prize { transform: translate(-50%, -88%) scale(1); }
+.chests .box.rest .prize { transform: translate(-50%, -70%) scale(.8); }
+.counter { display: grid; justify-items: center; gap: 4px; padding: 10px 0; }
+.cnum { width: 170px; height: 170px; border-radius: 50%; display: grid; place-items: center; font-size: 96px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums;
+  color: var(--goud); background: radial-gradient(circle at 50% 35%, #333, #050505 70%); border: 6px solid var(--ink);
+  box-shadow: 0 0 0 6px var(--goud), 0 0 40px rgba(255,210,63,.7), inset 0 6px 20px rgba(0,0,0,.9); text-shadow: 0 0 20px rgba(255,210,63,.9); }
+.cnum.run { animation: throb .22s ease-in-out infinite; }
+.cnum.hit { animation: cardin .5s cubic-bezier(.2,1.8,.4,1); color: #fff; }
+@keyframes throb { 50% { transform: scale(1.04); } }
+.counter span { font-weight: 900; text-transform: uppercase; letter-spacing: .08em; text-shadow: 0 2px 0 var(--ink); }
+.flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 40; }
+.flash.go { animation: flash .6s ease-out; }
+@keyframes flash { 0% { opacity: .9; } 100% { opacity: 0; } }
+.cabinet.quake { animation: quake .5s linear 2; }
+@keyframes quake { 20% { transform: translate(-6px, 3px) rotate(-1deg); } 40% { transform: translate(6px, -3px) rotate(1deg); } 60% { transform: translate(-4px, -2px); } 80% { transform: translate(4px, 2px); } }
+/* free-spin features */
+.wildrow { position: absolute; z-index: 5; border-radius: 12px; pointer-events: none; transform-origin: left center;
+  background: linear-gradient(90deg, rgba(255,210,63,.0), rgba(255,210,63,.55) 12%, rgba(255,255,255,.65) 50%, rgba(255,210,63,.55) 88%, rgba(255,210,63,0));
+  box-shadow: 0 0 0 3px var(--goud), 0 0 26px 6px rgba(255,210,63,.85); display: grid; place-items: center; animation: zap .45s cubic-bezier(.2,1.2,.4,1), settle .4s .9s forwards; }
+@keyframes settle { to { background: rgba(255,210,63,.12); } }
+.wildrow b { transition: opacity .3s; } .reels.dim ~ .wildrow b { opacity: 0; }
+.wildrow b { font-weight: 900; font-size: calc(var(--cell) * .26); letter-spacing: .2em; color: var(--ink); background: var(--goud); border: 3px solid var(--ink); border-radius: 10px; padding: 1px 10px; }
+@keyframes zap { from { transform: scaleX(0); opacity: 0; } }
+.cell.sticky { box-shadow: inset 0 0 0 3px var(--goud), 0 0 14px 2px rgba(255,210,63,.9); }
+.cell.wild.sticky::after { content: 'PLAK'; }
+
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 @media (prefers-reduced-motion: reduce) {
-  .rays, .bulb, .boxes .box, .cell.hit { animation: none !important; }
+  .rays, .bulb, .boxes .box, .chests .box, .cell.hit, .overlay.bonus::before, .box.open::before, .cnum.run, .cabinet.quake { animation: none !important; }
 }
 </style>
 </head>
@@ -228,10 +272,10 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
     <button class="iconbtn" id="muteBtn" type="button" aria-label="Geluid aan of uit"></button>
   </div>
 
-  <div class="collect" id="collect" title="Verzamel 25 dozen voor de Doos-bonus">
+  <div class="collect" id="collect" title="Verzamel 30 dozen voor de Doos-bonus">
     <img src="assets/doos.webp" alt="">
     <div class="track" id="track"></div>
-    <span id="collectTxt">0/25</span>
+    <span id="collectTxt">0/30</span>
   </div>
 
   <div class="cabinet" id="cabinet">
@@ -243,8 +287,8 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
 
   <div class="console" id="console">
     <div class="leds">
-      <div class="led"><span>Snack-punten</span><b id="credits">1.000</b></div>
-      <div class="led"><span>Inzet</span><b id="bet">10</b></div>
+      <div class="led"><span>Snack-punten</span><b id="credits">10.000</b></div>
+      <div class="led"><span>Inzet</span><b id="bet">50</b></div>
       <div class="led win"><span>Winst</span><b id="win">0</b></div>
     </div>
     <div class="ctrl">
@@ -271,8 +315,8 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
     <img src="assets/logo_white.webp" alt="SNX" style="width:52%;margin:0 auto;display:block;filter:drop-shadow(0 3px 0 #111)">
     <div class="big" style="font-size:44px">Power Slot</div>
     <div class="feat">
-      <div><span class="ic"><img src="assets/doos.webp" alt=""></span><span><b>3 Bonus-dozen</b> of 25 verzameld? Kies 3 verzenddozen en open je boosters.</span></div>
-      <div><span class="ic" style="background:#111;color:#ffd23f;font-weight:900;font-size:18px">+1</span><span><b>Booster free spins</b> met een <b>extra rij</b> op de rollen: tot 3.125 manieren om te winnen.</span></div>
+      <div><span class="ic"><img src="assets/doos.webp" alt=""></span><span><b>3 Bonus-dozen</b> of 30 verzameld? Kies je doos: Wild-regen, Wild-rij of Plak-wilds.</span></div>
+      <div><span class="ic" style="background:#111;color:#ffd23f;font-weight:900;font-size:18px">STOP</span><span><b>Stop de teller</b> voor je aantal <b>booster free spins</b>, met een <b>extra rij</b> op de rollen.</span></div>
       <div><span class="ic"><img src="assets/bal.webp" alt=""></span><span><b>Grote winst?</b> Dan spuit de bitterbal-fontein.</span></div>
     </div>
     <p style="font-size:12px;opacity:.9">Je speelt met gratis snack-punten. Geen geld, geen prijzen.</p>
@@ -288,23 +332,24 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
     <div class="pay" id="payTable"></div>
     <div class="feat">
       <div><span class="ic" style="background:#c3111a"><img src="assets/logo_white.webp" alt=""></span><span><b>SNX Wild</b> vervangt elke snack, op rol 2 t/m 5. De <b>Snack Truck</b> dropt soms 2 tot 5 extra wilds.</span></div>
-      <div><span class="ic"><img src="assets/doos.webp" alt=""></span><span><b>Doos-bonus</b>: 3+ Bonus-dozen in één spin, of 25 verzameld. Kies 3 van 6 dozen. Basis: 5 free spins met 4 rijen. Dozen geven extra spins, een hogere multiplier of nog een rij.</span></div>
-      <div><span class="ic" style="background:#111;color:#ffd23f;font-weight:900">×</span><span>In de free spins stijgt de multiplier met +1 bij elke winst (max ×10). 3+ dozen = +5 spins.</span></div>
+      <div><span class="ic"><img src="assets/doos.webp" alt=""></span><span><b>Doos-bonus</b>: 3+ Bonus-dozen in één spin, of 30 verzameld. Kies 1 van 3 dozen voor je wild-booster, en stop de teller voor 4 tot 10 free spins. De free spins draaien met 4 rijen (1.024 manieren).</span></div>
+      <div><span class="ic" style="background:#111;color:#ffd23f;font-weight:900">×</span><span><b>Wild-regen</b>: 3-5 extra wilds per spin. <b>Wild-rij</b>: een hele rij wild per spin. <b>Plak-wilds</b>: elke wild blijft staan. 3+ dozen in de free spins = +3 spins.</span></div>
     </div>
     <button class="btn" id="closeInfo" type="button">Terug</button>
   </div>
 </div>
 
-<!-- box picker -->
-<div class="overlay" id="pickCard" hidden>
+<!-- bonus stage: pick a chest, then stop the counter -->
+<div class="overlay bonus" id="bonusCard" hidden>
   <div class="picker">
-    <h2>Kies 3 dozen</h2>
-    <p id="pickTxt">Nog 3 keuzes</p>
-    <div class="boxes" id="boxes"></div>
-    <div class="boost" id="boost"></div>
-    <button class="btn" id="pickGo" type="button" hidden>Start free spins</button>
+    <h2 id="bTitle">Kies je doos</h2>
+    <p id="bTxt">Elke doos verbergt een andere wild-booster</p>
+    <div class="chests" id="chests"></div>
+    <div class="counter" id="counter" hidden><div class="cnum" id="cnum">5</div><span>booster free spins</span></div>
+    <button class="btn" id="bGo" type="button" hidden>Verder</button>
   </div>
 </div>
+<div class="flash" id="flash"></div>
 
 <!-- big win -->
 <div class="overlay" id="bigCard" hidden>
@@ -319,7 +364,7 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
 <div class="overlay" id="emptyCard" hidden>
   <div class="card">
     <h2>Op is op</h2>
-    <p>Je snack-punten zijn op. Pak er 1000 bij en ga door.</p>
+    <p>Je snack-punten zijn op. Pak er 10.000 bij en ga door.</p>
     <button class="btn" id="refill" type="button">Bijvullen</button>
   </div>
 </div>
@@ -340,16 +385,18 @@ const SYMBOLS = {
 };
 const KEYS = Object.keys(SYMBOLS);
 const PAYING = ['S', 'N', 'X', 'bal', 'kro', 'bob'];
-const DIV = 30;              // pay table is per 1/DIV of the bet, per way
-const FREE_DIV = 9.5;        // extra damping in free spins (more rows = many more ways)
-const COLLECT_MAX = 25;
+const DIV = 58;              // pay table is per 1/DIV of the bet, per way
+const COLLECT_MAX = 30;
 const TRUCK_CHANCE = 1 / 14;
-const BOX_PRIZES = [
-  { t: 'spins', v: 2 }, { t: 'spins', v: 3 }, { t: 'spins', v: 5 },
-  { t: 'mult', v: 1 }, { t: 'mult', v: 2 }, { t: 'row', v: 1 }
-];
-const BASE_BONUS = { spins: 5, rows: 4, mult: 1 };
-const RETRIGGER = 5;
+const FREE_ROWS = 4;         // booster free spins always play with an extra row
+const RETRIGGER = 3;
+// the spin counter cycles through these; the player stops it
+const COUNTER = [4, 6, 5, 8, 4, 6, 10, 5, 6, 4, 7, 5];
+const FEATURES = {
+  rain:   { name: 'Wild-regen', short: '3-5 extra wilds per spin', desc: 'Elke spin regent het 3 tot 5 extra wilds op de rollen.' },
+  row:    { name: 'Wild-rij',   short: 'een hele rij wild per spin', desc: 'Elke spin schiet er een hele rij wild over de rollen.' },
+  sticky: { name: 'Plak-wilds', short: 'wilds blijven staan', desc: 'Elke wild die valt blijft plakken tot de laatste spin. Je start met 2 wilds.' }
+};
 
 function pick(reel, rnd) {
   let total = 0;
@@ -372,9 +419,25 @@ function makeGrid(rnd, opts = {}) {
   }
   return { grid: g, truck };
 }
-function evaluate(grid, bet, mult, free) {
+// Applies the chosen booster to a free-spin grid. Returns what changed, for the animation.
+function applyFeature(grid, feature, rnd, stickySet, first) {
+  const rows = grid[0].length, out = { cells: [], row: -1, sticky: [] };
+  const randCell = () => [1 + Math.floor(rnd() * 4), Math.floor(rnd() * rows)];
+  if (feature === 'rain') {
+    const n = 3 + Math.floor(rnd() * 3);
+    for (let i = 0; i < n; i++) { const [r, row] = randCell(); if (grid[r][row] !== 'W') { grid[r][row] = 'W'; out.cells.push([r, row]); } }
+  } else if (feature === 'row') {
+    out.row = Math.floor(rnd() * rows);
+    for (let r = 1; r < 5; r++) grid[r][out.row] = 'W';
+  } else if (feature === 'sticky') {
+    if (first) for (let i = 0; i < 2; i++) { const [r, row] = randCell(); grid[r][row] = 'W'; }
+    stickySet.forEach((key) => { const [r, row] = key.split(',').map(Number); grid[r][row] = 'W'; out.sticky.push([r, row]); });
+    grid.forEach((col, r) => col.forEach((k, row) => { const key = r + ',' + row; if (k === 'W' && !stickySet.has(key)) { stickySet.add(key); out.cells.push([r, row]); } }));
+  }
+  return out;
+}
+function evaluate(grid, bet, mult = 1) {
   const wins = []; let total = 0;
-  const div = DIV * (free ? FREE_DIV : 1);
   for (const s of PAYING) {
     let ways = 1, len = 0; const cells = [];
     for (let r = 0; r < 5; r++) {
@@ -384,7 +447,7 @@ function evaluate(grid, bet, mult, free) {
       ways *= c; len++;
     }
     if (len >= 3) {
-      const amount = Math.round(ways * SYMBOLS[s].pay[len] * bet / div * mult);
+      const amount = Math.round(ways * SYMBOLS[s].pay[len] * bet / DIV * mult);
       if (amount > 0) { wins.push({ s, len, ways, amount, cells: cells.filter(([r]) => r < len) }); total += amount; }
     }
   }
@@ -392,27 +455,21 @@ function evaluate(grid, bet, mult, free) {
   grid.forEach((col, r) => col.forEach((k, row) => { if (k === 'B') scat.push([r, row]); }));
   return { wins, total, scat };
 }
-function shuffled(rnd) { const a = BOX_PRIZES.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function applyPicks(picks) {
-  const b = { ...BASE_BONUS };
-  picks.forEach((p) => { if (p.t === 'spins') b.spins += p.v; else if (p.t === 'mult') b.mult += p.v; else b.rows += p.v; });
-  return b;
-}
 /* ===== end rules ===== */
 
 (() => {
   if (typeof document === 'undefined') return;
   const $ = (id) => document.getElementById(id);
   const IMG = { bal: 'assets/bal.webp', kro: 'assets/kroket.webp', bob: 'assets/burger.webp', W: 'assets/logo_white.webp', B: 'assets/doos.webp' };
-  const BETS = [5, 10, 20, 50, 100];
+  const BETS = [10, 20, 50, 100, 200, 500];
   const store = {
-    get(k, d) { try { const v = localStorage.getItem('snxslot.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem('snxslot.' + k, JSON.stringify(v)); } catch {} }
+    get(k, d) { try { const v = localStorage.getItem('snxslot2.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem('snxslot2.' + k, JSON.stringify(v)); } catch {} }
   };
   const st = {
-    credits: store.get('credits', 1000), betIdx: store.get('betIdx', 1), boxes: Math.min(store.get('boxes', 0), COLLECT_MAX),
+    credits: store.get('credits', 10000), betIdx: store.get('betIdx', 2), boxes: Math.min(store.get('boxes', 0), COLLECT_MAX),
     muted: store.get('muted', false), spinning: false, turbo: false, auto: false,
-    free: 0, freeMult: 1, freeWin: 0, rows: 3
+    free: 0, freeWin: 0, rows: 3, feature: null, sticky: new Set(), first: false
   };
   const balImg = new Image(); balImg.src = IMG.bal;
   Object.values(IMG).forEach((src) => { const i = new Image(); i.src = src; });
@@ -524,7 +581,7 @@ function applyPicks(picks) {
     $('spinLab').textContent = st.auto ? 'STOP' : st.free ? 'FREE' : 'SPIN';
     sb.querySelector('svg').setAttribute('stroke', st.free ? '#111' : '#fff');
     $('fsbar').hidden = !st.free;
-    if (st.free) $('fsbar').textContent = `Free spins ${st.free} · ×${st.freeMult} · ${st.rows} rijen`;
+    if (st.free) $('fsbar').textContent = `${FEATURES[st.feature].name} · nog ${st.free} · ${st.rows} rijen`;
     $('turboBtn').classList.toggle('on', st.turbo); $('turboBtn').setAttribute('aria-pressed', st.turbo);
     $('autoBtn').classList.toggle('on', st.auto); $('autoBtn').setAttribute('aria-pressed', st.auto);
     $('muteBtn').innerHTML = st.muted ? ICON_OFF : ICON_ON;
@@ -579,47 +636,74 @@ function applyPicks(picks) {
     else { fxRun = false; ctx.clearRect(0, 0, innerWidth, innerHeight); document.body.classList.remove('hot'); }
   }
 
-  /* ---- box picker ---- */
-  function runPicker() {
+  /* ---- bonus stage ---- */
+  const autoTap = (el, ms) => { if (st.auto) setTimeout(() => el.click(), ms); };
+  function runChests() {
     return new Promise((resolve) => {
-      const prizes = shuffled(Math.random), picks = [];
-      const label = (p) => p.t === 'spins' ? `+${p.v}<small>free spins</small>` : p.t === 'mult' ? `+×${p.v}<small>multiplier</small>` : `+1 rij<small>extra rij</small>`;
-      const boxes = $('boxes'); boxes.className = 'boxes'; boxes.innerHTML = '';
-      $('pickGo').hidden = true; $('pickTxt').textContent = 'Nog 3 keuzes';
-      const showBoost = () => { const b = applyPicks(picks); $('boost').innerHTML = `<span><b>${b.spins}</b> spins</span><span><b>×${b.mult}</b> start</span><span><b>${b.rows}</b> rijen</span>`; };
-      showBoost();
-      prizes.forEach((p, i) => {
+      const keys = Object.keys(FEATURES).sort(() => Math.random() - .5);
+      const chests = $('chests'); chests.className = 'chests boxes'; chests.innerHTML = ''; chests.hidden = false;
+      $('counter').hidden = true; $('bGo').hidden = true;
+      $('bTitle').textContent = 'Kies je doos'; $('bTxt').textContent = 'Elke doos verbergt een andere wild-booster';
+      let chosen = null;
+      keys.forEach((k, i) => {
         const el = document.createElement('button'); el.type = 'button'; el.className = 'box'; el.setAttribute('aria-label', 'Doos ' + (i + 1));
-        el.innerHTML = `<div class="front"></div><div class="lid"></div><div class="prize">${label(p)}</div>`;
+        el.innerHTML = `<div class="front"></div><div class="lid"></div><div class="prize">${FEATURES[k].name}<small>${FEATURES[k].short}</small></div>`;
         el.onclick = () => {
-          if (el.classList.contains('open') || picks.length >= 3) return;
-          el.classList.add('open'); picks.push(p); sfx.open(); showBoost();
-          const left = 3 - picks.length;
-          $('pickTxt').textContent = left ? `Nog ${left} ${left === 1 ? 'keuze' : 'keuzes'}` : 'Je boosters:';
-          if (!left) {
-            boxes.classList.add('done');
-            setTimeout(() => { Array.from(boxes.children).forEach((b) => { if (!b.classList.contains('open')) { b.classList.add('open', 'rest'); } b.disabled = true; }); }, 700);
-            setTimeout(() => { $('pickGo').hidden = false; $('pickGo').focus(); if (st.auto) $('pickGo').click(); }, 1300);
-          }
+          if (chosen) return;
+          chosen = k; chests.classList.add('done'); el.classList.add('shake');
+          [0, 120, 240, 360].forEach((d, n) => tone(300 + n * 90, 0.08, 'square', 0.05, d / 1000));
+          setTimeout(() => {
+            el.classList.remove('shake'); el.classList.add('open'); sfx.open(); sfx.big(); flash();
+            $('bTitle').textContent = FEATURES[k].name + '!'; $('bTxt').textContent = FEATURES[k].desc;
+          }, 650);
+          setTimeout(() => Array.from(chests.children).forEach((b) => { if (b !== el) b.classList.add('open', 'rest'); b.disabled = true; }), 1500);
+          setTimeout(() => { const go = $('bGo'); go.textContent = 'Verder'; go.hidden = false; go.focus(); go.onclick = () => resolve(k); autoTap(go, 1200); }, 1900);
         };
-        boxes.appendChild(el);
+        chests.appendChild(el);
       });
-      $('pickGo').onclick = () => { $('pickCard').hidden = true; resolve(applyPicks(picks)); };
-      $('pickCard').hidden = false;
-      if (st.auto) { // auto-play picks for you
-        const order = Array.from(boxes.children).sort(() => Math.random() - .5).slice(0, 3);
-        order.forEach((b, i) => setTimeout(() => b.click(), 700 + i * 650));
-      }
+      $('bonusCard').hidden = false;
+      autoTap(chests.children[Math.floor(Math.random() * 3)], 1300);
     });
   }
+  function runCounter(feature) {
+    return new Promise((resolve) => {
+      $('chests').hidden = true; $('counter').hidden = false;
+      $('bTitle').textContent = 'Stop de teller!'; $('bTxt').textContent = 'Hoeveel booster free spins pak jij?';
+      const num = $('cnum'), go = $('bGo'); let i = Math.floor(Math.random() * COUNTER.length), running = true;
+      num.className = 'cnum run'; go.textContent = 'Stop!'; go.hidden = false; go.focus();
+      const tick = () => { if (!running) return; i = (i + 1) % COUNTER.length; num.textContent = COUNTER[i]; tone(500 + COUNTER[i] * 60, 0.03, 'square', 0.03); setTimeout(tick, 95); };
+      tick();
+      go.onclick = () => {
+        if (!running) return;
+        running = false; const n = COUNTER[i]; num.className = 'cnum hit'; sfx.big(); flash();
+        $('bTxt').innerHTML = `<b class="gold">${n} free spins</b> met <b class="gold">${FEATURES[feature].name}</b> en een extra rij`;
+        go.textContent = 'Start!';
+        setTimeout(() => { go.onclick = () => { $('bonusCard').hidden = true; resolve(n); }; autoTap(go, 1100); }, 350);
+      };
+      autoTap(go, 1600);
+    });
+  }
+  function flash() { const f = $('flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
 
-  async function startBonus() {
-    const b = await runPicker();
-    st.free = b.spins; st.freeMult = b.mult; st.freeWin = 0;
-    sfx.row();
-    setRows(b.rows);
-    render();
-    await banner(b.rows > 4 ? '2 extra rijen!<small>' + b.spins + ' booster free spins</small>' : 'Extra rij!<small>' + b.spins + ' booster free spins</small>', 1700, true);
+  async function startBonus(scat) {
+    // dramatic intro on the machine
+    const cab = $('cabinet'); cab.classList.add('quake', 'fast'); document.body.classList.add('hot'); flash(); sfx.big();
+    (scat || []).forEach(([r, row]) => cell(r, row) && cell(r, row).classList.add('hit'));
+    await banner('Doos-bonus!<small>maak je klaar</small>', 1500, true);
+    cab.classList.remove('quake', 'fast'); document.body.classList.remove('hot');
+    const feature = await runChests();
+    const spins = await runCounter(feature);
+    st.feature = feature; st.free = spins; st.freeWin = 0; st.sticky = new Set(); st.first = true;
+    sfx.row(); setRows(FREE_ROWS); render();
+    await banner(`Extra rij!<small>${spins} free spins · ${FEATURES[feature].name}</small>`, 1600, true);
+  }
+  function clearRowBand() { document.querySelectorAll('.wildrow').forEach((e) => e.remove()); }
+  function showRowBand(row) {
+    const win = document.querySelector('.window'), wr = win.getBoundingClientRect();
+    const a = reels[1].reel.getBoundingClientRect(), b = reels[4].reel.getBoundingClientRect(), h = cellPx();
+    const band = document.createElement('div'); band.className = 'wildrow';
+    Object.assign(band.style, { left: (a.left - wr.left - 4) + 'px', width: (b.right - a.left + 8) + 'px', top: (a.top - wr.top + row * h + 2) + 'px', height: (h - 4) + 'px' });
+    band.innerHTML = '<b>WILD RIJ</b>'; win.appendChild(band);
   }
 
   /* ---- spin flow ---- */
@@ -630,36 +714,60 @@ function applyPicks(picks) {
     st.spinning = true;
     if (!free) st.credits -= bet();
     $('win').textContent = '0';
-    reelsEl.classList.remove('dim');
+    reelsEl.classList.remove('dim'); clearRowBand();
     render();
 
     const { grid, truck } = makeGrid(Math.random, { rows: st.rows, free });
+    let feat = null, shown = grid;
+    if (free) {
+      const before = grid.map((c) => c.slice());
+      feat = applyFeature(grid, st.feature, Math.random, st.sticky, st.first); st.first = false;
+      feat.sticky.forEach(([r, row]) => { before[r][row] = 'W'; });
+      shown = before;
+    }
     const base = st.turbo ? 300 : 700, step = st.turbo ? 90 : 210;
-    await Promise.all(grid.map((col, r) => spinReel(r, col, base + r * step)));
+    await Promise.all(shown.map((col, r) => spinReel(r, col, base + r * step)));
 
     if (truck.length) {
       sfx.truck(); await banner('Snack Truck!<small>+' + truck.length + ' wilds</small>', 900);
       truck.forEach(([r, row]) => { const n = cellEl('W'); n.classList.add('drop'); cell(r, row).replaceWith(n); });
       await wait(450);
     }
+    if (feat) {
+      if (st.feature === 'row') {
+        tone(200, 0.35, 'sawtooth', 0.06, 0, 1600); showRowBand(feat.row);
+        await wait(300);
+        for (let r = 1; r < 5; r++) cell(r, feat.row).replaceWith(cellEl('W'));
+        await wait(350);
+      } else {
+        feat.sticky.forEach(([r, row]) => cell(r, row).classList.add('sticky'));
+        if (feat.cells.length) {
+          if (st.feature === 'rain') sfx.truck();
+          for (const [r, row] of feat.cells) {
+            if (shown[r][row] === 'W') { cell(r, row).classList.add('sticky'); continue; }
+            const n = cellEl('W'); n.classList.add('drop'); if (st.feature === 'sticky') n.classList.add('sticky');
+            cell(r, row).replaceWith(n); tone(700 + r * 80, 0.06, 'triangle', 0.05); await wait(110);
+          }
+          await wait(300);
+        }
+      }
+    }
 
-    const mult = free ? st.freeMult : 1;
-    const res = evaluate(grid, bet(), mult, free);
-
+    const res = evaluate(grid, bet());
     if (res.total > 0) {
       res.wins.forEach((w) => w.cells.forEach(([r, row]) => cell(r, row).classList.add('hit')));
       reelsEl.classList.add('dim'); $('cabinet').classList.add('fast');
       st.credits += res.total;
-      if (free) { st.freeWin += res.total; st.freeMult = Math.min(10, st.freeMult + 1); }
+      if (free) st.freeWin += res.total;
       const x = res.total / bet();
       const top = res.wins.sort((a, b) => b.amount - a.amount)[0];
       countUp($('win'), res.total);
       if (x >= 15) {
         sfx.big(); const lvl = x >= 100 ? 3 : x >= 50 ? 2 : 1; fountain(lvl);
-        await bigCard(['Big win', 'Mega win', 'Snack-tastic!'][lvl - 1], res.total, `${top.len}× ${SYMBOLS[top.s].name}${mult > 1 ? ' · ×' + mult : ''}`);
+        await bigCard(['Big win', 'Mega win', 'Snack-tastic!'][lvl - 1], res.total, `${top.len}× ${SYMBOLS[top.s].name}`);
       } else {
         sfx.win();
-        await banner(`+${fmt(res.total)}<small>${top.len}× ${SYMBOLS[top.s].name}${mult > 1 ? ' · ×' + mult : ''}</small>`, 1100);
+        await banner(`+${fmt(res.total)}<small>${top.len}× ${SYMBOLS[top.s].name}</small>`, 1100);
       }
       $('cabinet').classList.remove('fast');
       render();
@@ -681,23 +789,22 @@ function applyPicks(picks) {
 
     if (bonus) {
       st.boxes = 0; render();
-      await banner(res.scat.length >= 3 ? 'Doos-bonus!<small>' + res.scat.length + ' dozen geland</small>' : 'Doos-bonus!<small>25 dozen verzameld</small>', 1400, true);
-      await startBonus();
+      await startBonus(res.scat);
     } else if (free) {
       st.free--;
       if (st.free === 0) {
-        render();
+        render(); await wait(400);
         const x = st.freeWin / bet();
         if (x >= 15) { sfx.big(); fountain(x >= 100 ? 3 : x >= 50 ? 2 : 1); }
-        await bigCard('Free spins klaar', st.freeWin, x >= 15 ? 'Bitterbal-fontein!' : 'Totaal gewonnen');
-        st.freeMult = 1;
+        await bigCard('Booster klaar', st.freeWin, x >= 15 ? 'Bitterbal-fontein!' : 'Totaal gewonnen');
+        clearRowBand(); st.sticky = new Set(); st.feature = null;
         setRows(3);
       }
     }
 
     st.spinning = false;
     render();
-    if (st.free > 0 || st.auto) { await wait(st.free ? 450 : 650); if (!st.spinning && (st.free > 0 || st.auto)) spin(); }
+    if (st.free > 0 || st.auto) { await wait(st.free ? 500 : 650); if (!st.spinning && (st.free > 0 || st.auto)) spin(); }
   }
 
   /* ---- paytable ---- */
@@ -719,21 +826,22 @@ function applyPicks(picks) {
   $('muteBtn').onclick = () => { st.muted = !st.muted; render(); };
   $('infoBtn').onclick = () => { $('infoCard').hidden = false; };
   $('closeInfo').onclick = () => { $('infoCard').hidden = true; };
-  $('refill').onclick = () => { st.credits += 1000; $('emptyCard').hidden = true; render(); };
+  $('refill').onclick = () => { st.credits += 10000; $('emptyCard').hidden = true; render(); };
   document.addEventListener('keydown', (e) => {
     if (e.code !== 'Space') return;
-    if (!$('startCard').hidden || !$('pickCard').hidden || !$('infoCard').hidden) return;
+    if (!$('startCard').hidden || !$('bonusCard').hidden || !$('infoCard').hidden) return;
     e.preventDefault(); if (!$('bigCard').hidden) $('bigClose').click(); else spin();
   });
   // test hook: ?bonus=1 opens the box bonus on the first spin, ?fountain=1 shows the fountain
   const q = new URLSearchParams(location.search);
   if (q.get('bonus')) $('startBtn').addEventListener('click', () => { st.spinning = true; startBonus().then(() => { st.spinning = false; spin(); }); });
+  if (q.get('feature') && FEATURES[q.get('feature')]) $('startBtn').addEventListener('click', () => { st.feature = q.get('feature'); st.free = 6; st.freeWin = 0; st.first = true; setRows(FREE_ROWS); render(); setTimeout(spin, 400); });
   render(); layout(); requestAnimationFrame(layout);
   if (document.fonts) document.fonts.ready.then(layout);
   if (q.get('fountain')) setTimeout(() => fountain(2), 300);
 })();
 
-if (typeof module !== 'undefined') module.exports = { SYMBOLS, makeGrid, evaluate, applyPicks, shuffled, BASE_BONUS, RETRIGGER, COLLECT_MAX };
+if (typeof module !== 'undefined') module.exports = { SYMBOLS, makeGrid, evaluate, applyFeature, COUNTER, FEATURES, FREE_ROWS, RETRIGGER, COLLECT_MAX };
 </script>
 </body>
 </html>
