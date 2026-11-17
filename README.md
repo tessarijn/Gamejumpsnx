@@ -1,6 +1,22 @@
-# SNX Snack Rush
+# SNX World
 
-Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eén bestand: `index.html`.
+Game world van SNX, bedoeld voor www.snxfood.com/world. `index.html` is de startpagina met alle games; elke game is één eigen html-bestand.
+
+| Game | Bestand | Ranglijst/leads |
+|---|---|---|
+| Snack Rush | `snackrush.html` | ja (Edge Function `snack-rush`) |
+| Club Cup | `clubcup.html` | ja (Edge Function `club-cup`) |
+| Snack Match | `match.html` | nee |
+| Snack Blaster | `bubble.html` | nee |
+| Power Slot | `slot.html` | nee, nooit prijzen aan koppelen (kansspel) |
+| SNX Derby | `paardenrace.html` | nee, nooit prijzen aan koppelen (kansspel) |
+| SNXbar Tycoon | `snxbar.html` | nee, B2B-salesdemo |
+
+Nieuwe game toevoegen: html-bestand in de root, een regel in `GAMES` in `index.html` en in `PAGES` in `sw.js`.
+
+## SNX Snack Rush (`snackrush.html`)
+
+Mobiele endless runner die consumentenleads oplevert.
 
 ## Spel
 - Swipe links/rechts: wissel van baan. Ontwijk de SNX-trucks.
