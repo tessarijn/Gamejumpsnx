@@ -13,50 +13,44 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800&display=swap">
 <style>
-  :root { --rood: #ff2625; --rood-donker: #d12325; --zwart: #111; --wit: #fff; }
+  @font-face { font-family: 'Vanilla Dreamers'; src: url('assets/VanillaDreamers.otf') format('opentype'); font-display: swap; }
+  :root { --rood: #ff2625; --rood-donker: #d12325; --zwart: #111; --wit: #fff; --kop: 'Vanilla Dreamers', 'Poppins', sans-serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Poppins', Arial, sans-serif; color: var(--wit); min-height: 100vh;
     background: var(--rood) url('assets/backdrop.webp') center / cover fixed;
     padding: max(20px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
   }
-  .wrap { max-width: 980px; margin: 0 auto; }
-  header { text-align: center; margin: 8px 0 22px; }
-  header img { width: 140px; height: auto; }
-  .kaart-kop {
-    display: inline-block; margin-top: 14px; background: var(--zwart); border-radius: 18px;
-    padding: 12px 20px; box-shadow: 0 8px 24px rgba(0,0,0,.25);
-  }
-  h1 { font-weight: 800; font-size: clamp(28px, 7vw, 44px); letter-spacing: .5px; line-height: 1.05; }
-  .sub { font-weight: 500; font-size: 15px; opacity: .9; margin-top: 4px; }
-  .filters { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 0 18px; }
-  .filters button {
-    font: 600 14px 'Poppins', sans-serif; color: var(--wit); background: rgba(0,0,0,.35);
-    border: 2px solid transparent; border-radius: 999px; padding: 7px 14px; cursor: pointer;
-  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  header { text-align: center; margin: 6px 0 22px; }
+  header img { width: 130px; height: auto; }
+  .kaart-kop { display: inline-block; margin-top: 12px; background: var(--zwart); border-radius: 22px; padding: 14px 26px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  h1 { font-family: var(--kop); font-weight: 400; font-size: clamp(40px, 10vw, 68px); line-height: .95; letter-spacing: 1px; }
+  .sub { font-weight: 500; font-size: 15px; opacity: .9; margin-top: 6px; }
+  .filters { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 0 20px; }
+  .filters button { font: 600 14px 'Poppins', sans-serif; color: var(--wit); background: rgba(0,0,0,.35); border: 0; border-radius: 999px; padding: 8px 15px; cursor: pointer; }
   .filters button.aan { background: var(--wit); color: var(--rood-donker); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .game {
-    position: relative; display: flex; flex-direction: column; background: var(--zwart);
-    border-radius: 20px; overflow: hidden; text-decoration: none; color: var(--wit);
-    box-shadow: 0 8px 24px rgba(0,0,0,.25); transition: transform .15s;
-  }
-  .game:hover, .game:focus-visible { transform: translateY(-3px); outline: none; }
-  .beeld { height: 130px; display: flex; align-items: center; justify-content: center; background: var(--rood-donker); }
-  .beeld img { max-height: 104px; max-width: 70%; object-fit: contain; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
-  .tekst { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-  .game h2 { font-weight: 800; font-size: 20px; }
-  .game p { font-size: 14px; line-height: 1.4; opacity: .85; flex: 1; }
-  .speel {
-    align-self: flex-start; margin-top: 6px; background: var(--rood); color: var(--wit);
-    font-weight: 800; font-size: 14px; border-radius: 999px; padding: 8px 18px; letter-spacing: .5px;
-  }
-  .label {
-    position: absolute; top: 10px; left: 10px; background: var(--wit); color: var(--zwart);
-    font-weight: 700; font-size: 11px; border-radius: 999px; padding: 3px 9px; text-transform: uppercase;
-  }
-  footer { text-align: center; margin-top: 26px; font-size: 13px; opacity: .9; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .game { position: relative; display: flex; flex-direction: column; background: var(--zwart); border-radius: 22px; overflow: hidden; text-decoration: none; color: var(--wit); box-shadow: 0 10px 30px rgba(0,0,0,.28); transition: transform .2s; }
+  .game:hover, .game:focus-visible { transform: translateY(-4px) rotate(-.4deg); outline: none; }
+  .scherm { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--rood-donker); }
+  .scherm img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: opacity .5s, transform 3s ease-out; }
+  .scherm img.b { opacity: 0; }
+  .game:hover .scherm img, .game:focus-visible .scherm img { transform: scale(1.08); }
+  .game.speelt .scherm img.a { opacity: 0; }
+  .game.speelt .scherm img.b { opacity: 1; }
+  .scherm::after { content: ''; position: absolute; inset: auto 0 0 0; height: 40%; background: linear-gradient(transparent, rgba(17,17,17,.95)); }
+  .play { position: absolute; z-index: 2; left: 50%; top: 42%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: var(--rood); display: grid; place-items: center; box-shadow: 0 6px 20px rgba(0,0,0,.4); opacity: 0; transform: scale(.7); transition: .25s; }
+  .play::before { content: ''; margin-left: 5px; border-left: 20px solid #fff; border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
+  .game:hover .play, .game:focus-visible .play { opacity: 1; transform: scale(1); }
+  .tekst { position: relative; z-index: 2; margin-top: -46px; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .game h2 { font-family: var(--kop); font-weight: 400; font-size: 30px; line-height: 1; letter-spacing: .5px; }
+  .game p { font-size: 13.5px; line-height: 1.4; opacity: .85; flex: 1; }
+  .speel { align-self: flex-start; margin-top: 6px; background: var(--rood); color: var(--wit); font-weight: 800; font-size: 14px; border-radius: 999px; padding: 8px 18px; letter-spacing: .5px; }
+  .label { position: absolute; z-index: 2; top: 10px; left: 10px; background: var(--wit); color: var(--zwart); font-weight: 700; font-size: 11px; border-radius: 999px; padding: 3px 9px; text-transform: uppercase; }
+  footer { text-align: center; margin-top: 28px; font-size: 13px; opacity: .9; }
   footer a { color: var(--wit); font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) { .scherm img, .game { transition: none !important; } }
 </style>
 </head>
 <body>
@@ -86,19 +80,19 @@
 
 <script>
 const GAMES = [
-  { url: 'snackrush.html', naam: 'Snack Rush', img: 'assets/bal.webp', tags: ['ranglijst', 'snel'], label: 'Ranglijst',
+  { url: 'snackrush.html', shot: 'snackrush', alt: 2, naam: 'Snack Rush', img: 'assets/bal.webp', tags: ['ranglijst', 'snel'], label: 'Ranglijst',
     tekst: 'Ren, spring en ontwijk de trucks. Vang zoveel mogelijk Betterballen en pak de jaartitel.' },
-  { url: 'clubcup.html', naam: 'Club Cup', img: 'assets/burger.webp', tags: ['ranglijst'], label: 'Clubs',
+  { url: 'clubcup.html', shot: 'clubcup', alt: 0, naam: 'Club Cup', img: 'assets/burger.webp', tags: ['ranglijst'], label: 'Clubs',
     tekst: 'Padel, golf en penalty’s. Speel voor je eigen club en zet die bovenaan de clubranglijst.' },
-  { url: 'match.html', naam: 'Snack Match', img: 'assets/kroket.webp', tags: ['snel'],
+  { url: 'match.html', shot: 'match', alt: 0, naam: 'Snack Match', img: 'assets/kroket.webp', tags: ['snel'],
     tekst: 'Match drie of meer SNX-snacks en ruim het bord op. Level na level.' },
-  { url: 'bubble.html', naam: 'Snack Blaster', img: 'assets/chickenbite.webp', tags: ['snel'],
+  { url: 'bubble.html', shot: 'bubble', alt: 0, naam: 'Snack Blaster', img: 'assets/chickenbite.webp', tags: ['snel'],
     tekst: 'Schiet de bubbels met snacks weg voordat ze bij je zijn.' },
-  { url: 'slot.html', naam: 'Power Slot', img: 'assets/doos.webp', tags: ['snel'], label: 'Zonder geld',
+  { url: 'slot.html', shot: 'slot', alt: 0, naam: 'Power Slot', img: 'assets/doos.webp', tags: ['snel'], label: 'Zonder geld',
     tekst: 'Laat de rollen draaien voor snackpunten, free spins en de bitterbalfontein. Geen geld, geen inzet.' },
-  { url: 'paardenrace.html', naam: 'SNX Derby', img: 'assets/chickenbites.webp', tags: ['snel'], label: 'NL · EN · AR',
+  { url: 'paardenrace.html', shot: 'paardenrace', alt: 2, naam: 'SNX Derby', img: 'assets/chickenbites.webp', tags: ['snel'], label: 'NL · EN · AR',
     tekst: 'Kies je favoriet en juich je snackpaard naar de finish.' },
-  { url: 'snxbar.html', naam: 'SNXbar Tycoon', img: 'assets/burger.webp', tags: ['pro'], label: 'Ondernemers',
+  { url: 'snxbar.html', shot: 'snxbar', alt: 0, naam: 'SNXbar Tycoon', img: 'assets/burger.webp', tags: ['pro'], label: 'Ondernemers',
     tekst: 'Bouw één SNXbar uit tot een snackketen door heel Europa, met echte SNX-inkoopprijzen.' }
 ];
 const grid = document.getElementById('grid');
@@ -107,9 +101,20 @@ function toon(f) {
   grid.innerHTML = GAMES.filter((g) => f === 'alle' || g.tags.includes(f)).map((g) => `
     <a class="game" href="${g.url}">
       ${g.label ? `<span class="label">${esc(g.label)}</span>` : ''}
-      <div class="beeld"><img src="${g.img}" alt="" loading="lazy"></div>
+      <div class="scherm">
+        <img class="a" src="assets/shots/${g.shot}_1.webp" alt="Schermafdruk ${esc(g.naam)}" loading="lazy">
+        <img class="b" src="assets/shots/${g.shot}_${g.alt || 2}.webp" alt="" loading="lazy">
+        <span class="play" aria-hidden="true"></span>
+      </div>
       <div class="tekst"><h2>${esc(g.naam)}</h2><p>${esc(g.tekst)}</p><span class="speel">SPEEL</span></div>
     </a>`).join('');
+  grid.querySelectorAll('.game').forEach((el) => {
+    let t = null;
+    const aan = () => { if (t) return; el.classList.add('speelt'); t = setInterval(() => el.classList.toggle('speelt'), 900); };
+    const uit = () => { clearInterval(t); t = null; el.classList.remove('speelt'); };
+    el.addEventListener('mouseenter', aan); el.addEventListener('mouseleave', uit);
+    el.addEventListener('focus', aan); el.addEventListener('blur', uit);
+  });
 }
 document.querySelectorAll('.filters button').forEach((b) => b.addEventListener('click', () => {
   document.querySelectorAll('.filters button').forEach((x) => x.classList.toggle('aan', x === b));
