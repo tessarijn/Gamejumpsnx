@@ -11,11 +11,15 @@ Mobiele endless runner voor SNX (snxfood.com) die consumentenleads oplevert. Eé
 - Verzenddoos Betterballen = power-up: +100 en 8 seconden dubbele punten.
 
 ## SNX Power Slot (`slot.html`)
-Tweede game: 5 rollen x 3 rijen, 243 manieren om te winnen, met SNX-snacks als symbolen. Gratis snack-punten, geen geld, geen prijzen.
-- **SNX Wild** (rol 2-5) vervangt elke snack. **Bonus-doos**: 3/4/5 = 8/12/20 free spins, multiplier stijgt per winst (max x10).
-- **Power-meter**: +1 per winnende spin of Bonus-doos. Bij 15: Power Spin, 2 rollen volledig wild, winst x3 tot x5.
-- **Snack Truck**: willekeurig (~1 op 14 spins) 2-5 extra wilds.
-- Turbo, Auto-spin, geluid, punten en meter blijven bewaard in de browser. Gesimuleerd: ~100% terugbetaling, Power Spin ~1 op 17, free spins ~1 op 75.
+Tweede game: 5 rollen, 243 manieren om te winnen, SNX-snacks als symbolen. Gratis snack-punten, geen geld, geen prijzen.
+- **SNX Wild** (rol 2-5) vervangt elke snack. **Snack Truck** dropt soms 2-5 extra wilds.
+- **Doos-bonus**: 3+ Bonus-dozen in één spin, of 25 verzameld op de meter. Speler kiest 3 van 6 verzenddozen;
+  die geven extra free spins, een hogere start-multiplier of nog een rij.
+- **Booster free spins**: basis 5 spins met een **extra rij** (4 rijen, 1.024 manieren), met de rij-doos 5 rijen (3.125 manieren).
+  Multiplier +1 per winst (max x10), 3+ dozen = +5 spins.
+- **Bitterbal-fontein** bij winst vanaf 15x de inzet (groter bij 50x en 100x).
+- Gesimuleerd (500k spins): ~98% terugbetaling, Doos-bonus ~1 op 54 spins, gemiddeld ~18x inzet per bonus.
+- Testen: `slot.html?bonus=1` start direct de Doos-bonus, `slot.html?fountain=1` toont de fontein.
 
 ## Leads en ranglijst
 - Na een ronde: voornaam, e-mail, schermnaam. Verplicht: akkoord met de actievoorwaarden en privacy.

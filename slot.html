@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#ff2625">
+<meta name="theme-color" content="#b10f17">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
@@ -11,191 +11,307 @@
 <title>SNX Power Slot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;800;900&display=swap">
 <style>
 :root {
   --ink: #111;
   --snx: #ff2625;
   --rood: #d12325;
+  --diep: #7d0910;
   --wit: #fff;
-  --steen: #e7e5e0;
-  --geel: #ffd23f;
+  --creme: #fff6e8;
+  --goud: #ffd23f;
+  --goud2: #ffb100;
   --font: 'Poppins', 'Arial Black', system-ui, sans-serif;
-  --cell: min(calc((100vw - 80px) / 5), 96px, 11.5vh);
+  --cell: 64px;
+  --rows: 3;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
-body { background: var(--snx) url('assets/backdrop.webp') center / cover no-repeat; color: var(--wit); font-family: var(--font);
+body { background: radial-gradient(120% 80% at 50% 35%, #ff3b2f 0%, #d8141c 45%, #8a0a12 100%); color: var(--wit); font-family: var(--font);
   overflow: hidden; touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
   display: flex; justify-content: center; }
 [hidden] { display: none !important; }
-.app { width: 100%; max-width: 560px; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px calc(env(safe-area-inset-bottom, 0px) + 12px); gap: 8px; }
+button { font-family: var(--font); }
+button:focus-visible { outline: 3px solid var(--goud); outline-offset: 3px; }
 
-/* top */
-.top { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.top img { height: clamp(34px, 6vh, 52px); filter: drop-shadow(0 3px 0 var(--ink)); }
-.top h1 { margin: 0; font-weight: 800; font-size: clamp(20px, 3.6vh, 30px); text-transform: uppercase; line-height: .9; text-shadow: 0 3px 0 var(--ink); text-align: center; }
-.top h1 small { display: block; font-size: .45em; letter-spacing: .14em; }
-.iconbtn { background: rgba(17,17,17,.55); color: var(--wit); border: 2px solid var(--wit); border-radius: 12px; font: 800 14px var(--font);
-  padding: 7px 10px; cursor: pointer; min-width: 44px; min-height: 40px; }
+/* sunburst behind the machine */
+.rays { position: fixed; left: 50%; top: 40%; width: 220vmax; height: 220vmax; transform: translate(-50%, -50%); pointer-events: none; opacity: .18;
+  background: repeating-conic-gradient(from 0deg, #fff 0deg 7deg, transparent 7deg 18deg); animation: spinr 60s linear infinite;
+  -webkit-mask: radial-gradient(circle, #000 0 18%, transparent 55%); mask: radial-gradient(circle, #000 0 18%, transparent 55%); }
+body.hot .rays { opacity: .35; animation-duration: 8s; }
+@keyframes spinr { to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-/* power meter */
-.power { width: 100%; display: grid; gap: 4px; }
-.power .lbl { display: flex; justify-content: space-between; font-weight: 800; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 2px 0 var(--ink); }
-.bar { height: 16px; border-radius: 9px; background: rgba(17,17,17,.6); border: 3px solid var(--ink); overflow: hidden; box-shadow: 0 3px 0 var(--ink); }
-.bar i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--geel), #fff); transition: width .35s; }
-.bar.full i { background: linear-gradient(90deg, #fff, var(--geel), #fff); background-size: 200% 100%; animation: flow .6s linear infinite; }
-@keyframes flow { to { background-position: -200% 0; } }
+.app { position: relative; width: 100%; max-width: 560px; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center;
+  justify-content: space-evenly; padding: calc(env(safe-area-inset-top, 0px) + 8px) 16px calc(env(safe-area-inset-bottom, 0px) + 10px); gap: 8px; }
 
-/* machine */
-.machine { position: relative; background: var(--ink); border: 4px solid var(--ink); border-radius: 22px; padding: 8px; box-shadow: 0 8px 0 rgba(0,0,0,.35); }
-.machine.boost { animation: pulse 0.8s ease-in-out infinite; }
-@keyframes pulse { 50% { box-shadow: 0 0 0 6px var(--geel), 0 8px 0 rgba(0,0,0,.35); } }
+/* header */
+.top { width: 100%; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; }
+.brand { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.brand img { height: clamp(26px, 4.4vh, 40px); filter: drop-shadow(0 3px 0 var(--ink)); }
+.brand h1 { margin: 2px 0 0; font-weight: 900; font-size: clamp(22px, 4vh, 34px); letter-spacing: .02em; text-transform: uppercase;
+  background: linear-gradient(180deg, #fff7c2 0%, var(--goud) 45%, var(--goud2) 55%, #fff1a8 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink); filter: drop-shadow(0 3px 0 var(--ink)); }
+.iconbtn { width: 44px; height: 44px; border-radius: 50%; background: rgba(17,17,17,.45); color: var(--wit); border: 3px solid var(--ink);
+  font-weight: 900; font-size: 18px; cursor: pointer; box-shadow: inset 0 2px 0 rgba(255,255,255,.25), 0 3px 0 var(--ink); display: grid; place-items: center; padding: 0; }
+.iconbtn svg { width: 20px; height: 20px; }
+
+/* box collector meter */
+.collect { width: 100%; display: flex; align-items: center; gap: 8px; }
+.collect img { width: 36px; height: 28px; object-fit: cover; border-radius: 5px; border: 2px solid var(--ink); box-shadow: 0 2px 0 var(--ink); }
+.collect .track { flex: 1; display: grid; grid-template-columns: repeat(25, 1fr); gap: 2px; background: rgba(17,17,17,.55); border: 3px solid var(--ink);
+  border-radius: 10px; padding: 3px; box-shadow: 0 3px 0 var(--ink); }
+.collect .track i { height: 10px; border-radius: 3px; background: rgba(255,255,255,.12); transition: background .3s, transform .3s; }
+.collect .track i.on { background: linear-gradient(180deg, #fff6b0, var(--goud) 50%, var(--goud2)); }
+.collect .track i.new { transform: scaleY(1.6); }
+.collect span { font-weight: 800; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; text-shadow: 0 2px 0 var(--ink); white-space: nowrap; }
+
+/* cabinet */
+.cabinet { position: relative; border-radius: 28px; padding: 18px 12px; border: 4px solid var(--ink);
+  background: linear-gradient(180deg, #ff5a4a 0%, #e01a22 22%, #b80f18 70%, #8d0a12 100%);
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.4), inset 0 -4px 0 rgba(0,0,0,.25), 0 8px 0 var(--ink), 0 24px 40px rgba(0,0,0,.45); }
+.cabinet::before { content: ''; position: absolute; inset: 5px; border-radius: 22px; border: 2px solid rgba(255,214,120,.55); pointer-events: none; }
+.bulbs { position: absolute; left: 22px; right: 22px; height: 10px; display: flex; justify-content: space-between; pointer-events: none; }
+.bulbs.t { top: 4px; } .bulbs.b { bottom: 4px; }
+.bulb { width: 8px; height: 8px; border-radius: 50%; background: #ffe9a0; box-shadow: 0 0 6px 2px rgba(255,220,120,.9); animation: blink 1.2s steps(1) infinite; }
+.bulb:nth-child(even) { animation-delay: -.6s; }
+.cabinet.fast .bulb { animation-duration: .25s; }
+.cabinet.fast .bulb:nth-child(even) { animation-delay: -.125s; }
+@keyframes blink { 50% { background: #8a5a2a; box-shadow: none; } }
+.window { position: relative; background: var(--ink); border-radius: 18px; padding: 6px; box-shadow: inset 0 4px 10px rgba(0,0,0,.8), 0 0 0 3px rgba(255,214,120,.35); }
 .reels { display: grid; grid-template-columns: repeat(5, var(--cell)); gap: 5px; }
-.reel { position: relative; height: calc(var(--cell) * 3); overflow: hidden; border-radius: 12px; background: var(--steen); }
+.reel { position: relative; height: calc(var(--cell) * var(--rows)); overflow: hidden; border-radius: 12px;
+  background: linear-gradient(90deg, #d9d3c8 0%, #fffaf1 30%, #fffaf1 70%, #d9d3c8 100%); transition: height .5s cubic-bezier(.3,1.4,.5,1); }
+.reel::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background: linear-gradient(180deg, rgba(0,0,0,.38) 0%, rgba(0,0,0,0) 16%, rgba(0,0,0,0) 84%, rgba(0,0,0,.38) 100%); }
 .strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+.strip.blur .cell > * { filter: blur(1.5px); }
 .cell { height: var(--cell); display: grid; place-items: center; position: relative; }
-.cell img { width: 78%; height: 78%; object-fit: contain; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)); pointer-events: none; }
-.cell .let { width: 74%; height: 74%; display: grid; place-items: center; border-radius: 50%; font-weight: 800; font-size: calc(var(--cell) * .48);
-  border: 3px solid var(--ink); line-height: 1; }
-.let.S { background: var(--wit); color: var(--snx); }
-.let.N { background: var(--ink); color: var(--wit); }
-.let.X { background: var(--snx); color: var(--wit); }
-.cell.wild { background: var(--snx); }
-.cell.wild::after { content: 'WILD'; position: absolute; bottom: 3px; font-weight: 800; font-size: calc(var(--cell) * .15); letter-spacing: .1em; color: var(--wit); text-shadow: 0 1px 0 var(--ink); }
-.cell.wild img { width: 84%; height: 60%; margin-top: -10%; }
-.cell.scat { background: var(--geel); }
-.cell.scat::after { content: 'BONUS'; position: absolute; bottom: 3px; font-weight: 800; font-size: calc(var(--cell) * .15); letter-spacing: .1em; color: var(--ink); }
-.cell.scat img { width: 80%; height: 64%; margin-top: -10%; }
-.cell.hit { animation: hit .5s ease-in-out 3; z-index: 2; }
-.cell.hit::before { content: ''; position: absolute; inset: 2px; border: 4px solid var(--geel); border-radius: 10px; }
-@keyframes hit { 50% { transform: scale(1.1); } }
-.reel.dim .cell:not(.hit) { opacity: .35; }
-.cell.drop { animation: drop .5s cubic-bezier(.2,1.6,.4,1); }
-@keyframes drop { from { transform: translateY(-120%) scale(.6); opacity: 0; } }
+.cell img { width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(0 3px 2px rgba(0,0,0,.3)); pointer-events: none; }
+.chip { width: 72%; height: 72%; display: grid; place-items: center; border-radius: 50%; font-weight: 900; font-size: calc(var(--cell) * .42);
+  border: 3px solid var(--ink); line-height: 1; box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), inset 0 4px 0 rgba(255,255,255,.35), 0 3px 0 rgba(0,0,0,.35); }
+.chip.S { background: radial-gradient(circle at 35% 30%, #fff 0 40%, #e8e2d8 100%); color: var(--snx); }
+.chip.N { background: radial-gradient(circle at 35% 30%, #4a4a4a 0 20%, #111 100%); color: var(--wit); }
+.chip.X { background: radial-gradient(circle at 35% 30%, #ff6b5e 0 20%, #c3111a 100%); color: var(--wit); }
+.cell.wild { background: radial-gradient(circle at 50% 40%, #ff5a4a, #b80f18); box-shadow: inset 0 0 0 3px var(--goud); border-radius: 8px; }
+.cell.wild img { width: 86%; height: 62%; margin-top: -14%; }
+.cell.wild::after, .cell.scat::after { position: absolute; bottom: 4%; font-weight: 900; font-size: calc(var(--cell) * .15); letter-spacing: .12em;
+  padding: 1px 6px; border-radius: 6px; border: 2px solid var(--ink); line-height: 1.1; }
+.cell.wild::after { content: 'WILD'; background: var(--goud); color: var(--ink); }
+.cell.scat { background: radial-gradient(circle at 50% 40%, #fff6b0, var(--goud2)); box-shadow: inset 0 0 0 3px var(--ink); border-radius: 8px; }
+.cell.scat img { width: 86%; height: 62%; margin-top: -14%; border-radius: 4px; }
+.cell.scat::after { content: 'BONUS'; background: var(--snx); color: var(--wit); }
+.reels.dim .cell:not(.hit) > * { opacity: .3; }
+.reels.dim .cell.wild:not(.hit), .reels.dim .cell.scat:not(.hit) { filter: brightness(.45); }
+.cell.hit { z-index: 2; animation: hit .55s ease-in-out 3; }
+.cell.hit::before { content: ''; position: absolute; inset: 2px; border-radius: 10px; border: 3px solid var(--goud); box-shadow: 0 0 14px 3px rgba(255,210,63,.9), inset 0 0 12px rgba(255,210,63,.6); z-index: 4; }
+@keyframes hit { 50% { transform: scale(1.08); } }
+.cell.drop { animation: drop .55s cubic-bezier(.2,1.6,.4,1); }
+@keyframes drop { from { transform: translateY(-110%) scale(.5); opacity: 0; } }
 
-.banner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--snx); color: var(--wit); border: 4px solid var(--ink);
-  border-radius: 16px; padding: 8px 18px; font-weight: 800; font-size: clamp(20px, 4vh, 34px); text-transform: uppercase; white-space: nowrap;
-  box-shadow: 0 5px 0 var(--ink); pointer-events: none; z-index: 5; animation: pop .35s cubic-bezier(.2,1.6,.4,1); text-align: center; }
-.banner small { display: block; font-size: .45em; letter-spacing: .1em; }
-@keyframes pop { from { transform: translate(-50%, -50%) scale(.3); } }
+.banner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; text-align: center; white-space: nowrap;
+  font-weight: 900; font-size: clamp(24px, 4.6vh, 40px); text-transform: uppercase; line-height: 1; padding: 10px 20px 12px; border-radius: 18px;
+  background: linear-gradient(180deg, #ff5a4a, #c3111a); border: 4px solid var(--ink); box-shadow: 0 6px 0 var(--ink), 0 0 30px rgba(255,210,63,.6);
+  animation: pop .4s cubic-bezier(.2,1.6,.4,1); text-shadow: 0 3px 0 var(--ink); }
+.banner.gold { background: linear-gradient(180deg, #fff6b0, var(--goud) 50%, var(--goud2)); color: var(--ink); text-shadow: none; }
+.banner small { display: block; font-size: .42em; letter-spacing: .1em; margin-top: 4px; }
+@keyframes pop { from { transform: translate(-50%, -50%) scale(.3) rotate(-6deg); } }
 
-/* info row */
-.row { width: 100%; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.stat { background: rgba(17,17,17,.6); border: 3px solid var(--ink); border-radius: 14px; padding: 4px 8px; text-align: center; }
-.stat span { display: block; font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
-.stat b { display: block; font-size: clamp(18px, 3vh, 26px); line-height: 1.1; font-variant-numeric: tabular-nums; }
-.stat.win b { color: var(--geel); }
-.fs { width: 100%; text-align: center; font-weight: 800; text-transform: uppercase; background: var(--geel); color: var(--ink); border: 3px solid var(--ink);
-  border-radius: 12px; padding: 4px; font-size: 15px; }
+.fsbar { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); z-index: 6; white-space: nowrap; font-weight: 900; font-size: 13px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink); background: linear-gradient(180deg, #fff6b0, var(--goud)); border: 3px solid var(--ink); border-radius: 20px; padding: 3px 12px;
+  box-shadow: 0 3px 0 var(--ink); }
 
-/* controls */
-.controls { width: 100%; display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 10px; }
-.bet { display: flex; align-items: center; justify-content: center; gap: 6px; }
-.sm { width: 40px; height: 40px; border-radius: 50%; background: var(--wit); color: var(--rood); border: 3px solid var(--ink); font: 800 22px/1 var(--font);
-  cursor: pointer; box-shadow: 0 3px 0 var(--ink); }
-.sm:active { transform: translateY(3px); box-shadow: none; }
-.spin { width: clamp(84px, 13vh, 110px); height: clamp(84px, 13vh, 110px); border-radius: 50%; background: var(--wit); color: var(--rood);
-  border: 5px solid var(--ink); font: 800 clamp(18px, 2.8vh, 24px) var(--font); cursor: pointer; box-shadow: 0 6px 0 var(--ink); text-transform: uppercase; }
-.spin:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--ink); }
-.spin.power { background: var(--geel); color: var(--ink); animation: pulse2 .7s ease-in-out infinite; }
-@keyframes pulse2 { 50% { transform: scale(1.06); } }
-.spin:disabled { opacity: .6; cursor: default; }
-.toggles { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-.tg { background: rgba(17,17,17,.6); color: var(--wit); border: 3px solid var(--ink); border-radius: 12px; font: 800 13px var(--font); padding: 8px 9px; cursor: pointer; text-transform: uppercase; }
-.tg.on { background: var(--geel); color: var(--ink); }
-button:focus-visible { outline: 3px solid var(--geel); outline-offset: 3px; }
-.note { font-size: 11px; font-weight: 600; opacity: .9; text-align: center; text-shadow: 0 1px 0 var(--ink); }
+/* console */
+.console { width: 100%; background: linear-gradient(180deg, #2a2a2a, #111); border: 4px solid var(--ink); border-radius: 24px; padding: 10px 10px 12px;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,.15), 0 6px 0 rgba(0,0,0,.5); display: grid; gap: 10px; }
+.leds { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; gap: 6px; }
+.led { background: #050505; border-radius: 12px; padding: 4px 6px 5px; text-align: center; box-shadow: inset 0 2px 6px rgba(0,0,0,.9), 0 0 0 2px #333; }
+.led span { display: block; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--goud); }
+.led b { display: block; font-size: clamp(17px, 2.8vh, 24px); font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,.35); }
+.led.win b { color: var(--goud); text-shadow: 0 0 10px rgba(255,210,63,.7); }
+.ctrl { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; }
+.betbox { display: flex; gap: 6px; justify-content: flex-start; }
+.round { width: 42px; height: 42px; border-radius: 50%; border: 3px solid var(--ink); background: linear-gradient(180deg, #fff, #ddd6cb); color: var(--rood);
+  font-weight: 900; font-size: 22px; line-height: 1; cursor: pointer; box-shadow: 0 4px 0 #000; padding: 0; }
+.round:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+.round:disabled { opacity: .45; }
+.spin { position: relative; width: clamp(86px, 12.5vh, 112px); height: clamp(86px, 12.5vh, 112px); border-radius: 50%; border: 5px solid var(--ink); cursor: pointer;
+  background: radial-gradient(circle at 50% 35%, #ff6b5e 0%, var(--snx) 45%, #a50d15 100%); color: var(--wit);
+  box-shadow: inset 0 4px 0 rgba(255,255,255,.45), inset 0 -6px 0 rgba(0,0,0,.25), 0 7px 0 #000, 0 0 0 5px rgba(255,210,63,.45);
+  display: grid; place-items: center; padding: 0; }
+.spin svg { width: 46%; height: 46%; filter: drop-shadow(0 2px 0 var(--ink)); transition: transform .3s; }
+.spin.busy svg { animation: rot .6s linear infinite; }
+@keyframes rot { to { transform: rotate(360deg); } }
+.spin:active { transform: translateY(5px); box-shadow: inset 0 4px 0 rgba(255,255,255,.45), 0 2px 0 #000; }
+.spin .lab { position: absolute; bottom: 10%; font-size: 11px; font-weight: 900; letter-spacing: .12em; }
+.spin.free { background: radial-gradient(circle at 50% 35%, #fff6b0, var(--goud) 50%, var(--goud2)); color: var(--ink); }
+.spin.free svg { filter: none; }
+.toggles { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.tg { border: 3px solid var(--ink); border-radius: 12px; background: #333; color: #ddd; font-weight: 900; font-size: 12px; letter-spacing: .06em; padding: 8px 9px;
+  cursor: pointer; text-transform: uppercase; box-shadow: 0 3px 0 #000; }
+.tg.on { background: linear-gradient(180deg, #fff6b0, var(--goud)); color: var(--ink); }
+.note { font-size: 11px; font-weight: 600; text-align: center; text-shadow: 0 1px 0 var(--ink); opacity: .92; }
 .note a { color: var(--wit); }
 
 /* overlays */
-.overlay { position: fixed; inset: 0; background: rgba(17,17,17,.7); display: grid; place-items: center; padding: 16px; z-index: 20; }
-.card { width: min(380px, 100%); max-height: 100%; overflow-y: auto; background: var(--snx); color: var(--wit); border: 4px solid var(--ink); border-radius: 22px;
-  padding: 18px; box-shadow: 0 8px 0 var(--ink); display: grid; gap: 12px; text-align: center; }
-.card h2 { margin: 0; font-size: 28px; text-transform: uppercase; line-height: 1; text-shadow: 0 3px 0 var(--ink); }
-.card p { margin: 0; font-weight: 600; line-height: 1.3; }
-.pay { display: grid; grid-template-columns: 44px 1fr; gap: 6px 10px; align-items: center; text-align: left; font-size: 14px; font-weight: 600; }
-.pay .ic { width: 44px; height: 44px; border-radius: 10px; background: var(--steen); display: grid; place-items: center; overflow: hidden; }
-.pay .ic img { width: 86%; height: 86%; object-fit: contain; }
-.pay .ic .let { width: 34px; height: 34px; font-size: 20px; border-width: 2px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; }
-.pay b { font-weight: 800; }
-.btn { font: 800 22px var(--font); border-radius: 30px; background: var(--wit); color: var(--rood); border: 4px solid var(--ink); padding: 10px 18px 8px;
-  cursor: pointer; box-shadow: 0 5px 0 var(--ink); text-transform: uppercase; }
+.overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: radial-gradient(circle at 50% 45%, rgba(70,0,6,.86), rgba(10,0,0,.95)); }
+.card { position: relative; width: min(390px, 100%); max-height: 100%; overflow-y: auto; text-align: center; display: grid; gap: 12px; padding: 20px 18px;
+  border-radius: 26px; border: 4px solid var(--ink); background: linear-gradient(180deg, #ff4a3d, #c3111a 70%, #9e0c14);
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.35), 0 8px 0 var(--ink), 0 30px 60px rgba(0,0,0,.5); animation: cardin .4s cubic-bezier(.2,1.5,.4,1); }
+@keyframes cardin { from { transform: scale(.7); opacity: 0; } }
+.card h2 { margin: 0; font-size: 30px; font-weight: 900; text-transform: uppercase; line-height: 1; text-shadow: 0 3px 0 var(--ink); }
+.card p { margin: 0; font-weight: 600; line-height: 1.35; font-size: 15px; }
+.card .gold { color: var(--goud); }
+.btn { justify-self: center; min-width: 180px; font-weight: 900; font-size: 22px; text-transform: uppercase; border-radius: 30px; padding: 10px 24px 9px; cursor: pointer;
+  border: 4px solid var(--ink); background: linear-gradient(180deg, #fff6b0, var(--goud) 55%, var(--goud2)); color: var(--ink); box-shadow: 0 5px 0 var(--ink); }
 .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
-.big { font-size: clamp(40px, 9vh, 72px); font-weight: 800; color: var(--geel); text-shadow: 0 4px 0 var(--ink); line-height: 1; font-variant-numeric: tabular-nums; }
+.big { font-size: clamp(48px, 10vh, 84px); font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums;
+  background: linear-gradient(180deg, #fff7c2, var(--goud) 50%, var(--goud2)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: 2px var(--ink); filter: drop-shadow(0 4px 0 var(--ink)); }
+.feat { display: grid; gap: 8px; text-align: left; }
+.feat div { display: grid; grid-template-columns: 46px 1fr; gap: 10px; align-items: center; background: rgba(17,17,17,.3); border-radius: 14px; padding: 6px 8px; font-size: 13px; font-weight: 600; line-height: 1.3; }
+.feat .ic { width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center; overflow: hidden; border: 2px solid var(--ink); background: var(--creme); }
+.feat .ic img { width: 88%; height: 88%; object-fit: contain; }
+.feat b { font-weight: 900; }
+.pay { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.pay div { background: var(--creme); color: var(--ink); border: 2px solid var(--ink); border-radius: 12px; padding: 4px; font-size: 11px; font-weight: 800; line-height: 1.25; }
+.pay .ic { height: 40px; display: grid; place-items: center; }
+.pay .ic img { height: 36px; max-width: 90%; object-fit: contain; }
+.pay .chip { width: 32px; height: 32px; font-size: 17px; border-width: 2px; }
+
+/* box picker */
+.picker { width: min(420px, 100%); text-align: center; display: grid; gap: 10px; }
+.picker h2 { margin: 0; font-size: clamp(26px, 4.5vh, 38px); font-weight: 900; text-transform: uppercase; line-height: 1;
+  background: linear-gradient(180deg, #fff7c2, var(--goud) 50%, var(--goud2)); -webkit-background-clip: text; background-clip: text; color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink); filter: drop-shadow(0 3px 0 var(--ink)); }
+.picker p { margin: 0; font-weight: 700; text-shadow: 0 2px 0 var(--ink); }
+.boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 12px; padding: 26px 4px 4px; }
+.box { position: relative; aspect-ratio: 1.15; border: 0; padding: 0; background: none; cursor: pointer; perspective: 500px; }
+.box .front { position: absolute; inset: 18% 0 0; border-radius: 6px; border: 3px solid var(--ink); background: #c3111a url('assets/doos.webp') center / cover;
+  box-shadow: 0 6px 0 var(--ink), inset 0 -10px 16px rgba(0,0,0,.25); }
+.box .lid { position: absolute; left: -5%; right: -5%; top: 4%; height: 20%; border-radius: 6px; border: 3px solid var(--ink); z-index: 2;
+  background: linear-gradient(180deg, #ff5a4a, #c3111a); box-shadow: inset 0 3px 0 rgba(255,255,255,.35); transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.3,1.5,.5,1), opacity .45s; }
+.box .front::after { content: '?'; position: absolute; right: -8px; top: -8px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--goud); color: var(--ink); border: 3px solid var(--ink); font-weight: 900; font-size: 16px; box-shadow: 0 2px 0 var(--ink); }
+.box.open .front::after { display: none; }
+.box .lid::after { content: ''; position: absolute; left: 44%; right: 44%; top: -3px; bottom: -3px; background: var(--goud); border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); }
+.box:not(.open):not(:disabled):hover { animation: wobble .5s ease-in-out; }
+.boxes:not(.done) .box:not(.open) { animation: idle 2.4s ease-in-out infinite; }
+.box:nth-child(2n) { animation-delay: -.8s !important; } .box:nth-child(3n) { animation-delay: -1.6s !important; }
+@keyframes idle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes wobble { 25% { transform: rotate(-5deg); } 75% { transform: rotate(5deg); } }
+.box.open .lid { transform: translateY(-40%) rotateX(70deg) rotate(-14deg); opacity: .0; }
+.box .prize { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(0); z-index: 3; min-width: 92%; padding: 6px 4px; border-radius: 12px;
+  border: 3px solid var(--ink); background: linear-gradient(180deg, #fff6b0, var(--goud) 55%, var(--goud2)); color: var(--ink); font-weight: 900; font-size: clamp(13px, 2.2vh, 17px);
+  line-height: 1.05; text-transform: uppercase; box-shadow: 0 4px 0 var(--ink), 0 0 20px rgba(255,210,63,.8); transition: transform .45s .15s cubic-bezier(.2,1.7,.4,1); }
+.box .prize small { display: block; font-size: .62em; letter-spacing: .06em; }
+.box.open .prize { transform: translate(-50%, -78%) scale(1); }
+.box.rest { opacity: .55; filter: grayscale(.6); }
+.box.rest .prize { box-shadow: 0 3px 0 var(--ink); }
+.boost { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.boost span { background: rgba(17,17,17,.55); border: 3px solid var(--ink); border-radius: 14px; padding: 4px 10px; font-weight: 900; font-size: 15px; text-transform: uppercase; }
+.boost b { color: var(--goud); }
+
 canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
-@media (prefers-reduced-motion: reduce) { .cell.hit, .machine.boost, .spin.power, .bar.full i { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .rays, .bulb, .boxes .box, .cell.hit { animation: none !important; }
+}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="top">
-    <button class="iconbtn" id="infoBtn" type="button" aria-label="Uitbetalingen">?</button>
-    <h1>Power Slot<small>SNX snack spins</small></h1>
-    <button class="iconbtn" id="muteBtn" type="button" aria-label="Geluid aan of uit">🔊</button>
+<div class="rays" aria-hidden="true"></div>
+<div class="app" id="app">
+  <div class="top" id="top">
+    <button class="iconbtn" id="infoBtn" type="button" aria-label="Spelregels">?</button>
+    <div class="brand"><img src="assets/logo_white.webp" alt="SNX"><h1>Power Slot</h1></div>
+    <button class="iconbtn" id="muteBtn" type="button" aria-label="Geluid aan of uit"></button>
   </div>
 
-  <div class="power">
-    <div class="lbl"><span>Power-meter</span><span id="powerTxt">0 / 10</span></div>
-    <div class="bar" id="powerBar"><i></i></div>
+  <div class="collect" id="collect" title="Verzamel 25 dozen voor de Doos-bonus">
+    <img src="assets/doos.webp" alt="">
+    <div class="track" id="track"></div>
+    <span id="collectTxt">0/25</span>
   </div>
 
-  <div class="machine" id="machine">
-    <div class="reels" id="reels"></div>
+  <div class="cabinet" id="cabinet">
+    <div class="bulbs t" id="bulbsT"></div>
+    <div class="fsbar" id="fsbar" hidden></div>
+    <div class="window"><div class="reels" id="reels"></div></div>
+    <div class="bulbs b" id="bulbsB"></div>
   </div>
 
-  <div class="fs" id="fsBar" hidden></div>
-
-  <div class="row">
-    <div class="stat"><span>Snack-punten</span><b id="credits">1000</b></div>
-    <div class="stat"><span>Inzet</span><b id="bet">10</b></div>
-    <div class="stat win"><span>Winst</span><b id="win">0</b></div>
-  </div>
-
-  <div class="controls">
-    <div class="bet">
-      <button class="sm" id="betDown" type="button" aria-label="Inzet omlaag">−</button>
-      <button class="sm" id="betUp" type="button" aria-label="Inzet omhoog">+</button>
+  <div class="console" id="console">
+    <div class="leds">
+      <div class="led"><span>Snack-punten</span><b id="credits">1.000</b></div>
+      <div class="led"><span>Inzet</span><b id="bet">10</b></div>
+      <div class="led win"><span>Winst</span><b id="win">0</b></div>
     </div>
-    <button class="spin" id="spinBtn" type="button">Spin</button>
-    <div class="toggles">
-      <button class="tg" id="turboBtn" type="button" aria-pressed="false">Turbo</button>
-      <button class="tg" id="autoBtn" type="button" aria-pressed="false">Auto</button>
+    <div class="ctrl">
+      <div class="betbox">
+        <button class="round" id="betDown" type="button" aria-label="Inzet omlaag">−</button>
+        <button class="round" id="betUp" type="button" aria-label="Inzet omhoog">+</button>
+      </div>
+      <button class="spin" id="spinBtn" type="button" aria-label="Spin">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+        <span class="lab" id="spinLab">SPIN</span>
+      </button>
+      <div class="toggles">
+        <button class="tg" id="turboBtn" type="button" aria-pressed="false">Turbo</button>
+        <button class="tg" id="autoBtn" type="button" aria-pressed="false">Auto</button>
+      </div>
     </div>
   </div>
-  <div class="note">Gratis spel met snack-punten. Geen geld, geen prijzen. <a href="./">Speel Snack Rush</a></div>
+  <div class="note" id="note">Gratis spel met snack-punten. Geen geld, geen prijzen. <a href="./">Speel Snack Rush</a></div>
 </div>
 
+<!-- start -->
 <div class="overlay" id="startCard">
   <div class="card">
-    <img src="assets/logo_white.webp" alt="SNX" style="width:60%;margin:0 auto;display:block">
-    <h2>Power Slot</h2>
-    <p>Draai, vang snacks en laad je <b>Power-meter</b>. Vol? Dan krijg je een <b>Power Spin</b>: wilde rollen en tot ×5 winst.</p>
-    <p style="font-size:13px">Je speelt met gratis snack-punten. Er is geen geld en geen prijs mee te winnen.</p>
+    <img src="assets/logo_white.webp" alt="SNX" style="width:52%;margin:0 auto;display:block;filter:drop-shadow(0 3px 0 #111)">
+    <div class="big" style="font-size:44px">Power Slot</div>
+    <div class="feat">
+      <div><span class="ic"><img src="assets/doos.webp" alt=""></span><span><b>3 Bonus-dozen</b> of 25 verzameld? Kies 3 verzenddozen en open je boosters.</span></div>
+      <div><span class="ic" style="background:#111;color:#ffd23f;font-weight:900;font-size:18px">+1</span><span><b>Booster free spins</b> met een <b>extra rij</b> op de rollen: tot 3.125 manieren om te winnen.</span></div>
+      <div><span class="ic"><img src="assets/bal.webp" alt=""></span><span><b>Grote winst?</b> Dan spuit de bitterbal-fontein.</span></div>
+    </div>
+    <p style="font-size:12px;opacity:.9">Je speelt met gratis snack-punten. Geen geld, geen prijzen.</p>
     <button class="btn" id="startBtn" type="button">Speel</button>
   </div>
 </div>
 
+<!-- rules -->
 <div class="overlay" id="infoCard" hidden>
   <div class="card">
-    <h2>Zo werkt het</h2>
+    <h2>Spelregels</h2>
+    <p style="font-size:13px">Winst telt van links naar rechts op naast elkaar liggende rollen, op elke positie. Bedragen zijn per manier, als deel van je inzet.</p>
     <div class="pay" id="payTable"></div>
-    <p style="font-size:13px;text-align:left">
-      Winst telt van links naar rechts op naast elkaar liggende rollen, op elke positie (243 manieren).<br>
-      <b>Power-meter</b>: elke winnende spin +1, elke Bonus-doos +1. Bij 15 krijg je een Power Spin: 2 rollen worden helemaal wild, winst ×3 tot ×5.<br>
-      <b>Snack Truck</b>: soms rijdt de truck langs en dropt 2 tot 5 extra wilds.<br>
-      <b>3+ Bonus-dozen</b>: 8, 12 of 20 free spins. De multiplier stijgt bij elke winst.
-    </p>
+    <div class="feat">
+      <div><span class="ic" style="background:#c3111a"><img src="assets/logo_white.webp" alt=""></span><span><b>SNX Wild</b> vervangt elke snack, op rol 2 t/m 5. De <b>Snack Truck</b> dropt soms 2 tot 5 extra wilds.</span></div>
+      <div><span class="ic"><img src="assets/doos.webp" alt=""></span><span><b>Doos-bonus</b>: 3+ Bonus-dozen in één spin, of 25 verzameld. Kies 3 van 6 dozen. Basis: 5 free spins met 4 rijen. Dozen geven extra spins, een hogere multiplier of nog een rij.</span></div>
+      <div><span class="ic" style="background:#111;color:#ffd23f;font-weight:900">×</span><span>In de free spins stijgt de multiplier met +1 bij elke winst (max ×10). 3+ dozen = +5 spins.</span></div>
+    </div>
     <button class="btn" id="closeInfo" type="button">Terug</button>
   </div>
 </div>
 
+<!-- box picker -->
+<div class="overlay" id="pickCard" hidden>
+  <div class="picker">
+    <h2>Kies 3 dozen</h2>
+    <p id="pickTxt">Nog 3 keuzes</p>
+    <div class="boxes" id="boxes"></div>
+    <div class="boost" id="boost"></div>
+    <button class="btn" id="pickGo" type="button" hidden>Start free spins</button>
+  </div>
+</div>
+
+<!-- big win -->
 <div class="overlay" id="bigCard" hidden>
   <div class="card">
     <h2 id="bigTitle">Mega win</h2>
     <div class="big" id="bigAmount">0</div>
+    <p id="bigSub" class="gold" style="font-weight:800"></p>
     <button class="btn" id="bigClose" type="button">Top!</button>
   </div>
 </div>
@@ -213,67 +329,74 @@ canvas#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events
 <script>
 /* ===== Game rules (pure, no DOM) ===== */
 const SYMBOLS = {
-  S:  { name: 'S',            pay: [0, 0, 0, 2, 5, 10],   w: [12, 12, 12, 12, 12] },
-  N:  { name: 'N',            pay: [0, 0, 0, 2, 5, 10],   w: [12, 12, 12, 12, 12] },
-  X:  { name: 'X',            pay: [0, 0, 0, 3, 6, 12],   w: [11, 11, 11, 11, 11] },
-  bal:{ name: 'Betterbal',    pay: [0, 0, 0, 5, 12, 25],  w: [8, 8, 8, 8, 8] },
-  kro:{ name: 'K-Rocket',     pay: [0, 0, 0, 8, 20, 50],  w: [6, 6, 6, 6, 6] },
-  bob:{ name: 'BOB Burger',   pay: [0, 0, 0, 12, 40, 100], w: [4, 4, 4, 4, 4] },
-  W:  { name: 'SNX Wild',     pay: [0, 0, 0, 0, 0, 0],    w: [0, 2, 2, 2, 2] },
-  B:  { name: 'Bonus-doos',   pay: [0, 0, 0, 0, 0, 0],    w: [2, 2, 2, 2, 2] }
+  S:   { name: 'S',          pay: [0, 0, 0, 2, 5, 10],    w: [12, 12, 12, 12, 12] },
+  N:   { name: 'N',          pay: [0, 0, 0, 2, 5, 10],    w: [12, 12, 12, 12, 12] },
+  X:   { name: 'X',          pay: [0, 0, 0, 3, 6, 12],    w: [11, 11, 11, 11, 11] },
+  bal: { name: 'Betterbal',  pay: [0, 0, 0, 5, 12, 25],   w: [8, 8, 8, 8, 8] },
+  kro: { name: 'K-Rocket',   pay: [0, 0, 0, 8, 20, 50],   w: [6, 6, 6, 6, 6] },
+  bob: { name: 'BOB Burger', pay: [0, 0, 0, 12, 40, 100], w: [4, 4, 4, 4, 4] },
+  W:   { name: 'SNX Wild',   pay: [0, 0, 0, 0, 0, 0],     w: [0, 2, 2, 2, 2] },
+  B:   { name: 'Bonus-doos', pay: [0, 0, 0, 0, 0, 0],     w: [1.5, 1.5, 1.5, 1.5, 1.5] }
 };
 const KEYS = Object.keys(SYMBOLS);
 const PAYING = ['S', 'N', 'X', 'bal', 'kro', 'bob'];
-const DIV = 84;                 // pay values are per 1/DIV of the bet, per way
-const POWER_MAX = 15;
-const FS_AWARD = { 3: 8, 4: 12, 5: 20 };
+const DIV = 30;              // pay table is per 1/DIV of the bet, per way
+const FREE_DIV = 9.5;        // extra damping in free spins (more rows = many more ways)
+const COLLECT_MAX = 25;
 const TRUCK_CHANCE = 1 / 14;
+const BOX_PRIZES = [
+  { t: 'spins', v: 2 }, { t: 'spins', v: 3 }, { t: 'spins', v: 5 },
+  { t: 'mult', v: 1 }, { t: 'mult', v: 2 }, { t: 'row', v: 1 }
+];
+const BASE_BONUS = { spins: 5, rows: 4, mult: 1 };
+const RETRIGGER = 5;
 
-function pick(reel, rnd, freeSpin) {
+function pick(reel, rnd) {
   let total = 0;
-  for (const k of KEYS) total += SYMBOLS[k].w[reel] + (freeSpin && k === 'W' ? 1 : 0);
+  for (const k of KEYS) total += SYMBOLS[k].w[reel];
   let r = rnd() * total;
-  for (const k of KEYS) { r -= SYMBOLS[k].w[reel] + (freeSpin && k === 'W' ? 1 : 0); if (r < 0) return k; }
+  for (const k of KEYS) { r -= SYMBOLS[k].w[reel]; if (r < 0) return k; }
   return 'S';
 }
-
 // grid[reel][row]
 function makeGrid(rnd, opts = {}) {
-  const g = [];
-  for (let r = 0; r < 5; r++) { g.push([pick(r, rnd, opts.free), pick(r, rnd, opts.free), pick(r, rnd, opts.free)]); }
-  const extra = { truck: [], powerReels: [] };
-  if (opts.power) {
-    // two whole reels go wild (reels 2-5)
-    const pool = [1, 2, 3, 4];
-    for (let i = 0; i < 2; i++) { const idx = Math.floor(rnd() * pool.length); const reel = pool.splice(idx, 1)[0]; extra.powerReels.push(reel); g[reel] = ['W', 'W', 'W']; }
-  } else if (rnd() < TRUCK_CHANCE) {
+  const rows = opts.rows || 3, g = [];
+  for (let r = 0; r < 5; r++) { const col = []; for (let i = 0; i < rows; i++) col.push(pick(r, rnd)); g.push(col); }
+  const truck = [];
+  if (!opts.free && rnd() < TRUCK_CHANCE) {
     const n = 2 + Math.floor(rnd() * 4);
     for (let i = 0; i < n; i++) {
-      const reel = 1 + Math.floor(rnd() * 4), row = Math.floor(rnd() * 3);
-      if (g[reel][row] !== 'W') { g[reel][row] = 'W'; extra.truck.push([reel, row]); }
+      const reel = 1 + Math.floor(rnd() * 4), row = Math.floor(rnd() * rows);
+      if (g[reel][row] !== 'W') { g[reel][row] = 'W'; truck.push([reel, row]); }
     }
   }
-  return { grid: g, extra };
+  return { grid: g, truck };
 }
-
-function evaluate(grid, bet, mult) {
+function evaluate(grid, bet, mult, free) {
   const wins = []; let total = 0;
+  const div = DIV * (free ? FREE_DIV : 1);
   for (const s of PAYING) {
     let ways = 1, len = 0; const cells = [];
     for (let r = 0; r < 5; r++) {
       let c = 0;
-      for (let row = 0; row < 3; row++) { if (grid[r][row] === s || (r > 0 && grid[r][row] === 'W')) { c++; cells.push([r, row]); } }
+      grid[r].forEach((k, row) => { if (k === s || (r > 0 && k === 'W')) { c++; cells.push([r, row]); } });
       if (!c) break;
       ways *= c; len++;
     }
     if (len >= 3) {
-      const amount = Math.round(ways * SYMBOLS[s].pay[len] * bet / DIV * mult);
+      const amount = Math.round(ways * SYMBOLS[s].pay[len] * bet / div * mult);
       if (amount > 0) { wins.push({ s, len, ways, amount, cells: cells.filter(([r]) => r < len) }); total += amount; }
     }
   }
   const scat = [];
-  for (let r = 0; r < 5; r++) for (let row = 0; row < 3; row++) if (grid[r][row] === 'B') scat.push([r, row]);
+  grid.forEach((col, r) => col.forEach((k, row) => { if (k === 'B') scat.push([r, row]); }));
   return { wins, total, scat };
+}
+function shuffled(rnd) { const a = BOX_PRIZES.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function applyPicks(picks) {
+  const b = { ...BASE_BONUS };
+  picks.forEach((p) => { if (p.t === 'spins') b.spins += p.v; else if (p.t === 'mult') b.mult += p.v; else b.rows += p.v; });
+  return b;
 }
 /* ===== end rules ===== */
 
@@ -286,38 +409,44 @@ function evaluate(grid, bet, mult) {
     get(k, d) { try { const v = localStorage.getItem('snxslot.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
     set(k, v) { try { localStorage.setItem('snxslot.' + k, JSON.stringify(v)); } catch {} }
   };
-
   const st = {
-    credits: store.get('credits', 1000), betIdx: store.get('betIdx', 1), power: store.get('power', 0),
-    spinning: false, turbo: false, auto: false, free: 0, freeMult: 1, freeWin: 0, muted: store.get('muted', false),
-    grid: null
+    credits: store.get('credits', 1000), betIdx: store.get('betIdx', 1), boxes: Math.min(store.get('boxes', 0), COLLECT_MAX),
+    muted: store.get('muted', false), spinning: false, turbo: false, auto: false,
+    free: 0, freeMult: 1, freeWin: 0, rows: 3
   };
+  const balImg = new Image(); balImg.src = IMG.bal;
   Object.values(IMG).forEach((src) => { const i = new Image(); i.src = src; });
+  const wait = (ms) => new Promise((r) => setTimeout(r, st.turbo ? ms * 0.55 : ms));
+  const bet = () => BETS[st.betIdx];
+  const fmt = (n) => n.toLocaleString('nl-NL');
 
   /* ---- sound ---- */
   let ac = null;
-  function tone(freq, dur = 0.08, type = 'square', vol = 0.06, when = 0) {
+  function tone(freq, dur = 0.08, type = 'square', vol = 0.06, when = 0, slide) {
     if (st.muted) return;
     try {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)();
       const t = ac.currentTime + when, o = ac.createOscillator(), g = ac.createGain();
-      o.type = type; o.frequency.setValueAtTime(freq, t);
+      o.type = type; o.frequency.setValueAtTime(freq, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
       g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur + 0.02);
     } catch {}
   }
   const sfx = {
-    stop: () => tone(160, 0.06, 'square', 0.05),
+    stop: () => tone(150, 0.07, 'square', 0.05),
     win: () => [523, 659, 784].forEach((f, i) => tone(f, 0.12, 'triangle', 0.08, i * 0.08)),
-    big: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.18, 'triangle', 0.1, i * 0.1)),
-    power: () => [220, 330, 440, 660, 880].forEach((f, i) => tone(f, 0.12, 'sawtooth', 0.06, i * 0.06)),
+    big: () => [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.2, 'triangle', 0.1, i * 0.09)),
     truck: () => { tone(90, 0.3, 'sawtooth', 0.07); tone(70, 0.3, 'sawtooth', 0.07, 0.25); tone(880, 0.1, 'square', 0.05, 0.5); tone(880, 0.1, 'square', 0.05, 0.65); },
-    scat: () => tone(1200, 0.1, 'sine', 0.08)
+    scat: (i = 0) => tone(900 + i * 180, 0.14, 'sine', 0.09),
+    open: () => { tone(300, 0.12, 'square', 0.05, 0, 900); tone(1200, 0.15, 'triangle', 0.07, 0.12); },
+    row: () => [330, 440, 554, 660].forEach((f, i) => tone(f, 0.12, 'sawtooth', 0.05, i * 0.07)),
+    pop: () => tone(400 + Math.random() * 500, 0.05, 'sine', 0.03)
   };
+  const ICON_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M18.5 6.5a8 8 0 0 1 0 11"/></svg>';
+  const ICON_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
 
   /* ---- reels ---- */
-  const reelsEl = $('reels');
-  const reels = [];
+  const reelsEl = $('reels'), reels = [];
   for (let r = 0; r < 5; r++) {
     const reel = document.createElement('div'); reel.className = 'reel';
     const strip = document.createElement('div'); strip.className = 'strip';
@@ -326,190 +455,263 @@ function evaluate(grid, bet, mult) {
   function cellEl(k) {
     const c = document.createElement('div'); c.className = 'cell' + (k === 'W' ? ' wild' : k === 'B' ? ' scat' : '');
     if (IMG[k]) { const i = document.createElement('img'); i.src = IMG[k]; i.alt = SYMBOLS[k].name; c.appendChild(i); }
-    else { const l = document.createElement('div'); l.className = 'let ' + k; l.textContent = k; c.appendChild(l); }
+    else { const l = document.createElement('div'); l.className = 'chip ' + k; l.textContent = k; c.appendChild(l); }
     return c;
   }
-  function cellH() { return reels[0].reel.clientHeight / 3; }
-  function setReel(r, col) {
-    const s = reels[r].strip; s.style.transition = 'none'; s.style.transform = 'translateY(0)'; s.innerHTML = '';
-    col.forEach((k) => s.appendChild(cellEl(k)));
-  }
+  const cell = (r, row) => reels[r].strip.children[row];
+  const cellPx = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
 
   function spinReel(r, col, dur) {
     return new Promise((res) => {
-      const s = reels[r].strip, h = cellH();
-      const old = Array.from(s.children).slice(-3).map((c) => c.cloneNode(true));
-      const filler = 10 + r * 3;
+      const s = reels[r].strip, h = cellPx();
+      const old = Array.from(s.children).map((c) => { const n = c.cloneNode(true); n.classList.remove('hit', 'drop'); return n; });
+      const filler = 9 + r * 3;
       s.style.transition = 'none'; s.innerHTML = '';
       col.forEach((k) => s.appendChild(cellEl(k)));
       for (let i = 0; i < filler; i++) s.appendChild(cellEl(pick(r, Math.random)));
-      old.forEach((c) => { c.classList.remove('hit', 'drop'); s.appendChild(c); });
-      // strip runs top→bottom: new symbols at top, old at the bottom, so we slide down
-      const n = s.children.length;
-      s.style.transform = `translateY(${-(n - 3) * h}px)`;
+      old.forEach((c) => s.appendChild(c));
+      s.style.transform = `translateY(${-(s.children.length - old.length) * h}px)`;
+      s.classList.add('blur');
       void s.offsetHeight;
-      s.style.transition = `transform ${dur}ms cubic-bezier(.3,.05,.25,1.08)`;
+      s.style.transition = `transform ${dur}ms cubic-bezier(.35,.05,.25,1.12)`;
       s.style.transform = 'translateY(0)';
+      setTimeout(() => s.classList.remove('blur'), dur * 0.8);
       setTimeout(() => {
         s.style.transition = 'none';
-        // keep only the final three cells
-        while (s.children.length > 3) s.removeChild(s.lastChild);
-        s.style.transform = 'translateY(0)';
+        while (s.children.length > col.length) s.removeChild(s.lastChild);
         sfx.stop(); res();
       }, dur + 20);
     });
   }
-  // after a spin the visible cells are the first three
-  function cell(r, row) { return reels[r].strip.children[row]; }
+  function setRows(n) {
+    st.rows = n;
+    document.documentElement.style.setProperty('--rows', n);
+    reels.forEach(({ strip }, r) => {
+      while (strip.children.length > n) strip.removeChild(strip.lastChild);
+      while (strip.children.length < n) { const c = cellEl(pick(r, Math.random)); c.classList.add('drop'); strip.appendChild(c); }
+    });
+    layout();
+  }
 
-  /* ---- UI ---- */
-  const bet = () => BETS[st.betIdx];
+  /* ---- layout: size the cells to fit width and height ---- */
+  function layout() {
+    const app = $('app'), cab = $('cabinet');
+    const W = app.clientWidth - 32;
+    const fromW = (W - 2 * (12 + 4) - 2 * 6 - 4 * 5) / 5;
+    const other = $('top').offsetHeight + $('collect').offsetHeight + $('console').offsetHeight + $('note').offsetHeight;
+    const pad = parseFloat(getComputedStyle(app).paddingTop) + parseFloat(getComputedStyle(app).paddingBottom);
+    const availH = app.clientHeight - other - pad - 5 * 8 - (18 + 4) * 2 - 12 - 24;
+    const rowsRoom = Math.max(4, st.rows);
+    const c = Math.floor(Math.max(36, Math.min(fromW, 104, availH / rowsRoom)));
+    document.documentElement.style.setProperty('--cell', c + 'px');
+    // bulbs along top and bottom
+    const n = Math.max(6, Math.floor((cab.offsetWidth - 44) / 20));
+    ['bulbsT', 'bulbsB'].forEach((id) => { const el = $(id); if (el.children.length !== n) el.innerHTML = '<i class="bulb"></i>'.repeat(n); });
+  }
+  addEventListener('resize', layout);
+
+  /* ---- HUD ---- */
   function render() {
-    $('credits').textContent = st.credits.toLocaleString('nl-NL');
+    $('credits').textContent = fmt(st.credits);
     $('bet').textContent = st.free ? 'FREE' : bet();
-    $('powerTxt').textContent = `${Math.min(st.power, POWER_MAX)} / ${POWER_MAX}`;
-    $('powerBar').querySelector('i').style.width = Math.min(100, st.power / POWER_MAX * 100) + '%';
-    const full = st.power >= POWER_MAX;
-    $('powerBar').classList.toggle('full', full);
+    const track = $('track');
+    if (track.children.length !== COLLECT_MAX) track.innerHTML = '<i></i>'.repeat(COLLECT_MAX);
+    Array.from(track.children).forEach((el, i) => el.classList.toggle('on', i < st.boxes));
+    $('collectTxt').textContent = `${st.boxes}/${COLLECT_MAX}`;
     const sb = $('spinBtn');
-    sb.classList.toggle('power', full && !st.free);
-    sb.textContent = st.free ? 'Free' : full ? 'Power' : 'Spin';
-    sb.disabled = st.spinning && !st.auto;
-    $('fsBar').hidden = !st.free;
-    if (st.free) $('fsBar').textContent = `Free spins: ${st.free} · multiplier ×${st.freeMult} · ${st.freeWin} gewonnen`;
+    sb.classList.toggle('free', st.free > 0);
+    sb.classList.toggle('busy', st.spinning);
+    $('spinLab').textContent = st.auto ? 'STOP' : st.free ? 'FREE' : 'SPIN';
+    sb.querySelector('svg').setAttribute('stroke', st.free ? '#111' : '#fff');
+    $('fsbar').hidden = !st.free;
+    if (st.free) $('fsbar').textContent = `Free spins ${st.free} · ×${st.freeMult} · ${st.rows} rijen`;
     $('turboBtn').classList.toggle('on', st.turbo); $('turboBtn').setAttribute('aria-pressed', st.turbo);
     $('autoBtn').classList.toggle('on', st.auto); $('autoBtn').setAttribute('aria-pressed', st.auto);
-    $('muteBtn').textContent = st.muted ? '🔇' : '🔊';
+    $('muteBtn').innerHTML = st.muted ? ICON_OFF : ICON_ON;
     $('betDown').disabled = $('betUp').disabled = st.spinning || st.free > 0;
-    store.set('credits', st.credits); store.set('betIdx', st.betIdx); store.set('power', st.power); store.set('muted', st.muted);
+    store.set('credits', st.credits); store.set('betIdx', st.betIdx); store.set('boxes', st.boxes); store.set('muted', st.muted);
   }
-  function banner(html, ms = 1300) {
-    const b = document.createElement('div'); b.className = 'banner'; b.innerHTML = html; $('machine').appendChild(b);
-    return new Promise((res) => setTimeout(() => { b.remove(); res(); }, st.turbo ? ms * 0.6 : ms));
+  function banner(html, ms = 1300, gold) {
+    const b = document.createElement('div'); b.className = 'banner' + (gold ? ' gold' : ''); b.innerHTML = html; $('cabinet').appendChild(b);
+    return wait(ms).then(() => b.remove());
   }
-  function countUp(el, to, ms = 600) {
-    const from = 0, t0 = performance.now();
-    return new Promise((res) => {
-      (function step(t) { const p = Math.min(1, (t - t0) / ms); el.textContent = Math.round(from + (to - from) * p).toLocaleString('nl-NL'); p < 1 ? requestAnimationFrame(step) : res(); })(t0);
+  function countUp(el, to, ms = 700) {
+    const t0 = performance.now();
+    return new Promise((res) => { (function step(t) { const p = Math.min(1, (t - t0) / ms); el.textContent = fmt(Math.round(to * (1 - Math.pow(1 - p, 3)))); p < 1 ? requestAnimationFrame(step) : res(); })(t0); });
+  }
+  function bigCard(title, amount, sub) {
+    $('bigTitle').textContent = title; $('bigSub').textContent = sub || '';
+    $('bigCard').hidden = false; countUp($('bigAmount'), amount, 1600);
+    return new Promise((r) => { const close = () => { clearTimeout(t); $('bigCard').hidden = true; r(); }; $('bigClose').onclick = close; const t = st.auto ? setTimeout(close, 3200) : 0; });
+  }
+
+  /* ---- bitterbal fountain ---- */
+  const fx = $('fx'), ctx = fx.getContext('2d');
+  let balls = [], emit = 0, emitRate = 0, acc = 0, fxRun = false, last = 0;
+  function sizeFx() { const d = Math.min(2, devicePixelRatio || 1); fx.width = innerWidth * d; fx.height = innerHeight * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
+  function fountain(level) {
+    // level 1 = big, 2 = mega, 3 = snack-tastic
+    sizeFx(); emit = 1600 + level * 800; emitRate = 0.5 + level * 0.45;
+    document.body.classList.add('hot');
+    if (!fxRun) { fxRun = true; last = performance.now(); requestAnimationFrame(tickFx); }
+  }
+  function spawn() {
+    const s = 26 + Math.random() * 34, side = Math.random() < .5 ? -1 : 1;
+    balls.push({ x: innerWidth / 2 + (Math.random() - .5) * 30, y: innerHeight + s, vx: side * (0.5 + Math.random() * 4.5), vy: -(innerHeight * 0.022 + Math.random() * innerHeight * 0.012),
+      r: s, a: Math.random() * 6, va: (Math.random() - .5) * .3, bounced: false });
+  }
+  function tickFx(t) {
+    const dt = Math.min(2, (t - last) / 16.7); last = t;
+    if (emit > 0) { emit -= 16.7 * dt; acc += emitRate * dt; while (acc >= 1) { spawn(); acc--; } if (Math.random() < .12) sfx.pop(); }
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    // water-ish glow at the spout
+    if (emit > 0) { const g = ctx.createRadialGradient(innerWidth / 2, innerHeight, 0, innerWidth / 2, innerHeight, 160); g.addColorStop(0, 'rgba(255,210,63,.55)'); g.addColorStop(1, 'rgba(255,210,63,0)'); ctx.fillStyle = g; ctx.fillRect(0, innerHeight - 160, innerWidth, 160); }
+    for (const b of balls) {
+      b.vy += 0.42 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.a += b.va * dt;
+      if (!b.bounced && b.vy > 0 && b.y > innerHeight - b.r / 2) { b.vy *= -0.45; b.vx *= 0.8; b.bounced = true; }
+      ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.a);
+      if (balImg.complete && balImg.naturalWidth) ctx.drawImage(balImg, -b.r / 2, -b.r / 2 * 0.87, b.r, b.r * 0.87);
+      else { ctx.fillStyle = '#b5641c'; ctx.beginPath(); ctx.arc(0, 0, b.r / 2, 0, 7); ctx.fill(); }
+      ctx.restore();
+    }
+    balls = balls.filter((b) => b.y < innerHeight + b.r * 2 && b.x > -80 && b.x < innerWidth + 80 && !(b.bounced && b.y > innerHeight + b.r));
+    if (balls.length || emit > 0) requestAnimationFrame(tickFx);
+    else { fxRun = false; ctx.clearRect(0, 0, innerWidth, innerHeight); document.body.classList.remove('hot'); }
+  }
+
+  /* ---- box picker ---- */
+  function runPicker() {
+    return new Promise((resolve) => {
+      const prizes = shuffled(Math.random), picks = [];
+      const label = (p) => p.t === 'spins' ? `+${p.v}<small>free spins</small>` : p.t === 'mult' ? `+×${p.v}<small>multiplier</small>` : `+1 rij<small>extra rij</small>`;
+      const boxes = $('boxes'); boxes.className = 'boxes'; boxes.innerHTML = '';
+      $('pickGo').hidden = true; $('pickTxt').textContent = 'Nog 3 keuzes';
+      const showBoost = () => { const b = applyPicks(picks); $('boost').innerHTML = `<span><b>${b.spins}</b> spins</span><span><b>×${b.mult}</b> start</span><span><b>${b.rows}</b> rijen</span>`; };
+      showBoost();
+      prizes.forEach((p, i) => {
+        const el = document.createElement('button'); el.type = 'button'; el.className = 'box'; el.setAttribute('aria-label', 'Doos ' + (i + 1));
+        el.innerHTML = `<div class="front"></div><div class="lid"></div><div class="prize">${label(p)}</div>`;
+        el.onclick = () => {
+          if (el.classList.contains('open') || picks.length >= 3) return;
+          el.classList.add('open'); picks.push(p); sfx.open(); showBoost();
+          const left = 3 - picks.length;
+          $('pickTxt').textContent = left ? `Nog ${left} ${left === 1 ? 'keuze' : 'keuzes'}` : 'Je boosters:';
+          if (!left) {
+            boxes.classList.add('done');
+            setTimeout(() => { Array.from(boxes.children).forEach((b) => { if (!b.classList.contains('open')) { b.classList.add('open', 'rest'); } b.disabled = true; }); }, 700);
+            setTimeout(() => { $('pickGo').hidden = false; $('pickGo').focus(); if (st.auto) $('pickGo').click(); }, 1300);
+          }
+        };
+        boxes.appendChild(el);
+      });
+      $('pickGo').onclick = () => { $('pickCard').hidden = true; resolve(applyPicks(picks)); };
+      $('pickCard').hidden = false;
+      if (st.auto) { // auto-play picks for you
+        const order = Array.from(boxes.children).sort(() => Math.random() - .5).slice(0, 3);
+        order.forEach((b, i) => setTimeout(() => b.click(), 700 + i * 650));
+      }
     });
   }
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-  /* ---- confetti ---- */
-  const fx = $('fx'), ctx = fx.getContext('2d'); let parts = [], fxOn = false;
-  function confetti(n = 140) {
-    const dpr = Math.min(2, devicePixelRatio || 1); fx.width = innerWidth * dpr; fx.height = innerHeight * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const cols = ['#ff2625', '#fff', '#ffd23f', '#111'];
-    for (let i = 0; i < n; i++) parts.push({ x: innerWidth / 2, y: innerHeight * 0.45, vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, s: 5 + Math.random() * 7, c: cols[i % 4], a: Math.random() * 6, life: 1 });
-    if (!fxOn) { fxOn = true; requestAnimationFrame(tick); }
-  }
-  function tick() {
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
-    parts.forEach((p) => { p.vy += 0.35; p.x += p.vx; p.y += p.vy; p.a += 0.2; p.life -= 0.008;
-      ctx.save(); ctx.globalAlpha = Math.max(0, p.life); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore(); });
-    parts = parts.filter((p) => p.life > 0 && p.y < innerHeight + 40);
-    if (parts.length) requestAnimationFrame(tick); else { fxOn = false; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+  async function startBonus() {
+    const b = await runPicker();
+    st.free = b.spins; st.freeMult = b.mult; st.freeWin = 0;
+    sfx.row();
+    setRows(b.rows);
+    render();
+    await banner(b.rows > 4 ? '2 extra rijen!<small>' + b.spins + ' booster free spins</small>' : 'Extra rij!<small>' + b.spins + ' booster free spins</small>', 1700, true);
   }
 
   /* ---- spin flow ---- */
   async function spin() {
     if (st.spinning) return;
     const free = st.free > 0;
-    const power = !free && st.power >= POWER_MAX;
     if (!free && st.credits < bet()) { st.auto = false; render(); $('emptyCard').hidden = false; return; }
     st.spinning = true;
     if (!free) st.credits -= bet();
-    if (power) st.power = 0;
     $('win').textContent = '0';
-    reels.forEach(({ reel }) => reel.classList.remove('dim'));
-    $('machine').classList.toggle('boost', power || free);
+    reelsEl.classList.remove('dim');
     render();
-    if (power) { sfx.power(); await banner('Power Spin!<small>2 wilde rollen</small>', 1000); }
 
-    const { grid, extra } = makeGrid(Math.random, { power, free });
-    st.grid = grid;
-    const base = st.turbo ? 260 : 650, step = st.turbo ? 90 : 220;
+    const { grid, truck } = makeGrid(Math.random, { rows: st.rows, free });
+    const base = st.turbo ? 300 : 700, step = st.turbo ? 90 : 210;
     await Promise.all(grid.map((col, r) => spinReel(r, col, base + r * step)));
 
-    if (extra.truck.length) {
-      sfx.truck(); await banner('Snack Truck!<small>+' + extra.truck.length + ' wilds</small>', 900);
-      extra.truck.forEach(([r, row]) => { const old = cell(r, row), n = cellEl('W'); n.classList.add('drop'); old.replaceWith(n); });
+    if (truck.length) {
+      sfx.truck(); await banner('Snack Truck!<small>+' + truck.length + ' wilds</small>', 900);
+      truck.forEach(([r, row]) => { const n = cellEl('W'); n.classList.add('drop'); cell(r, row).replaceWith(n); });
       await wait(450);
     }
 
-    let mult = 1;
-    if (power) mult = 3 + Math.floor(Math.random() * 3);
-    if (free) mult = st.freeMult;
-    const res = evaluate(grid, bet(), mult);
+    const mult = free ? st.freeMult : 1;
+    const res = evaluate(grid, bet(), mult, free);
 
     if (res.total > 0) {
-      const hitSet = new Set();
-      res.wins.forEach((w) => w.cells.forEach(([r, row]) => hitSet.add(r + ':' + row)));
-      hitSet.forEach((k) => { const [r, row] = k.split(':').map(Number); cell(r, row).classList.add('hit'); });
-      reels.forEach(({ reel }) => reel.classList.add('dim'));
+      res.wins.forEach((w) => w.cells.forEach(([r, row]) => cell(r, row).classList.add('hit')));
+      reelsEl.classList.add('dim'); $('cabinet').classList.add('fast');
       st.credits += res.total;
       if (free) { st.freeWin += res.total; st.freeMult = Math.min(10, st.freeMult + 1); }
-      else st.power = Math.min(POWER_MAX, st.power + 1);
       const x = res.total / bet();
+      const top = res.wins.sort((a, b) => b.amount - a.amount)[0];
+      countUp($('win'), res.total);
       if (x >= 15) {
-        sfx.big(); confetti(x >= 50 ? 260 : 150);
-        $('bigTitle').textContent = x >= 50 ? 'Snack-tastic!' : x >= 30 ? 'Mega win' : 'Big win';
-        $('bigCard').hidden = false; countUp($('bigAmount'), res.total, 1400);
-        await new Promise((r) => { const close = () => { $('bigCard').hidden = true; r(); }; $('bigClose').onclick = close; if (st.auto) setTimeout(close, 2600); });
+        sfx.big(); const lvl = x >= 100 ? 3 : x >= 50 ? 2 : 1; fountain(lvl);
+        await bigCard(['Big win', 'Mega win', 'Snack-tastic!'][lvl - 1], res.total, `${top.len}× ${SYMBOLS[top.s].name}${mult > 1 ? ' · ×' + mult : ''}`);
       } else {
         sfx.win();
+        await banner(`+${fmt(res.total)}<small>${top.len}× ${SYMBOLS[top.s].name}${mult > 1 ? ' · ×' + mult : ''}</small>`, 1100);
       }
-      const top = res.wins.sort((a, b) => b.amount - a.amount)[0];
-      const multTxt = mult > 1 ? ` · ×${mult}` : '';
-      countUp($('win'), res.total);
-      await banner(`+${res.total}<small>${top.len}× ${SYMBOLS[top.s].name}${multTxt}</small>`, 1100);
+      $('cabinet').classList.remove('fast');
+      render();
     }
 
+    let bonus = false;
     if (res.scat.length) {
-      if (!free) st.power = Math.min(POWER_MAX, st.power + 1);
-      res.scat.forEach(([r, row]) => cell(r, row).classList.add('hit'));
-      sfx.scat();
-      if (res.scat.length >= 3) {
-        const add = FS_AWARD[Math.min(5, res.scat.length)];
-        if (!free) { st.freeMult = 1; st.freeWin = 0; }
-        st.free += add;
-        sfx.big(); confetti(100);
-        await banner(`${add} Free spins!<small>${free ? 'erbij' : 'multiplier stijgt bij elke winst'}</small>`, 1600);
+      res.scat.forEach(([r, row], i) => { cell(r, row).classList.add('hit'); sfx.scat(i); });
+      if (!free) {
+        st.boxes = Math.min(COLLECT_MAX, st.boxes + res.scat.length);
+        const track = $('track'); Array.from(track.children).forEach((el, i) => { if (i < st.boxes) el.classList.add('new'); });
+        setTimeout(() => Array.from(track.children).forEach((el) => el.classList.remove('new')), 400);
+        if (res.scat.length >= 3 || st.boxes >= COLLECT_MAX) bonus = true;
+      } else if (res.scat.length >= 3) {
+        st.free += RETRIGGER; await banner(`+${RETRIGGER} free spins!`, 1300, true);
       }
+      render(); await wait(500);
     }
 
-    if (free) {
+    if (bonus) {
+      st.boxes = 0; render();
+      await banner(res.scat.length >= 3 ? 'Doos-bonus!<small>' + res.scat.length + ' dozen geland</small>' : 'Doos-bonus!<small>25 dozen verzameld</small>', 1400, true);
+      await startBonus();
+    } else if (free) {
       st.free--;
       if (st.free === 0) {
         render();
-        $('bigTitle').textContent = 'Free spins klaar';
-        $('bigCard').hidden = false; countUp($('bigAmount'), st.freeWin, 1200); confetti(120);
-        await new Promise((r) => { const close = () => { $('bigCard').hidden = true; r(); }; $('bigClose').onclick = close; if (st.auto) setTimeout(close, 2600); });
+        const x = st.freeWin / bet();
+        if (x >= 15) { sfx.big(); fountain(x >= 100 ? 3 : x >= 50 ? 2 : 1); }
+        await bigCard('Free spins klaar', st.freeWin, x >= 15 ? 'Bitterbal-fontein!' : 'Totaal gewonnen');
         st.freeMult = 1;
+        setRows(3);
       }
     }
 
-    $('machine').classList.remove('boost');
     st.spinning = false;
     render();
-    if (st.free > 0 || st.auto) { await wait(st.turbo ? 250 : 600); if (st.free > 0 || st.auto) spin(); }
+    if (st.free > 0 || st.auto) { await wait(st.free ? 450 : 650); if (!st.spinning && (st.free > 0 || st.auto)) spin(); }
   }
 
   /* ---- paytable ---- */
   const pt = $('payTable');
   ['bob', 'kro', 'bal', 'X', 'S', 'N'].forEach((k) => {
-    const s = SYMBOLS[k];
-    const x = (n) => +(s.pay[n] / DIV).toFixed(2);
-    const ic = IMG[k] ? `<img src="${IMG[k]}" alt="">` : `<div class="let ${k}">${k}</div>`;
-    pt.insertAdjacentHTML('beforeend', `<div class="ic">${ic}</div><div><b>${s.name}</b>: 3× = ${x(3)}× · 4× = ${x(4)}× · 5× = ${x(5)}× inzet per manier</div>`);
+    const s = SYMBOLS[k], x = (n) => +(s.pay[n] / DIV).toFixed(2);
+    const ic = IMG[k] ? `<img src="${IMG[k]}" alt="">` : `<span class="chip ${k}">${k}</span>`;
+    pt.insertAdjacentHTML('beforeend', `<div><div class="ic">${ic}</div>${s.name}<br>5× ${x(5)} · 4× ${x(4)} · 3× ${x(3)}</div>`);
   });
-  pt.insertAdjacentHTML('beforeend', `<div class="ic" style="background:var(--snx)"><img src="${IMG.W}" alt=""></div><div><b>SNX Wild</b>: vervangt elke snack. Rol 2 t/m 5.</div>`);
-  pt.insertAdjacentHTML('beforeend', `<div class="ic" style="background:var(--geel)"><img src="${IMG.B}" alt=""></div><div><b>Bonus-doos</b>: 3, 4 of 5 = 8, 12 of 20 free spins.</div>`);
 
   /* ---- wiring ---- */
-  for (let r = 0; r < 5; r++) setReel(r, [pick(r, Math.random), pick(r, Math.random), pick(r, Math.random)]);
-  $('startBtn').onclick = () => { $('startCard').hidden = true; tone(660, 0.1, 'triangle', 0.06); };
-  $('spinBtn').onclick = () => { if (st.auto && st.spinning) { st.auto = false; render(); return; } spin(); };
+  for (let r = 0; r < 5; r++) { reels[r].strip.innerHTML = ''; for (let i = 0; i < 3; i++) reels[r].strip.appendChild(cellEl(pick(r, Math.random))); }
+  $('startBtn').onclick = () => { $('startCard').hidden = true; tone(660, 0.1, 'triangle', 0.06); tone(990, 0.12, 'triangle', 0.06, 0.1); };
+  $('spinBtn').onclick = () => { if (st.auto) { st.auto = false; render(); return; } spin(); };
   $('betUp').onclick = () => { if (!st.spinning && !st.free) { st.betIdx = Math.min(BETS.length - 1, st.betIdx + 1); render(); } };
   $('betDown').onclick = () => { if (!st.spinning && !st.free) { st.betIdx = Math.max(0, st.betIdx - 1); render(); } };
   $('turboBtn').onclick = () => { st.turbo = !st.turbo; render(); };
@@ -518,11 +720,20 @@ function evaluate(grid, bet, mult) {
   $('infoBtn').onclick = () => { $('infoCard').hidden = false; };
   $('closeInfo').onclick = () => { $('infoCard').hidden = true; };
   $('refill').onclick = () => { st.credits += 1000; $('emptyCard').hidden = true; render(); };
-  document.addEventListener('keydown', (e) => { if (e.code === 'Space' && $('startCard').hidden) { e.preventDefault(); spin(); } });
-  render();
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space') return;
+    if (!$('startCard').hidden || !$('pickCard').hidden || !$('infoCard').hidden) return;
+    e.preventDefault(); if (!$('bigCard').hidden) $('bigClose').click(); else spin();
+  });
+  // test hook: ?bonus=1 opens the box bonus on the first spin, ?fountain=1 shows the fountain
+  const q = new URLSearchParams(location.search);
+  if (q.get('bonus')) $('startBtn').addEventListener('click', () => { st.spinning = true; startBonus().then(() => { st.spinning = false; spin(); }); });
+  render(); layout(); requestAnimationFrame(layout);
+  if (document.fonts) document.fonts.ready.then(layout);
+  if (q.get('fountain')) setTimeout(() => fountain(2), 300);
 })();
 
-if (typeof module !== 'undefined') module.exports = { SYMBOLS, makeGrid, evaluate, POWER_MAX, FS_AWARD };
+if (typeof module !== 'undefined') module.exports = { SYMBOLS, makeGrid, evaluate, applyPicks, shuffled, BASE_BONUS, RETRIGGER, COLLECT_MAX };
 </script>
 </body>
 </html>
