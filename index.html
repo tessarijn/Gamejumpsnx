@@ -30,7 +30,7 @@
   .filters { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 0 20px; }
   .filters button { font: 600 14px 'Poppins', sans-serif; color: var(--wit); background: rgba(0,0,0,.35); border: 0; border-radius: 999px; padding: 8px 15px; cursor: pointer; }
   .filters button.aan { background: var(--wit); color: var(--rood-donker); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 300px)); justify-content: center; gap: 16px; }
   .game { position: relative; display: flex; flex-direction: column; background: var(--zwart); border-radius: 22px; overflow: hidden; text-decoration: none; color: var(--wit); box-shadow: 0 10px 30px rgba(0,0,0,.28); transition: transform .2s; }
   .game:hover, .game:focus-visible { transform: translateY(-4px) rotate(-.4deg); outline: none; }
   .scherm { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--rood-donker); }
@@ -63,13 +63,6 @@
     </div>
   </header>
 
-  <nav class="filters" aria-label="Filter games">
-    <button type="button" class="aan" data-f="alle">Alle games</button>
-    <button type="button" data-f="ranglijst">Met ranglijst</button>
-    <button type="button" data-f="snel">Even snel</button>
-    <button type="button" data-f="pro">Voor ondernemers</button>
-  </nav>
-
   <main class="grid" id="grid"></main>
 
   <footer>
@@ -80,25 +73,17 @@
 
 <script>
 const GAMES = [
-  { url: 'snackrush.html', shot: 'snackrush', alt: 2, naam: 'Snack Rush', img: 'assets/bal.webp', tags: ['ranglijst', 'snel'], label: 'Ranglijst',
+  { url: 'snackrush.html', shot: 'snackrush', alt: 2, naam: 'Snack Rush', label: 'Ranglijst',
     tekst: 'Ren, spring en ontwijk de trucks. Vang zoveel mogelijk Betterballen en pak de jaartitel.' },
-  { url: 'clubcup.html', shot: 'clubcup', alt: 0, naam: 'Club Cup', img: 'assets/burger.webp', tags: ['ranglijst'], label: 'Clubs',
-    tekst: 'Padel, golf en penalty’s. Speel voor je eigen club en zet die bovenaan de clubranglijst.' },
-  { url: 'match.html', shot: 'match', alt: 0, naam: 'Snack Match', img: 'assets/kroket.webp', tags: ['snel'],
+  { url: 'match.html', shot: 'match', alt: 0, naam: 'Snack Match',
     tekst: 'Match drie of meer SNX-snacks en ruim het bord op. Level na level.' },
-  { url: 'bubble.html', shot: 'bubble', alt: 0, naam: 'Snack Blaster', img: 'assets/chickenbite.webp', tags: ['snel'],
-    tekst: 'Schiet de bubbels met snacks weg voordat ze bij je zijn.' },
-  { url: 'slot.html', shot: 'slot', alt: 0, naam: 'Power Slot', img: 'assets/doos.webp', tags: ['snel'], label: 'Zonder geld',
-    tekst: 'Laat de rollen draaien voor snackpunten, free spins en de bitterbalfontein. Geen geld, geen inzet.' },
-  { url: 'paardenrace.html', shot: 'paardenrace', alt: 2, naam: 'SNX Derby', img: 'assets/chickenbites.webp', tags: ['snel'], label: 'NL · EN · AR',
-    tekst: 'Kies je favoriet en juich je snackpaard naar de finish.' },
-  { url: 'snxbar.html', shot: 'snxbar', alt: 0, naam: 'SNXbar Tycoon', img: 'assets/burger.webp', tags: ['pro'], label: 'Ondernemers',
-    tekst: 'Bouw één SNXbar uit tot een snackketen door heel Europa, met echte SNX-inkoopprijzen.' }
+  { url: 'bubble.html', shot: 'bubble', alt: 0, naam: 'Snack Blaster',
+    tekst: 'Schiet de bubbels met snacks weg voordat ze bij je zijn.' }
 ];
 const grid = document.getElementById('grid');
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function toon(f) {
-  grid.innerHTML = GAMES.filter((g) => f === 'alle' || g.tags.includes(f)).map((g) => `
+  grid.innerHTML = GAMES.map((g) => `
     <a class="game" href="${g.url}">
       ${g.label ? `<span class="label">${esc(g.label)}</span>` : ''}
       <div class="scherm">
@@ -116,10 +101,6 @@ function toon(f) {
     el.addEventListener('focus', aan); el.addEventListener('blur', uit);
   });
 }
-document.querySelectorAll('.filters button').forEach((b) => b.addEventListener('click', () => {
-  document.querySelectorAll('.filters button').forEach((x) => x.classList.toggle('aan', x === b));
-  toon(b.dataset.f);
-}));
 toon('alle');
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
