@@ -51,6 +51,12 @@ Tweede game: eigen match-3 puzzel met de SNX-producten als tegels (Betterbal, BO
 - 4 op een rij = Turbo-snack (ruimt rij of kolom). L/T-vorm = Frituurbom. 5 op een rij = SNX Mega (wist een hele soort).
 - 30 levels met doel (X van een product verzamelen + puntendoel) en beperkt aantal zetten; 1-3 sterren.
 - Voortgang staat lokaal in de browser (localStorage). Nog geen leadformulier of ranglijst gekoppeld.
+## SNX Derby (paardenrace)
+`paardenrace.html`: wedden op 7 SNX-paarden (Betterbal Bliksem, K-Rocket, BOB Burger, Verzenddoos Express, Chickenbites Champ, Now You Can, Have It All),
+zoals in een Engels wedkantoor: fractional odds (5/2, EVS), Win of Each-way (1/4 odds, plaats 1-2), vaste prijs bij inzet,
+koersen bewegen tot de start. Speelgeld (SNX-munten, start 1000, saldo blijft in de browser). Namen staan bovenaan in `HORSES`.
+Talen: NL, EN en Arabisch (rechts-naar-links). Speler kiest zelf; vaste taal via de link: `paardenrace.html?lang=en` of `?lang=ar`.
+Na publicatie: `https://<github-pages-url>/paardenrace.html`.
 
 ## Online zetten
 GitHub Pages via `.github/workflows/pages.yml` (bij push naar `main`). Daarna met een iframe op snxfood.com/game:
