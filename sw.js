@@ -1,6 +1,6 @@
 // SNX World service worker: all games work offline after the first visit.
 // Score APIs (Supabase) always go to the network.
-const CACHE = 'snx-world-v3';
+const CACHE = 'snx-world-v4';
 const PAGES = ['./', './index.html', './snackrush.html', './match.html', './bubble.html', './slot.html', './paardenrace.html', './snxbar.html', './clubcup.html'];
 const CORE = PAGES.concat(['./manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png']);
 
