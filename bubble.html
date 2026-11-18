@@ -36,6 +36,8 @@ html, body { height: 100%; margin: 0; background: var(--rood-donker); color: #ff
 #mute { pointer-events: auto; background: rgba(17,17,17,.55); color: #fff; border: 2px solid #fff; border-radius: 8px;
   font: 800 clamp(12px, 1.6vh, 18px) var(--font); letter-spacing: .08em; padding: 3px 8px; cursor: pointer; }
 .screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(17,17,17,.45); }
+.screen { padding: max(16px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom)); }
+@media (max-height: 800px) { .screen { place-items: start center; } }
 .card { width: min(360px, 100%); max-height: 100%; overflow-y: auto; box-sizing: border-box;
   background: var(--snx) url('assets/backdrop.webp') center / cover; border: 4px solid var(--ink); border-radius: 22px;
   box-shadow: 0 8px 0 var(--ink); padding: 16px 16px 16px; text-align: center; display: grid; gap: 10px; }
@@ -446,7 +448,7 @@ function gameOver() {
   const newBest = score >= best && score > 0;
   $('overTitle').textContent = newBest ? 'Nieuw record!' : 'Game over';
   $('overMsg').textContent = popped >= 50 ? popped + ' snacks geknald. Die hebben echt honger gekregen.' : 'De snacks zijn de streep over. Probeer het nog een keer.';
-  setTimeout(() => { $('over').hidden = false; $('hud').hidden = true; }, 600);
+  setTimeout(() => { $('over').hidden = false; $('hud').hidden = true; const c = $('over').firstElementChild; if (c) c.scrollTop = 0; }, 600);
   SNXRanglijst.score({ score, duration: (performance.now() - runStart) / 1000 });
 }
 
