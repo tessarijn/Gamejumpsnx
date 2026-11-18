@@ -1,11 +1,15 @@
 // SNX B2B-leads uit SNXbar Tycoon: opslaan in b2b_leads en doorzetten naar ActiveCampaign
-// (contact + tag "SNX Bar lead" + notitie met wens en business case; nieuwsbrieflijst 3 alleen met opt-in).
+// contact + tag "SNX Bar lead" + notitie + deal (stage Nieuw / Contact opnemen, eigenaar Tessa) + opvolgtaak voor Tessa.
+// Nieuwsbrieflijst 3 alleen met opt-in.
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const AC_URL = (Deno.env.get('AC_API_URL') || '').replace(/\/+$/, '');
 const AC_KEY = Deno.env.get('AC_API_KEY') || '';
 const TAG_NAME = 'SNX Bar lead';
 const NEWSLETTER_LIST = 3;
+const OWNER_EMAIL = 'tessa@snxfood.com';
+// pipeline 3 'Leads eigen distributie B2B' stage 22 'Nieuw'; groothandel: pipeline 6 stage 28 'Contact opnemen'
+const PIPE = { default: { group: '3', stage: '22' }, Groothandel: { group: '6', stage: '28' } } as Record<string, { group: string; stage: string }>;
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'content-type', 'Access-Control-Max-Age': '86400' };
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...cors, 'Content-Type': 'application/json' } });
 const db = (path: string, init: RequestInit = {}) => fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...init,
@@ -13,7 +17,7 @@ const db = (path: string, init: RequestInit = {}) => fetch(`${SUPABASE_URL}/rest
 async function ac(path: string, method = 'GET', body?: unknown) {
   const r = await fetch(`${AC_URL}/api/3/${path}`, { method, headers: { 'Api-Token': AC_KEY, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
   const j = await r.json().catch(() => null);
-  if (!r.ok && r.status !== 422) throw new Error(`ac ${path} ${r.status}`);
+  if (!r.ok && r.status !== 422) throw new Error(`ac ${path} ${r.status} ${JSON.stringify(j).slice(0, 200)}`);
   return j;
 }
 const s = (v: unknown, n: number) => String(v ?? '').trim().slice(0, n);
@@ -40,7 +44,7 @@ Deno.serve(async (req) => {
   if (!ins.ok) { console.error('insert', await ins.text()); return json({ error: 'submit_failed' }, 500); }
   const [row] = await ins.json();
 
-  let synced = false;
+  let synced = false, task = false, taskErr = '';
   if (AC_URL && AC_KEY) {
     try {
       const [first, ...rest] = lead.naam.split(/\s+/);
@@ -61,10 +65,29 @@ Deno.serve(async (req) => {
           d.units != null ? `Demo-dienst: ${d.units} verkocht, marge ${euro(d.margin)}${d.calc?.marginPerYear ? ', berekend per jaar ' + euro(d.calc.marginPerYear) : ''}` : '',
         ].filter(Boolean).join('\n');
         await ac('notes', 'POST', { note: { note, relid: cid, reltype: 'Subscriber' } });
+        // deal + opvolgtaak voor Tessa, morgen 10:00 (NL)
+        try {
+          const users = await ac('users?limit=100');
+          const owner = users?.users?.find((u: { email: string }) => (u.email || '').toLowerCase() === OWNER_EMAIL);
+          const pipe = PIPE[lead.kanaal || ''] || PIPE.default;
+          const deal = await ac('deals', 'POST', { deal: { title: `SNX Bar lead: ${lead.bedrijf}`, contact: String(cid), value: 0, currency: 'eur', group: pipe.group, stage: pipe.stage, ...(owner ? { owner: String(owner.id) } : {}) } });
+          const dealId = deal?.deal?.id;
+          if (!dealId) throw new Error('deal ' + JSON.stringify(deal).slice(0, 200));
+          await ac('notes', 'POST', { note: { note, relid: dealId, reltype: 'Deal' } });
+          const types = await ac('dealTasktypes');
+          const type = types?.dealTasktypes?.find((t: { title: string }) => /bel|call/i.test(t.title)) || types?.dealTasktypes?.[0];
+          const due = new Date(Date.now() + 24 * 3600e3); due.setUTCHours(9, 0, 0, 0);
+          const r = await ac('dealTasks', 'POST', { dealTask: { title: `Opvolgen SNX Bar lead: ${lead.bedrijf}`, note, relid: dealId, reltype: 'Deal',
+            duedate: due.toISOString(), edate: new Date(due.getTime() + 15 * 60e3).toISOString(), status: 0,
+            ...(type ? { dealTasktype: type.id } : {}), ...(owner ? { assignee: owner.id } : {}) } });
+          task = !!r?.dealTask?.id;
+          if (!task) taskErr = JSON.stringify(r).slice(0, 300);
+        } catch (e) { taskErr = String(e).slice(0, 300); }
+        if (taskErr) console.error('taak mislukt', taskErr);
         await db(`b2b_leads?id=eq.${row.id}`, { method: 'PATCH', body: JSON.stringify({ ac_synced: true, ac_synced_at: new Date().toISOString() }) });
         synced = true;
       }
     } catch (e) { console.error('ac sync failed', e); }
   }
-  return json({ ok: true, synced });
+  return json({ ok: true, synced, task });
 });
